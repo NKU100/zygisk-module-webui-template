@@ -3,6 +3,8 @@ on:
   push:
     branches:
       - 'master'
+    tags-ignore:
+      - 'v**'
 
 jobs:
   pre-release:
@@ -33,6 +35,11 @@ jobs:
         with:
           name: zygisk-module
           path: module/build/outputs/module/release
+
+      - name: Update ci tag
+        run: |
+          git tag -f ci
+          git push origin ci -f
 
       - name: Build changelog
         uses: mikepenz/release-changelog-builder-action@v6
