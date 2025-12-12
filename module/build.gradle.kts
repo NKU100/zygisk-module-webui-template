@@ -1,17 +1,58 @@
 import android.databinding.tool.ext.capitalizeUS
+import groovy.json.JsonBuilder
+import org.apache.commons.codec.binary.Hex
 import org.apache.tools.ant.filters.FixCrLfFilter
 import org.apache.tools.ant.filters.ReplaceTokens
+import org.gradle.kotlin.dsl.register
+import java.io.ByteArrayOutputStream
 import java.security.MessageDigest
 
 plugins {
     alias(libs.plugins.agp.app)
 }
 
+fun String.execute(currentWorkingDir: File = file("./")): String {
+    val byteOut = ByteArrayOutputStream()
+    val byteErr = ByteArrayOutputStream()
+    project.exec {
+        workingDir = currentWorkingDir
+        commandLine = split("\\s".toRegex())
+        standardOutput = byteOut
+        errorOutput = byteErr
+    }
+    if (byteErr.size() > 0) {
+        throw Exception(byteErr.toString())
+    }
+    return String(byteOut.toByteArray()).trim()
+}
+
+val commitCount = "git rev-list HEAD --count".execute().toInt()
+val commitHash = "git rev-parse --verify --short HEAD".execute()
+val tag = try {
+    "git describe --tags --abbrev=0".execute()
+} catch (e: Exception) {
+    println("Failed to get tag: $e")
+    "ci"
+}
+val remoteUrl = "git remote get-url origin".execute()
+var gitHubUser = "NKU100"
+var gitHubRepo = "zygisk-module-webui-template"
+try {
+    val regex = Regex("""(?:https://github\\.com/|git@github\\.com:)([^/]+)/([^/]+?)(?:\\.git)?$""")
+    val matchResult = regex.find(remoteUrl)
+    if (matchResult != null) {
+        gitHubUser = matchResult.groupValues[1]
+        gitHubRepo = matchResult.groupValues[2]
+    }
+} catch (_: Exception) {
+    println("Failed to parse remote url: $remoteUrl")
+}
+
 val moduleId: String by rootProject.extra
 val moduleName: String by rootProject.extra
-val verCode: Int by rootProject.extra
-val verName: String by rootProject.extra
-val commitHash: String by rootProject.extra
+val moduleAuthor: String by rootProject.extra
+val moduleDesc: String by rootProject.extra
+val moduleLibName: String by rootProject.extra
 val abiList: List<String> by rootProject.extra
 
 android {
@@ -28,8 +69,7 @@ android {
             cmake {
                 cppFlags("-std=c++20")
                 arguments(
-                    "-DANDROID_STL=none",
-                    "-DMODULE_NAME=$moduleId"
+                    "-DANDROID_STL=none", "-DMODULE_NAME=$moduleLibName"
                 )
             }
         }
@@ -63,9 +103,11 @@ androidComponents.onVariants { variant ->
 
         val moduleDir = layout.buildDirectory.file("outputs/module/$variantLowered")
         val zipFileName =
-            "$moduleName-$verName-$verCode-$commitHash-$buildTypeLowered.zip".replace(' ', '-')
+            "$moduleName-$tag-$commitCount-$commitHash-$buildTypeLowered.zip".replace(' ', '-')
+        val versionName = "$tag ($commitCount-$commitHash-$variantLowered)"
+        val versionCode = commitCount
 
-        val prepareModuleFilesTask = task<Sync>("prepareModuleFiles$variantCapped") {
+        val prepareModuleFilesTask = tasks.register<Sync>("prepareModuleFiles$variantCapped") {
             group = "module"
             dependsOn("assemble$variantCapped")
             into(moduleDir)
@@ -74,20 +116,25 @@ androidComponents.onVariants { variant ->
                 exclude("module.prop", "customize.sh", "post-fs-data.sh", "service.sh")
                 filter<FixCrLfFilter>("eol" to FixCrLfFilter.CrLf.newInstance("lf"))
             }
+            val updateJson =
+                "https://github.com/$gitHubUser/$gitHubRepo/releases/download/$tag/update.json"
             from(layout.projectDirectory.file("template")) {
                 include("module.prop")
                 expand(
                     "moduleId" to moduleId,
                     "moduleName" to moduleName,
-                    "versionName" to "$verName ($verCode-$commitHash-$variantLowered)",
-                    "versionCode" to verCode
+                    "versionName" to versionName,
+                    "versionCode" to versionCode,
+                    "moduleAuthor" to moduleAuthor,
+                    "moduleDesc" to moduleDesc,
+                    "updateJson" to updateJson,
                 )
             }
             from(layout.projectDirectory.file("template")) {
                 include("customize.sh", "post-fs-data.sh", "service.sh")
                 val tokens = mapOf(
                     "DEBUG" to if (buildTypeLowered == "debug") "true" else "false",
-                    "SONAME" to moduleId,
+                    "SONAME" to moduleLibName,
                     "SUPPORTED_ABIS" to supportedAbis
                 )
                 filter<ReplaceTokens>("tokens" to tokens)
@@ -105,7 +152,7 @@ androidComponents.onVariants { variant ->
                         md.update(bytes, 0, size)
                     }
                     file(file.path + ".sha256").writeText(
-                        org.apache.commons.codec.binary.Hex.encodeHexString(
+                        Hex.encodeHexString(
                             md.digest()
                         )
                     )
@@ -113,7 +160,7 @@ androidComponents.onVariants { variant ->
             }
         }
 
-        val zipTask = task<Zip>("zip$variantCapped") {
+        val zipTask = tasks.register<Zip>("zip$variantCapped") {
             group = "module"
             dependsOn(prepareModuleFilesTask)
             archiveFileName.set(zipFileName)
@@ -121,22 +168,43 @@ androidComponents.onVariants { variant ->
             from(moduleDir)
         }
 
-        val pushTask = task<Exec>("push$variantCapped") {
+        tasks.register("ci$variantCapped") {
             group = "module"
             dependsOn(zipTask)
-            commandLine("adb", "push", zipTask.outputs.files.singleFile.path, "/data/local/tmp")
+
+            doLast {
+                val updateJsonFile = layout.projectDirectory.file("release/update.json").asFile
+                val jsonContent = mapOf(
+                    "version" to versionName,
+                    "versionCode" to versionCode,
+                    "zipUrl" to "https://github.com/$gitHubUser/$gitHubRepo/releases/download/$tag/$zipFileName",
+                    "changelog" to "https://github.com/$gitHubUser/$gitHubRepo/releases/download/$tag/changelog.md"
+                )
+                updateJsonFile.writeText(JsonBuilder(jsonContent).toPrettyString())
+            }
         }
 
-        val installKsuTask = task<Exec>("installKsu$variantCapped") {
+        val pushTask = tasks.register<Exec>("push$variantCapped") {
+            group = "module"
+            dependsOn(zipTask)
+            commandLine(
+                "adb", "push", zipTask.get().outputs.files.singleFile.path, "/data/local/tmp"
+            )
+        }
+
+        val installKsuTask = tasks.register<Exec>("installKsu$variantCapped") {
             group = "module"
             dependsOn(pushTask)
             commandLine(
-                "adb", "shell", "su", "-c",
+                "adb",
+                "shell",
+                "su",
+                "-c",
                 "/data/adb/ksud module install /data/local/tmp/$zipFileName"
             )
         }
 
-        val installMagiskTask = task<Exec>("installMagisk$variantCapped") {
+        val installMagiskTask = tasks.register<Exec>("installMagisk$variantCapped") {
             group = "module"
             dependsOn(pushTask)
             commandLine(
@@ -149,13 +217,13 @@ androidComponents.onVariants { variant ->
             )
         }
 
-        task<Exec>("installKsuAndReboot$variantCapped") {
+        tasks.register<Exec>("installKsuAndReboot$variantCapped") {
             group = "module"
             dependsOn(installKsuTask)
             commandLine("adb", "reboot")
         }
 
-        task<Exec>("installMagiskAndReboot$variantCapped") {
+        tasks.register<Exec>("installMagiskAndReboot$variantCapped") {
             group = "module"
             dependsOn(installMagiskTask)
             commandLine("adb", "reboot")

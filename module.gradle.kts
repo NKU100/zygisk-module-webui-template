@@ -1,0 +1,6 @@
+val moduleId by extra("zygisk_sample")
+val moduleName by extra("Zygisk Module Sample")
+val moduleAuthor by extra("NKU100")
+val moduleDesc by extra("A sample module for zygisk")
+var moduleLibName by extra("sample")
+val abiList by extra(listOf("arm64-v8a", "armeabi-v7a", "x86", "x86_64"))

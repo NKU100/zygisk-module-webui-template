@@ -1,30 +1,10 @@
 import com.android.build.gradle.AppExtension
-import java.io.ByteArrayOutputStream
 
 plugins {
     alias(libs.plugins.agp.app) apply false
 }
 
-fun String.execute(currentWorkingDir: File = file("./")): String {
-    val byteOut = ByteArrayOutputStream()
-    project.exec {
-        workingDir = currentWorkingDir
-        commandLine = split("\\s".toRegex())
-        standardOutput = byteOut
-    }
-    return String(byteOut.toByteArray()).trim()
-}
-
-val gitCommitCount = "git rev-list HEAD --count".execute().toInt()
-val gitCommitHash = "git rev-parse --verify --short HEAD".execute()
-
-// also the soname
-val moduleId by extra("sample")
-val moduleName by extra("Zygisk Module Sample")
-val verName by extra("v1")
-val verCode by extra(gitCommitCount)
-val commitHash by extra(gitCommitHash)
-val abiList by extra(listOf("arm64-v8a", "armeabi-v7a", "x86", "x86_64"))
+apply(from = "module.gradle.kts")
 
 val androidMinSdkVersion by extra(26)
 val androidTargetSdkVersion by extra(36)
