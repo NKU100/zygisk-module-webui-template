@@ -8,6 +8,8 @@ jobs:
   tagged-release:
     name: Tagged Release
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout
@@ -40,10 +42,11 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           outputFile: module/release/changelog.md
+          mode: HYBRID
 
       - name: Release
-        uses: marvinpinto/action-automatic-releases@v1.2.1
+        uses: softprops/action-gh-release@v2
         with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          prerelease: false
+          body_path: module/release/changelog.md
+          prerelease: true
           files: module/release/**
