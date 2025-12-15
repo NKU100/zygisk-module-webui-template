@@ -56,5 +56,6 @@ jobs:
         with:
           body_path: module/release/changelog.md
           prerelease: true
-          name: "CI Build"
+          name: CI Build
+          tag_name: ci
           files: module/release/**
