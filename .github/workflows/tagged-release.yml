@@ -43,6 +43,7 @@ jobs:
         with:
           outputFile: module/release/changelog.md
           mode: HYBRID
+          configuration: configs/changelog.json
 
       - name: Release
         uses: softprops/action-gh-release@v2
