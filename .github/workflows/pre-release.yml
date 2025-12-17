@@ -44,13 +44,9 @@ jobs:
           git push origin ci -f
 
       - name: Build changelog
-        uses: mikepenz/release-changelog-builder-action@v6
+        uses: orhun/git-cliff-action@v4
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          outputFile: module/release/changelog.md
-          mode: HYBRID
-          configuration: configs/changelog.json
+          OUTPUT: module/release/changelog.md
 
       - name: Release
         uses: softprops/action-gh-release@v2
