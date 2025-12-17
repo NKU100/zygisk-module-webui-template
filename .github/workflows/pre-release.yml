@@ -5,6 +5,7 @@ on:
       - 'master'
     tags-ignore:
       - 'v**'
+  workflow_dispatch:
 
 jobs:
   pre-release:
@@ -33,7 +34,7 @@ jobs:
           ./gradlew :module:ciRelease
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: zygisk-module
           path: module/build/outputs/module/release
