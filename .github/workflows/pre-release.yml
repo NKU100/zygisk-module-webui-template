@@ -5,7 +5,6 @@ on:
       - 'master'
     tags-ignore:
       - 'v**'
-  workflow_dispatch:
 
 jobs:
   pre-release:
@@ -28,19 +27,13 @@ jobs:
           java-version: 21
           cache: gradle
 
-      - name: Sdk Cache
-        uses: actions/cache@v5
-        with:
-          path: /usr/local/lib/android/sdk
-          key: ${{ runner.os }}-sdk-${{ hashFiles('**gradle.kts') }}
-
       - name: Build with Gradle
         run: |
           chmod +x ./gradlew
           ./gradlew :module:ciRelease
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v4
         with:
           name: zygisk-module
           path: module/build/outputs/module/release
