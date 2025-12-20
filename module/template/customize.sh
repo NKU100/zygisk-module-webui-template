@@ -84,5 +84,10 @@ else
   mv "$MODPATH/zygisk/lib$SONAME.so" "$MODPATH/zygisk/arm64-v8a.so"
 fi
 
+mkdir "$MODPATH/webroot"
+
+ui_print "- Extracting webroot"
+unzip -o "$ZIPFILE" "webroot/*" -x "*.sha256" -d "$MODPATH"
+
 ui_print "- Setting permissions"
 set_perm_recursive "$MODPATH" 0 0 0755 0644

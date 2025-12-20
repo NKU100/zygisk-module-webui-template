@@ -102,22 +102,23 @@ androidComponents.onVariants { variant ->
         }
 
         val moduleDir = layout.buildDirectory.file("outputs/module/$variantLowered")
-        val zipFileName =
-            "$moduleName-$tag-$commitCount-$commitHash-$buildTypeLowered.zip".replace(' ', '-')
+        val zipFileName = "$moduleName-$tag-$commitCount-$commitHash-$buildTypeLowered.zip".replace(' ', '-')
         val versionName = "$tag ($commitCount-$commitHash-$variantLowered)"
         val versionCode = commitCount
 
         val prepareModuleFilesTask = tasks.register<Sync>("prepareModuleFiles$variantCapped") {
             group = "module"
-            dependsOn("assemble$variantCapped")
+            dependsOn("assemble$variantCapped", ":webui:build")
             into(moduleDir)
+            from(layout.projectDirectory.file("webui/dist")) {
+                into("webroot")
+            }
             from(rootProject.layout.projectDirectory.file("README.md"))
             from(layout.projectDirectory.file("template")) {
                 exclude("module.prop", "customize.sh", "post-fs-data.sh", "service.sh")
                 filter<FixCrLfFilter>("eol" to FixCrLfFilter.CrLf.newInstance("lf"))
             }
-            val updateJson =
-                "https://github.com/$gitHubUser/$gitHubRepo/releases/download/$tag/update.json"
+            val updateJson = "https://github.com/$gitHubUser/$gitHubRepo/releases/download/$tag/update.json"
             from(layout.projectDirectory.file("template")) {
                 include("module.prop")
                 expand(
@@ -196,11 +197,7 @@ androidComponents.onVariants { variant ->
             group = "module"
             dependsOn(pushTask)
             commandLine(
-                "adb",
-                "shell",
-                "su",
-                "-c",
-                "/data/adb/ksud module install /data/local/tmp/$zipFileName"
+                "adb", "shell", "su", "-c", "/data/adb/ksud module install /data/local/tmp/$zipFileName"
             )
         }
 
@@ -208,12 +205,7 @@ androidComponents.onVariants { variant ->
             group = "module"
             dependsOn(pushTask)
             commandLine(
-                "adb",
-                "shell",
-                "su",
-                "-M",
-                "-c",
-                "magisk --install-module /data/local/tmp/$zipFileName"
+                "adb", "shell", "su", "-M", "-c", "magisk --install-module /data/local/tmp/$zipFileName"
             )
         }
 

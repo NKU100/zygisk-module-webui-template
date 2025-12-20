@@ -16,5 +16,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "Zygisk Module WebUI Template"
 include(
-    ":module"
+    ":module", ":webui"
 )
