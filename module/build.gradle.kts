@@ -110,7 +110,7 @@ androidComponents.onVariants { variant ->
             group = "module"
             dependsOn("assemble$variantCapped", ":webui:build")
             into(moduleDir)
-            from(layout.projectDirectory.file("webui/dist")) {
+            from(rootProject.layout.projectDirectory.file("webui/dist")) {
                 into("webroot")
             }
             from(rootProject.layout.projectDirectory.file("README.md"))
