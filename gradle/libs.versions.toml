@@ -1,5 +1,31 @@
 [versions]
 agp = "8.11.0"
+kotlin = "2.3.20"
+compose-multiplatform = "1.10.3"
+kotlinx-serialization = "1.8.1"
+miuix = "0.8.8"
+backdrop = "1.0.6"
+capsule = "2.1.3"
+haze = "1.7.2"
+materialKolor = "4.1.1"
+
+[libraries]
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
+# Android-specific artifacts (used in androidMain only)
+miuix-android = { module = "top.yukonga.miuix.kmp:miuix-android", version.ref = "miuix" }
+miuix-icons-android = { module = "top.yukonga.miuix.kmp:miuix-icons-android", version.ref = "miuix" }
+backdrop = { module = "io.github.kyant0:backdrop", version.ref = "backdrop" }
+capsule = { module = "io.github.kyant0:capsule", version.ref = "capsule" }
+haze-android = { module = "dev.chrisbanes.haze:haze-android", version.ref = "haze" }
+material-kolor = { group = "com.materialkolor", name = "material-kolor", version.ref = "materialKolor" }
+# KMP main artifacts (Gradle auto-resolves to correct platform variant)
+miuix = { module = "top.yukonga.miuix.kmp:miuix", version.ref = "miuix" }
+miuix-icons = { module = "top.yukonga.miuix.kmp:miuix-icons", version.ref = "miuix" }
+haze = { module = "dev.chrisbanes.haze:haze", version.ref = "haze" }
 
 [plugins]
 agp-app = { id = "com.android.application", version.ref = "agp" }
+kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+compose-multiplatform = { id = "org.jetbrains.compose", version.ref = "compose-multiplatform" }
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }

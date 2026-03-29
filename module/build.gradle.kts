@@ -108,9 +108,9 @@ androidComponents.onVariants { variant ->
 
         val prepareModuleFilesTask = tasks.register<Sync>("prepareModuleFiles$variantCapped") {
             group = "module"
-            dependsOn("assemble$variantCapped", ":webui:build")
+            dependsOn("assemble$variantCapped", ":webui:buildWebUI")
             into(moduleDir)
-            from(rootProject.layout.projectDirectory.file("webui/dist")) {
+            from(rootProject.layout.projectDirectory.dir("webui/build/dist/wasmJs/productionExecutable")) {
                 into("webroot")
             }
             from(rootProject.layout.projectDirectory.file("README.md"))

@@ -2,6 +2,10 @@ import com.android.build.gradle.AppExtension
 
 plugins {
     alias(libs.plugins.agp.app) apply false
+    alias(libs.plugins.kotlin.multiplatform) apply false
+    alias(libs.plugins.kotlin.serialization) apply false
+    alias(libs.plugins.compose.multiplatform) apply false
+    alias(libs.plugins.compose.compiler) apply false
 }
 
 apply(from = "module.gradle.kts")

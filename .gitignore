@@ -1,12 +1,22 @@
-*.iml
-.gradle
-/local.properties
+# IDE & OS
 /.idea
+*.iml
 .DS_Store
+
+# Gradle
+.gradle
 /build
-/captures
-.externalNativeBuild
+/local.properties
+
+# Android NDK
 .cxx
-local.properties
+
+# Kotlin/Wasm tooling
+.kotlin/
+kotlin-js-store/
 node_modules
-dist
+
+# Build outputs
+module/build/
+module/release/
+webui/build/
