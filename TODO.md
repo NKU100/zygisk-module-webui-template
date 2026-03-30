@@ -7,7 +7,7 @@
 - [x] Web 端：MainScreen 使用 Miuix 组件（Scaffold + NavigationBar + HorizontalPager）
 - [x] Web 端：修正 KernelSU JS API（exec 回调模式、补充 fullScreen/exit/moduleInfo 等）
 - [x] Web 端：浏览器环境展示模拟数据
-- [ ] 合并：提取两端相同代码到 commonMain（建议阶段 2/3 完成后再做）
+- [x] 合并：提取两端相同代码到 commonMain（BottomTab / PlaceholderPage / LetterIcon / AppTheme / MainScreenState）
 
 ## 阶段 2：搬运页面屏幕
 

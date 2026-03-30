@@ -13,11 +13,6 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Cottage
-import androidx.compose.material.icons.rounded.Extension
-import androidx.compose.material.icons.rounded.Security
-import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -28,7 +23,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -38,10 +32,6 @@ import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeStyle
 import dev.chrisbanes.haze.HazeTint
 import dev.chrisbanes.haze.hazeSource
-import io.github.nku100.webui.data.ConfigRepository
-import io.github.nku100.webui.data.ModuleConfig
-import io.github.nku100.webui.platform.PackageInfo
-import io.github.nku100.webui.platform.PlatformBridge
 import io.github.nku100.webui.ui.component.FloatingBottomBar
 import io.github.nku100.webui.ui.component.FloatingBottomBarItem
 import io.github.nku100.webui.ui.theme.AppTheme
@@ -55,37 +45,18 @@ import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
-enum class BottomTab(val label: String, val icon: ImageVector) {
-    HOME("Home", Icons.Rounded.Cottage),
-    APPS("Apps", Icons.Rounded.Security),
-    LOGS("Logs", Icons.Rounded.Extension),
-    SETTINGS("Settings", Icons.Rounded.Settings),
-}
-
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 actual fun MainScreen() {
     val scope = rememberCoroutineScope()
-    var config by remember { mutableStateOf(ModuleConfig()) }
-    var packages by remember { mutableStateOf<List<PackageInfo>>(emptyList()) }
-    var loading by remember { mutableStateOf(true) }
-
-    val themeMode = remember(config.themeMode) {
-        ThemeMode.entries.find { it.name == config.themeMode } ?: ThemeMode.FOLLOW_SYSTEM
-    }
+    val state = remember { MainScreenState(scope) }
 
     LaunchedEffect(Unit) {
-        config = ConfigRepository.load()
-        packages = PlatformBridge.listPackages()
-        loading = false
+        state.loadFromPlatform()
     }
 
-    fun saveConfig(newConfig: ModuleConfig) {
-        config = newConfig
-        scope.launch { ConfigRepository.save(newConfig) }
-    }
-
-    AppTheme(themeMode = themeMode) {
+    AppTheme(themeMode = state.themeMode) {
+        val config = state.config
         val enableFloatingBottomBar = config.enableFloatingBottomBar
         val enableFloatingBottomBarBlur = config.enableFloatingBottomBarBlur && enableFloatingBottomBar
 
@@ -138,7 +109,7 @@ actual fun MainScreen() {
                         backdrop = backdrop,
                         tabsCount = items.size,
                         isBlurEnabled = enableFloatingBottomBarBlur,
-                        isDark = themeMode == ThemeMode.DARK,
+                        isDark = state.themeMode == ThemeMode.DARK,
                     ) {
                         items.forEachIndexed { index, item ->
                             FloatingBottomBarItem(
@@ -200,10 +171,10 @@ actual fun MainScreen() {
                 PlaceholderPage(
                     tab = BottomTab.entries[page],
                     config = config,
-                    packages = packages,
-                    loading = loading,
+                    packages = state.packages,
+                    loading = state.loading,
                     bottomPadding = innerPadding.calculateBottomPadding(),
-                    onConfigChange = ::saveConfig,
+                    onConfigChange = state::saveConfig,
                     onNavigateToPage = { target ->
                         scope.launch { pagerState.animateScrollToPage(target) }
                     },
