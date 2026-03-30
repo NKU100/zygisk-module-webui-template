@@ -4,37 +4,26 @@ import org.apache.commons.codec.binary.Hex
 import org.apache.tools.ant.filters.FixCrLfFilter
 import org.apache.tools.ant.filters.ReplaceTokens
 import org.gradle.kotlin.dsl.register
-import java.io.ByteArrayOutputStream
 import java.security.MessageDigest
 
 plugins {
     alias(libs.plugins.agp.app)
 }
 
-fun String.execute(currentWorkingDir: File = file("./")): String {
-    val byteOut = ByteArrayOutputStream()
-    val byteErr = ByteArrayOutputStream()
-    project.exec {
-        workingDir = currentWorkingDir
-        commandLine = split("\\s".toRegex())
-        standardOutput = byteOut
-        errorOutput = byteErr
-    }
-    if (byteErr.size() > 0) {
-        throw Exception(byteErr.toString())
-    }
-    return String(byteOut.toByteArray()).trim()
-}
-
-val commitCount = "git rev-list HEAD --count".execute().toInt()
-val commitHash = "git rev-parse --verify --short HEAD".execute()
+// Use Provider-based lazy evaluation for git commands (configuration-cache friendly)
+val commitCount = providers.exec { commandLine("git", "rev-list", "HEAD", "--count") }
+    .standardOutput.asText.map { it.trim().toInt() }
+val commitHash = providers.exec { commandLine("git", "rev-parse", "--verify", "--short", "HEAD") }
+    .standardOutput.asText.map { it.trim() }
 val tag = try {
-    "git describe --tags --abbrev=0".execute()
+    providers.exec { commandLine("git", "describe", "--tags", "--abbrev=0") }
+        .standardOutput.asText.map { it.trim() }.get()
 } catch (e: Exception) {
     println("Failed to get tag: $e")
     "ci"
 }
-val remoteUrl = "git remote get-url origin".execute()
+val remoteUrl = providers.exec { commandLine("git", "remote", "get-url", "origin") }
+    .standardOutput.asText.map { it.trim() }.get()
 var gitHubUser = "NKU100"
 var gitHubRepo = "zygisk-module-webui-template"
 try {
@@ -61,11 +50,6 @@ android {
             abiFilters.addAll(abiList)
         }
         externalNativeBuild {
-            /*
-            ndkBuild {
-                arguments("MODULE_NAME=$moduleId")
-            }
-            */
             cmake {
                 cppFlags("-std=c++20")
                 arguments(
@@ -75,11 +59,6 @@ android {
         }
     }
     externalNativeBuild {
-        /*
-        ndkBuild {
-            path("src/main/cpp/Android.mk")
-        }
-        */
         cmake {
             path("src/main/cpp/CMakeLists.txt")
         }
@@ -102,9 +81,11 @@ androidComponents.onVariants { variant ->
         }
 
         val moduleDir = layout.buildDirectory.file("outputs/module/$variantLowered")
-        val zipFileName = "$moduleName-$tag-$commitCount-$commitHash-$buildTypeLowered.zip".replace(' ', '-')
-        val versionName = "$tag ($commitCount-$commitHash-$variantLowered)"
-        val versionCode = commitCount
+        val count = commitCount.get()
+        val hash = commitHash.get()
+        val zipFileName = "$moduleName-$tag-$count-$hash-$buildTypeLowered.zip".replace(' ', '-')
+        val versionName = "$tag ($count-$hash-$variantLowered)"
+        val versionCode = count
 
         val prepareModuleFilesTask = tasks.register<Sync>("prepareModuleFiles$variantCapped") {
             group = "module"

@@ -5,7 +5,12 @@ on:
       - 'master'
     tags-ignore:
       - 'v**'
+      - 'ci'
   workflow_dispatch:
+
+concurrency:
+  group: pre-release
+  cancel-in-progress: true
 
 jobs:
   pre-release:
@@ -34,20 +39,25 @@ jobs:
           ./gradlew :module:ciRelease
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: zygisk-module
           path: module/build/outputs/module/release
 
-      - name: Update ci tag
-        run: |
-          git tag -f ci
-          git push origin ci -f
+      - name: Remove ci tag locally
+        run: git tag -d ci || true
 
       - name: Build changelog
         uses: orhun/git-cliff-action@v4
         env:
           OUTPUT: module/release/changelog.md
+        with:
+          args: --unreleased --tag "CI Build"
+
+      - name: Update ci tag
+        run: |
+          git tag -f ci
+          git push origin ci -f
 
       - name: Release
         uses: softprops/action-gh-release@v2

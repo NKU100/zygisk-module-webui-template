@@ -29,17 +29,19 @@
 
 ## 🔴 高优先级
 
-- [ ] 修复 `tagged-release.yml` 中 `prerelease: true` 应改为 `false`
-- [ ] 统一两个 workflow 的 `upload-artifact` 版本（pre-release 用 v6，tagged-release 用 v4）
+- [x] 修复 `tagged-release.yml` 中 `prerelease: true` 应改为 `false`，添加 `name` 和 `workflow_dispatch`
+- [x] 统一两个 workflow 的 `upload-artifact` 版本到 v7
+- [x] `pre-release.yml` 的 `tags-ignore` 增加 `ci`，防止更新 ci tag 时重复触发
 
 ## 🟡 中优先级
 
-- [ ] `gradle.properties` 开启 `org.gradle.parallel=true` 和 `org.gradle.caching=true`
-- [ ] WebUI Gradle 任务（prepare / build）添加 inputs/outputs 声明，避免每次重复执行
-- [ ] CI workflow 添加 `setup-node` 步骤，固定 Node.js 版本
-- [ ] `module/build.gradle.kts` 中 git 命令改为 Provider 懒加载；清理 ndkBuild 注释块和废弃的 `buildDir` API
+- [x] `gradle.properties` 优化：开启 `parallel` 和 `caching`，JVM 内存提升到 4096m，移除 `enableJetifier`
+- [x] CI workflow 添加 `concurrency` 并发控制，防止重复运行
+- [x] CI changelog 生成优化：pre-release 用 `--unreleased --tag "CI Build"`，tagged 用 `--latest`；生成前先 `git tag -d ci`
+- [x] `module/build.gradle.kts` 中 git 命令改为 Provider 懒加载；清理 ndkBuild 注释块
+- [x] `webui/build.gradle.kts` 中 `activity-compose` 硬编码版本移入 `libs.versions.toml`
 
 ## 🟢 低优先级
 
-- [ ] `gradle.properties` 移除 `android.enableJetifier=true`
-- [ ] `module.gradle.kts` 中 `var moduleLibName` 改为 `val`
+- [x] `module.gradle.kts` 中 `var moduleLibName` 改为 `val`
+- [x] `build.gradle.kts` 中废弃的 `buildDir` 改为 `layout.buildDirectory`

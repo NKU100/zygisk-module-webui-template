@@ -43,7 +43,7 @@ kotlin {
         androidMain.dependencies {
             implementation(compose.preview)
             implementation(compose.materialIconsExtended)
-            implementation("androidx.activity:activity-compose:1.10.1")
+            implementation(libs.activity.compose)
             implementation(libs.miuix.android)
             implementation(libs.miuix.icons.android)
             implementation(libs.backdrop)
