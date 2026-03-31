@@ -83,6 +83,8 @@ private external fun arrayGet(arr: JsAny, index: Int): JsAny
 @JsFun("(obj, key) => obj[key] || ''")
 private external fun objGetString(obj: JsAny, key: String): String
 
+actual val isAndroidPlatform: Boolean = false
+
 actual object PlatformBridge {
     actual suspend fun exec(command: String): ShellResult {
         val result = ksuExecJs(command, emptyJsObject()).await<JsAny>()

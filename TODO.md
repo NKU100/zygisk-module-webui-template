@@ -9,19 +9,13 @@
 - [x] Web 端：浏览器环境展示模拟数据
 - [x] 合并：提取两端相同代码到 commonMain（BottomTab / PlaceholderPage / LetterIcon / AppTheme / MainScreenState）
 
-## 阶段 2：搬运页面屏幕
+## 阶段 2：逐页面搬运（页面 + 依赖组件一起搬，每搬一个编译验证）
 
-- [ ] Home 页面（模块状态、版本信息）
-- [ ] Apps 页面（SuperUser / 应用列表）
-- [ ] Settings 页面（主题、ColorPalette 配色）
-- [ ] 双平台验证
-
-## 阶段 3：搬运组件 + 辅助
-
-- [ ] SuperSearchBar（搜索栏）
-- [ ] Dialog（各类对话框）
-- [ ] 辅助组件（StatusTag 等）
-- [ ] 双平台验证 + 最终效果对比
+- [x] Settings 主页面（Module Enabled / Theme Mode / UI Effects / About 入口）→ 双平台编译验证通过
+- [ ] Settings → About 子页面 → 编译验证
+- [ ] Home 页面（模块状态、版本信息 + StatusTag 等依赖组件）→ 编译验证
+- [ ] Apps 页面（SuperUser / 应用列表 + SuperSearchBar + Dialog 等依赖组件）→ 编译验证
+- [ ] 最终双平台效果对比
 
 ---
 

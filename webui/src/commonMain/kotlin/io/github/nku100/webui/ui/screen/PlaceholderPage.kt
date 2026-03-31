@@ -15,6 +15,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.nku100.webui.data.ModuleConfig
 import io.github.nku100.webui.platform.PackageInfo
+import io.github.nku100.webui.platform.isAndroidPlatform
+import io.github.nku100.webui.ui.screen.settings.SettingsActions
+import io.github.nku100.webui.ui.screen.settings.SettingsPage
+import io.github.nku100.webui.ui.screen.settings.SettingsUiState
+import io.github.nku100.webui.ui.theme.ThemeMode
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
@@ -28,6 +33,34 @@ fun PlaceholderPage(
     onConfigChange: (ModuleConfig) -> Unit,
     onNavigateToPage: (Int) -> Unit,
 ) {
+    when (tab) {
+        BottomTab.SETTINGS -> {
+            val settingsState = SettingsUiState.fromConfig(config, isAndroidPlatform)
+            val settingsActions = SettingsActions(
+                onEnabledChange = { enabled ->
+                    onConfigChange(config.copy(enabled = enabled))
+                },
+                onThemeModeChange = { mode ->
+                    onConfigChange(config.copy(themeMode = mode.name))
+                },
+                onEnableBlurChange = { enabled ->
+                    onConfigChange(config.copy(enableBlur = enabled))
+                },
+                onEnableFloatingBottomBarChange = { enabled ->
+                    onConfigChange(config.copy(enableFloatingBottomBar = enabled))
+                },
+                onEnableFloatingBottomBarBlurChange = { enabled ->
+                    onConfigChange(config.copy(enableFloatingBottomBarBlur = enabled))
+                },
+            )
+            SettingsPage(
+                uiState = settingsState,
+                actions = settingsActions,
+                bottomPadding = bottomPadding,
+                enableBlur = config.enableBlur,
+            )
+        }
+        else -> {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -53,5 +86,7 @@ fun PlaceholderPage(
             fontSize = 14.sp,
             color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
         )
+    }
+        }
     }
 }

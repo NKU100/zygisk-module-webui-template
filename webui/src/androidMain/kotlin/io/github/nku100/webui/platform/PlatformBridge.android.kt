@@ -5,6 +5,8 @@ import android.content.pm.ApplicationInfo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
+actual val isAndroidPlatform: Boolean = true
+
 actual object PlatformBridge {
     // Set by the Activity on creation
     var appContext: Context? = null

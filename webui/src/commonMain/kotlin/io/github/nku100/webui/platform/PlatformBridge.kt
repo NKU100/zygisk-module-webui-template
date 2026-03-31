@@ -16,6 +16,12 @@ data class PackageInfo(
 )
 
 /**
+ * Whether the current platform is Android (vs wasmJs / browser).
+ * Used to conditionally show platform-specific UI (e.g. Blur, FloatingBottomBar).
+ */
+expect val isAndroidPlatform: Boolean
+
+/**
  * Platform abstraction for KernelSU / Root operations.
  * - wasmJs: bridges to window.ksu via JS interop
  * - Android: executes commands via root shell
