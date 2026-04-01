@@ -32,6 +32,7 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
@@ -45,6 +46,7 @@ import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeStyle
 import dev.chrisbanes.haze.hazeEffect
 import io.github.nku100.webui.ui.animation.DampedDragAnimation
+import io.github.nku100.webui.ui.animation.InteractiveHighlight
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
@@ -160,11 +162,24 @@ fun WasmFloatingBottomBar(
         }
     }
 
+    val interactiveHighlight = remember(animationScope, tabWidthPx) {
+        InteractiveHighlight(
+            animationScope = animationScope,
+            position = { size, _ ->
+                Offset(
+                    if (isLtr) (dampedDragAnimation.value + 0.5f) * tabWidthPx + panelOffset
+                    else size.width - (dampedDragAnimation.value + 0.5f) * tabWidthPx + panelOffset,
+                    size.height / 2f
+                )
+            }
+        )
+    }
+
     Box(
         modifier = modifier.width(IntrinsicSize.Min),
         contentAlignment = Alignment.CenterStart
     ) {
-        // Layer 1: Background container (haze blur instead of backdrop)
+        // Layer 1: Background container
         CompositionLocalProvider(
             LocalFloatingBottomBarTabScale provides {
                 lerp(1f, 1.2f, dampedDragAnimation.pressProgress)
@@ -186,6 +201,7 @@ fun WasmFloatingBottomBar(
                     .clip(ContinuousCapsule)
                     .hazeEffect(state = hazeState, style = style)
                     .background(containerColor)
+                    .then(interactiveHighlight.modifier)
                     .height(64.dp)
                     .padding(4.dp),
                 verticalAlignment = Alignment.CenterVertically,
@@ -210,6 +226,7 @@ fun WasmFloatingBottomBar(
                             -progressOffset + panelOffset
                         }
                     }
+                    .then(interactiveHighlight.gestureModifier)
                     .then(dampedDragAnimation.modifier)
                     .graphicsLayer {
                         scaleX = dampedDragAnimation.scaleX

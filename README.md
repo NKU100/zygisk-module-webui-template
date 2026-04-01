@@ -10,7 +10,8 @@ A Zygisk module template with **Compose Multiplatform** WebUI, based on [zygisk-
   - **Android APK**: Standalone config app for Magisk users (no WebUI support)
 - **Miuix UI framework** — KernelSU-style Material You theme on both platforms
   - Android: FloatingBottomBar with liquid glass (backdrop), haze blur, AGSL shader highlights
-  - Web: FloatingBottomBar with ContinuousCapsule shape + haze blur
+  - Web: FloatingBottomBar with ContinuousCapsule shape + haze blur + Skia SkSL shader highlights
+  - Shared: DampedDragAnimation (spring physics, velocity deformation, press/release scale), DragGestureInspector, InteractiveHighlight
 - **[Capsule][capsule]** — G2 continuous smooth corners (cross-platform fork, included as git submodule)
 - **KernelSU API abstraction** via `expect/actual` pattern (`PlatformBridge`)
   - Full v3.0.2 API: exec (async callback), toast, listPackages, getPackagesInfo, moduleInfo, fullScreen, enableEdgeToEdge, exit
@@ -42,7 +43,9 @@ A Zygisk module template with **Compose Multiplatform** WebUI, based on [zygisk-
 │       └── wasmJsMain/             # Web target (Miuix + FloatingBottomBar)
 │           ├── platform/           # KernelSU JS API bridge (v3.0.2)
 │           └── ui/
+│               ├── animation/      # DampedDragAnimation (SkSL), InteractiveHighlight (SkSL)
 │               ├── component/      # WasmFloatingBottomBar (Capsule + Haze)
+│               ├── modifier/       # DragGestureInspector
 │               └── screen/         # MainScreen (Miuix Scaffold + Pager)
 ├── external/
 │   └── Capsule/                     # Cross-platform Capsule library (git submodule)

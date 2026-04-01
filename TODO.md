@@ -22,6 +22,7 @@
 ### 已完全对齐 ✅
 - [x] DampedDragAnimation 类结构/弹簧参数（和 KernelSU 一致）
 - [x] DragGestureInspector（inspectDragGestures 双 awaitFirstDown）
+- [x] InteractiveHighlight（Skia RuntimeEffect/SkSL 替代 AGSL RuntimeShader）
 - [x] panelOffset（拖拽时底栏微偏）
 - [x] press/release 缩放动画（独立 scaleX/scaleY 弹簧）
 - [x] velocity 形变（拖拽速度→横向拉伸/纵向压缩）
@@ -40,7 +41,6 @@
 
 ### 无法对齐（平台限制）❌
 - [ ] 背景渲染：Android 用 `drawBackdrop`（vibrancy/blur/lens/shadow），wasmJs 用 haze + background
-- [ ] InteractiveHighlight：Android 用 AGSL RuntimeShader 径向高光，wasmJs 无 AGSL
 - [ ] Layer 2 隐藏副本：Android 用透明 Row + layerBackdrop 供 backdrop 合成，wasmJs 无需
 - [ ] Indicator 底色：Android 在 drawBackdrop.onDrawSurface 中绘制（含 pressProgress 渐变），wasmJs 用固定 background
 - [ ] 容器 pressProgress 缩放：Android 在 backdrop layerBlock 中实现，wasmJs 无 backdrop
