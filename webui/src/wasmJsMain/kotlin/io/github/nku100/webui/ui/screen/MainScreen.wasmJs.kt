@@ -1,8 +1,10 @@
 package io.github.nku100.webui.ui.screen
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
@@ -12,13 +14,25 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.hazeSource
+import io.github.nku100.webui.ui.component.WasmFloatingBottomBar
+import io.github.nku100.webui.ui.component.WasmFloatingBottomBarItem
 import io.github.nku100.webui.ui.theme.AppTheme
+import io.github.nku100.webui.ui.theme.ThemeMode
 import kotlinx.coroutines.launch
+import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.NavigationBar
 import top.yukonga.miuix.kmp.basic.NavigationBarItem
 import top.yukonga.miuix.kmp.basic.NavigationItem
 import top.yukonga.miuix.kmp.basic.Scaffold
+import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @JsFun("() => typeof window !== 'undefined' && typeof window.ksu !== 'undefined' && window.ksu != null")
@@ -42,11 +56,15 @@ actual fun MainScreen() {
     }
 
     AppTheme(themeMode = state.themeMode) {
+        val config = state.config
+        val enableFloatingBottomBar = config.enableFloatingBottomBar
+        val hazeState = remember { HazeState() }
+
         val pagerState = rememberPagerState(pageCount = { BottomTab.entries.size })
 
         var selectedPage by remember { mutableStateOf(0) }
-        LaunchedEffect(pagerState.currentPage) {
-            selectedPage = pagerState.currentPage
+        LaunchedEffect(pagerState.settledPage) {
+            selectedPage = pagerState.settledPage
         }
 
         val items = BottomTab.entries.map { tab ->
@@ -55,36 +73,85 @@ actual fun MainScreen() {
 
         val bottomBar = @Composable {
             Box(modifier = Modifier.fillMaxWidth()) {
-                NavigationBar(
-                    color = MiuixTheme.colorScheme.surface,
-                    content = {
+                if (enableFloatingBottomBar) {
+                    WasmFloatingBottomBar(
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .padding(bottom = 12.dp),
+                        selectedIndex = selectedPage,
+                        onSelected = { index ->
+                            selectedPage = index
+                            scope.launch { pagerState.animateScrollToPage(index) }
+                        },
+                        hazeState = hazeState,
+                        isDark = state.themeMode == ThemeMode.DARK,
+                    ) {
                         items.forEachIndexed { index, item ->
-                            NavigationBarItem(
-                                modifier = Modifier.weight(1f),
-                                icon = item.icon,
-                                label = item.label,
+                            WasmFloatingBottomBarItem(
                                 selected = selectedPage == index,
                                 onClick = {
                                     selectedPage = index
                                     scope.launch { pagerState.animateScrollToPage(index) }
-                                }
-                            )
+                                },
+                                modifier = Modifier.defaultMinSize(minWidth = 76.dp)
+                            ) {
+                                Icon(
+                                    imageVector = item.icon,
+                                    contentDescription = item.label,
+                                    tint = if (selectedPage == index)
+                                        MiuixTheme.colorScheme.primary
+                                    else
+                                        MiuixTheme.colorScheme.onSurface
+                                )
+                                Text(
+                                    text = item.label,
+                                    fontSize = 11.sp,
+                                    lineHeight = 14.sp,
+                                    color = if (selectedPage == index)
+                                        MiuixTheme.colorScheme.primary
+                                    else
+                                        MiuixTheme.colorScheme.onSurface,
+                                    maxLines = 1,
+                                    softWrap = false,
+                                    overflow = TextOverflow.Visible
+                                )
+                            }
                         }
                     }
-                )
+                } else {
+                    NavigationBar(
+                        color = MiuixTheme.colorScheme.surface,
+                        content = {
+                            items.forEachIndexed { index, item ->
+                                NavigationBarItem(
+                                    modifier = Modifier.weight(1f),
+                                    icon = item.icon,
+                                    label = item.label,
+                                    selected = selectedPage == index,
+                                    onClick = {
+                                        selectedPage = index
+                                        scope.launch { pagerState.animateScrollToPage(index) }
+                                    }
+                                )
+                            }
+                        }
+                    )
+                }
             }
         }
 
         Scaffold(bottomBar = bottomBar) { innerPadding ->
             HorizontalPager(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .hazeSource(state = hazeState),
                 state = pagerState,
                 beyondViewportPageCount = 3,
                 userScrollEnabled = true,
             ) { page ->
                 PlaceholderPage(
                     tab = BottomTab.entries[page],
-                    config = state.config,
+                    config = config,
                     packages = state.packages,
                     loading = state.loading,
                     bottomPadding = innerPadding.calculateBottomPadding(),

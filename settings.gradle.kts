@@ -19,3 +19,5 @@ rootProject.name = "zygisk-module-webui-template"
 include(
     ":module", ":webui"
 )
+
+includeBuild("external/Capsule")

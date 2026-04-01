@@ -1,3 +1,6 @@
 [submodule "module/src/main/cpp/external/libcxx"]
 	path = module/src/main/cpp/external/libcxx
 	url = https://github.com/topjohnwu/libcxx
+[submodule "external/Capsule"]
+	path = external/Capsule
+	url = https://github.com/NKU100/Capsule.git

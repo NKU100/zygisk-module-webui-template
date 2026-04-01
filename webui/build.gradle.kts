@@ -39,6 +39,7 @@ kotlin {
             implementation(compose.ui)
             implementation(compose.components.resources)
             implementation(libs.kotlinx.serialization.json)
+            implementation("com.kyant.capsule:capsule")
         }
         androidMain.dependencies {
             implementation(compose.preview)
@@ -47,7 +48,6 @@ kotlin {
             implementation(libs.miuix.android)
             implementation(libs.miuix.icons.android)
             implementation(libs.backdrop)
-            implementation(libs.capsule)
             implementation(libs.haze.android)
             implementation(libs.material.kolor)
         }

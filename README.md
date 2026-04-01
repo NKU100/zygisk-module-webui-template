@@ -10,7 +10,8 @@ A Zygisk module template with **Compose Multiplatform** WebUI, based on [zygisk-
   - **Android APK**: Standalone config app for Magisk users (no WebUI support)
 - **Miuix UI framework** — KernelSU-style Material You theme on both platforms
   - Android: FloatingBottomBar with liquid glass (backdrop), haze blur, AGSL shader highlights
-  - Web: Miuix Scaffold + NavigationBar (standard bottom bar)
+  - Web: FloatingBottomBar with ContinuousCapsule shape + haze blur
+- **[Capsule][capsule]** — G2 continuous smooth corners (cross-platform fork, included as git submodule)
 - **KernelSU API abstraction** via `expect/actual` pattern (`PlatformBridge`)
   - Full v3.0.2 API: exec (async callback), toast, listPackages, getPackagesInfo, moduleInfo, fullScreen, enableEdgeToEdge, exit
   - Browser mock data for development preview
@@ -38,16 +39,28 @@ A Zygisk module template with **Compose Multiplatform** WebUI, based on [zygisk-
 │       │       ├── screen/         # MainScreen (Miuix Scaffold + Pager)
 │       │       ├── theme/          # MiuixTheme
 │       │       └── util/           # HazeExt
-│       └── wasmJsMain/             # Web target (Miuix + NavigationBar)
+│       └── wasmJsMain/             # Web target (Miuix + FloatingBottomBar)
 │           ├── platform/           # KernelSU JS API bridge (v3.0.2)
-│           └── ui/                 # MainScreen (Miuix Scaffold + Pager)
+│           └── ui/
+│               ├── component/      # WasmFloatingBottomBar (Capsule + Haze)
+│               └── screen/         # MainScreen (Miuix Scaffold + Pager)
+├── external/
+│   └── Capsule/                     # Cross-platform Capsule library (git submodule)
 ├── module.gradle.kts                # Module metadata (id, name, author)
 └── build.gradle.kts                 # Global build config
 ```
 
 ## Usage
 
-### 1. Configure module metadata
+### 1. Clone with submodules
+
+```bash
+git clone --recursive https://github.com/NKU100/zygisk-module-webui-template.git
+# Or if already cloned:
+git submodule update --init --recursive
+```
+
+### 2. Configure module metadata
 
 Edit [module.gradle.kts](./module.gradle.kts):
 
@@ -59,11 +72,11 @@ val moduleDesc by extra("A sample module for zygisk")
 val moduleApplicationId by extra("io.github.nku100.zygisk.sample")
 ```
 
-### 2. Write native code
+### 3. Write native code
 
 Edit `module/src/main/cpp/example.cpp` with your Zygisk logic.
 
-### 3. Customize WebUI
+### 4. Customize WebUI
 
 Edit files under `webui/src/` to build your configuration UI:
 - `commonMain/data/ModuleConfig.kt` — add config fields (auto-serialized to JSON)
@@ -71,7 +84,7 @@ Edit files under `webui/src/` to build your configuration UI:
 - `androidMain/ui/screen/` — Android UI with Miuix components
 - `wasmJsMain/ui/screen/` — Web UI with Miuix components
 
-### 4. Build
+### 5. Build
 
 ```bash
 # Build module zip (includes WebUI)
@@ -85,11 +98,14 @@ Edit files under `webui/src/` to build your configuration UI:
 
 # Dev server (browser preview at http://localhost:8080)
 ./gradlew :webui:wasmJsBrowserDevelopmentRun
+
+# Install both Android APK and WebUI to device
+./gradlew :webui:installDebug :webui:install
 ```
 
 The module zip will be generated under `module/release/`.
 
-### 5. Install
+### 6. Install
 
 ```bash
 # KernelSU
@@ -116,10 +132,11 @@ The module zip will be generated under `module/release/`.
 | UI framework | Compose Multiplatform 1.10.3 |
 | Language | Kotlin 2.3.20 |
 | Web target | Kotlin/Wasm |
-| Android UI | Miuix 0.8.8 + Backdrop 1.0.6 + Capsule 2.1.3 + Haze 1.7.2 |
-| Web UI | Miuix 0.8.8 + Haze 1.7.2 + MaterialKolor 4.1.1 |
+| Android UI | Miuix 0.8.8 + Backdrop 1.0.6 + Capsule (KMP fork) + Haze 1.7.2 |
+| Web UI | Miuix 0.8.8 + Capsule (KMP fork) + Haze 1.7.2 + MaterialKolor 4.1.1 |
+| Smooth corners | [Capsule][capsule] — G2 continuous rounded rectangles (cross-platform) |
 | Serialization | kotlinx.serialization (JSON) |
-| Build system | Gradle 8.14, AGP 8.11 |
+| Build system | Gradle 9.3, AGP 9.0 |
 
 ## See also
 
@@ -128,5 +145,7 @@ The module zip will be generated under `module/release/`.
 - [Compose Multiplatform](https://github.com/JetBrains/compose-multiplatform)
 - [Miuix](https://compose-miuix-ui.github.io/miuix/)
 - [KernelSU JS API](https://www.npmjs.com/package/kernelsu)
+- [Capsule (KMP fork)][capsule]
 
 [zygisk-module-template]: https://github.com/5ec1cff/zygisk-module-template
+[capsule]: https://github.com/NKU100/Capsule
