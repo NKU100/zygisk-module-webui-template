@@ -17,6 +17,35 @@
 - [ ] Apps 页面（SuperUser / 应用列表 + SuperSearchBar + Dialog 等依赖组件）→ 编译验证
 - [ ] 最终双平台效果对比
 
+## wasmJs 悬浮底栏对齐进度
+
+### 已完全对齐 ✅
+- [x] DampedDragAnimation 类结构/弹簧参数（和 KernelSU 一致）
+- [x] DragGestureInspector（inspectDragGestures 双 awaitFirstDown）
+- [x] panelOffset（拖拽时底栏微偏）
+- [x] press/release 缩放动画（独立 scaleX/scaleY 弹簧）
+- [x] velocity 形变（拖拽速度→横向拉伸/纵向压缩）
+- [x] pressProgress 动画
+- [x] MutatorMutex
+- [x] snapshotFlow + collectLatest 状态管理
+- [x] selectedIndex 类型（`() -> Int` lambda）
+- [x] LocalFloatingBottomBarTabScale（按下时 tab 内容放大 1.2x）
+- [x] 底栏位置（Scaffold.bottomBar 内，和 Android 一致）
+
+### 平台 API 替换（功能一致）
+- [x] `awaitFrame()` → `withFrameNanos {}`（Compose Runtime 跨平台 API）
+- [x] `System.currentTimeMillis()` → `kotlin.time.TimeSource.Monotonic`（`@JsFun Date.now()` 高频调用导致 wasmJs 卡死）
+- [x] `fastFirstOrNull` → `firstOrNull`（wasmJs 无此扩展，功能一致）
+- [x] `fastRoundToInt`/`fastCoerceIn` → `roundToInt`/`coerceIn`（同上）
+
+### 无法对齐（平台限制）❌
+- [ ] 背景渲染：Android 用 `drawBackdrop`（vibrancy/blur/lens/shadow），wasmJs 用 haze + background
+- [ ] InteractiveHighlight：Android 用 AGSL RuntimeShader 径向高光，wasmJs 无 AGSL
+- [ ] Layer 2 隐藏副本：Android 用透明 Row + layerBackdrop 供 backdrop 合成，wasmJs 无需
+- [ ] Indicator 底色：Android 在 drawBackdrop.onDrawSurface 中绘制（含 pressProgress 渐变），wasmJs 用固定 background
+- [ ] 容器 pressProgress 缩放：Android 在 backdrop layerBlock 中实现，wasmJs 无 backdrop
+- [ ] Icon/Text 颜色：Android 固定 onSurface（靠 backdrop ColorFilter 着色），wasmJs 用条件 primary/onSurface
+
 ---
 
 # 构建脚本优化清单

@@ -16,7 +16,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -71,6 +70,7 @@ actual fun MainScreen() {
             NavigationItem(label = tab.label, icon = tab.icon)
         }
 
+        // Floating bar in bottomBar (same structure as Android)
         val bottomBar = @Composable {
             Box(modifier = Modifier.fillMaxWidth()) {
                 if (enableFloatingBottomBar) {
@@ -78,17 +78,17 @@ actual fun MainScreen() {
                         modifier = Modifier
                             .align(Alignment.BottomCenter)
                             .padding(bottom = 12.dp),
-                        selectedIndex = selectedPage,
+                        selectedIndex = { selectedPage },
                         onSelected = { index ->
                             selectedPage = index
                             scope.launch { pagerState.animateScrollToPage(index) }
                         },
                         hazeState = hazeState,
+                        tabsCount = items.size,
                         isDark = state.themeMode == ThemeMode.DARK,
                     ) {
                         items.forEachIndexed { index, item ->
                             WasmFloatingBottomBarItem(
-                                selected = selectedPage == index,
                                 onClick = {
                                     selectedPage = index
                                     scope.launch { pagerState.animateScrollToPage(index) }
