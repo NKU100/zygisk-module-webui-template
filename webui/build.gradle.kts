@@ -47,7 +47,7 @@ kotlin {
             implementation(libs.activity.compose)
             implementation(libs.miuix.android)
             implementation(libs.miuix.icons.android)
-            implementation(libs.backdrop)
+            implementation("com.kyant.backdrop:backdrop")
             implementation(libs.haze.android)
             implementation(libs.material.kolor)
         }

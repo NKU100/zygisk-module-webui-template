@@ -4,3 +4,6 @@
 [submodule "external/Capsule"]
 	path = external/Capsule
 	url = https://github.com/NKU100/Capsule.git
+[submodule "external/Backdrop"]
+	path = external/Backdrop
+	url = https://github.com/NKU100/Backdrop.git

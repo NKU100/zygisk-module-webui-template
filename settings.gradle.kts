@@ -21,3 +21,4 @@ include(
 )
 
 includeBuild("external/Capsule")
+includeBuild("external/Backdrop")
