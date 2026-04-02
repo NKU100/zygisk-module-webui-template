@@ -9,16 +9,18 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.util.VelocityTracker
 import androidx.compose.ui.unit.IntSize
+import io.github.nku100.webui.platform.awaitNextFrame
+import io.github.nku100.webui.platform.currentTimeMillis
+import io.github.nku100.webui.ui.modifier.inspectDragGestures
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.android.awaitFrame
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import io.github.nku100.webui.ui.modifier.inspectDragGestures
 import kotlin.math.abs
 
 /**
  * Ported from KernelSU: DampedDragAnimation.kt
+ * Cross-platform version using expect/actual for frame awaiting and time tracking.
  */
 class DampedDragAnimation(
     private val animationScope: CoroutineScope,
@@ -90,7 +92,7 @@ class DampedDragAnimation(
 
     fun release() {
         animationScope.launch {
-            awaitFrame()
+            awaitNextFrame()
             if (value != targetValue) {
                 val threshold = (valueRange.endInclusive - valueRange.start) * 0.025f
                 snapshotFlow { valueAnimation.value }
@@ -125,7 +127,7 @@ class DampedDragAnimation(
     }
 
     private fun updateVelocity() {
-        velocityTracker.addPosition(System.currentTimeMillis(), Offset(value, 0f))
+        velocityTracker.addPosition(currentTimeMillis(), Offset(value, 0f))
         val targetVelocity = velocityTracker.calculateVelocity().x / (valueRange.endInclusive - valueRange.start)
         animationScope.launch { velocityAnimation.animateTo(targetVelocity, velocityAnimationSpec) }
     }

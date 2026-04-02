@@ -69,7 +69,7 @@ import kotlin.math.sign
 val LocalFloatingBottomBarTabScale = staticCompositionLocalOf { { 1f } }
 
 @Composable
-fun RowScope.WasmFloatingBottomBarItem(
+fun RowScope.FloatingBottomBarItem(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     content: @Composable ColumnScope.() -> Unit
@@ -98,7 +98,7 @@ fun RowScope.WasmFloatingBottomBarItem(
 }
 
 @Composable
-fun WasmFloatingBottomBar(
+fun FloatingBottomBar(
     modifier: Modifier = Modifier,
     selectedIndex: () -> Int,
     onSelected: (index: Int) -> Unit,

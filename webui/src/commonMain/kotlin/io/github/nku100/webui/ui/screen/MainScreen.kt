@@ -55,8 +55,5 @@ class MainScreenState(private val scope: CoroutineScope) {
 
 /**
  * Root screen composable with multi-tab navigation.
- * - Android: uses Miuix + FloatingBottomBar + Haze + Backdrop
- * - wasmJs: uses Miuix NavigationBar (no FloatingBottomBar)
+ * Fully cross-platform — uses Backdrop + Haze + platform expect/actual for insets and API detection.
  */
-@Composable
-expect fun MainScreen()

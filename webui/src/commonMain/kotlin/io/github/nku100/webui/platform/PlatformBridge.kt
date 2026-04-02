@@ -22,6 +22,13 @@ data class PackageInfo(
 expect val isAndroidPlatform: Boolean
 
 /**
+ * Whether the platform API is available for saving config / executing commands.
+ * - Android: always true (runs as Zygisk module WebUI with root)
+ * - wasmJs: true only if window.ksu is available
+ */
+expect fun hasPlatformApi(): Boolean
+
+/**
  * Platform abstraction for KernelSU / Root operations.
  * - wasmJs: bridges to window.ksu via JS interop
  * - Android: executes commands via root shell

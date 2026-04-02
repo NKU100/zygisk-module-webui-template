@@ -7,6 +7,8 @@ import kotlinx.coroutines.withContext
 
 actual val isAndroidPlatform: Boolean = true
 
+actual fun hasPlatformApi(): Boolean = true
+
 actual object PlatformBridge {
     // Set by the Activity on creation
     var appContext: Context? = null

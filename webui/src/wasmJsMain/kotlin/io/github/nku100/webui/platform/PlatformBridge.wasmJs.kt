@@ -85,6 +85,11 @@ private external fun objGetString(obj: JsAny, key: String): String
 
 actual val isAndroidPlatform: Boolean = false
 
+@JsFun("() => typeof window !== 'undefined' && typeof window.ksu !== 'undefined' && window.ksu != null")
+private external fun hasKsuApiJs(): Boolean
+
+actual fun hasPlatformApi(): Boolean = hasKsuApiJs()
+
 actual object PlatformBridge {
     actual suspend fun exec(command: String): ShellResult {
         val result = ksuExecJs(command, emptyJsObject()).await<JsAny>()

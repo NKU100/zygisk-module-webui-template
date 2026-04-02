@@ -26,9 +26,9 @@ import org.intellij.lang.annotations.Language
  * Uses AGSL RuntimeShader for radial highlight effect.
  */
 @SuppressLint("NewApi")
-class InteractiveHighlight(
+actual class InteractiveHighlight actual constructor(
     val animationScope: CoroutineScope,
-    val position: (size: Size, offset: Offset) -> Offset = { _, offset -> offset }
+    val position: (size: Size, offset: Offset) -> Offset
 ) {
     private val pressProgressAnimationSpec = spring(0.5f, 300f, 0.001f)
     private val positionAnimationSpec = spring(0.5f, 300f, Offset.VisibilityThreshold)
@@ -37,7 +37,7 @@ class InteractiveHighlight(
     private val positionAnimation = Animatable(Offset.Zero, Offset.VectorConverter, Offset.VisibilityThreshold)
 
     private var startPosition = Offset.Zero
-    val offset: Offset get() = positionAnimation.value - startPosition
+    actual val offset: Offset get() = positionAnimation.value - startPosition
 
     @Language("AGSL")
     private val shader = RuntimeShader("""
@@ -52,7 +52,7 @@ class InteractiveHighlight(
         return color * intensity;
     }""")
 
-    val modifier: Modifier = Modifier.drawWithContent {
+    actual val modifier: Modifier = Modifier.drawWithContent {
         val progress = pressProgressAnimation.value
         if (progress > 0f) {
             drawRect(Color.White.copy(0.06f * progress), blendMode = BlendMode.Plus)
@@ -71,7 +71,7 @@ class InteractiveHighlight(
         drawContent()
     }
 
-    val gestureModifier: Modifier = Modifier.pointerInput(animationScope) {
+    actual val gestureModifier: Modifier = Modifier.pointerInput(animationScope) {
         inspectDragGestures(
             onDragStart = { down ->
                 startPosition = down.position

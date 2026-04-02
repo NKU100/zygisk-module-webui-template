@@ -18,15 +18,20 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.HazeStyle
+import dev.chrisbanes.haze.HazeTint
 import dev.chrisbanes.haze.hazeSource
-import io.github.nku100.webui.ui.component.WasmFloatingBottomBar
-import io.github.nku100.webui.ui.component.WasmFloatingBottomBarItem
+import io.github.nku100.webui.platform.hasPlatformApi
+import io.github.nku100.webui.platform.navigationBarBottomPadding
+import io.github.nku100.webui.ui.component.FloatingBottomBar
+import io.github.nku100.webui.ui.component.FloatingBottomBarItem
 import io.github.nku100.webui.ui.theme.AppTheme
 import io.github.nku100.webui.ui.theme.ThemeMode
 import kotlinx.coroutines.launch
@@ -38,16 +43,13 @@ import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
-@JsFun("() => typeof window !== 'undefined' && typeof window.ksu !== 'undefined' && window.ksu != null")
-private external fun hasKsuApi(): Boolean
-
 @Composable
-actual fun MainScreen() {
+fun MainScreen() {
     val scope = rememberCoroutineScope()
     val state = remember { MainScreenState(scope) }
 
     LaunchedEffect(Unit) {
-        if (hasKsuApi()) {
+        if (hasPlatformApi()) {
             try {
                 state.loadFromPlatform()
             } catch (_: Exception) {
@@ -65,6 +67,14 @@ actual fun MainScreen() {
 
         val surfaceColor = MiuixTheme.colorScheme.surface
         val hazeState = remember { HazeState() }
+        val hazeStyle = if (config.enableBlur) {
+            HazeStyle(
+                backgroundColor = surfaceColor,
+                tint = HazeTint(surfaceColor.copy(0.8f))
+            )
+        } else {
+            HazeStyle.Unspecified
+        }
 
         val backdrop = rememberLayerBackdrop {
             drawRect(surfaceColor)
@@ -85,7 +95,7 @@ actual fun MainScreen() {
         val bottomBar = @Composable {
             Box(modifier = Modifier.fillMaxWidth()) {
                 if (enableFloatingBottomBar) {
-                    WasmFloatingBottomBar(
+                    FloatingBottomBar(
                         modifier = Modifier
                             .align(Alignment.BottomCenter)
                             .clickable(
@@ -93,7 +103,9 @@ actual fun MainScreen() {
                                 indication = null,
                                 onClick = {},
                             )
-                            .padding(bottom = 12.dp),
+                            .padding(
+                                bottom = 12.dp + navigationBarBottomPadding()
+                            ),
                         selectedIndex = { selectedPage },
                         onSelected = { index ->
                             selectedPage = index
@@ -105,7 +117,7 @@ actual fun MainScreen() {
                         isDark = state.themeMode == ThemeMode.DARK,
                     ) {
                         items.forEachIndexed { index, item ->
-                            WasmFloatingBottomBarItem(
+                            FloatingBottomBarItem(
                                 onClick = {
                                     selectedPage = index
                                     scope.launch { pagerState.animateScrollToPage(index) }
@@ -131,7 +143,7 @@ actual fun MainScreen() {
                     }
                 } else {
                     NavigationBar(
-                        color = MiuixTheme.colorScheme.surface,
+                        color = if (config.enableBlur) Color.Transparent else MiuixTheme.colorScheme.surface,
                         content = {
                             items.forEachIndexed { index, item ->
                                 NavigationBarItem(
@@ -155,7 +167,7 @@ actual fun MainScreen() {
             HorizontalPager(
                 modifier = Modifier
                     .fillMaxSize()
-                    .hazeSource(state = hazeState)
+                    .then(if (config.enableBlur) Modifier.hazeSource(state = hazeState) else Modifier)
                     .then(if (enableFloatingBottomBarBlur) Modifier.layerBackdrop(backdrop) else Modifier),
                 state = pagerState,
                 beyondViewportPageCount = 3,
@@ -168,7 +180,7 @@ actual fun MainScreen() {
                     loading = state.loading,
                     bottomPadding = innerPadding.calculateBottomPadding(),
                     onConfigChange = { newConfig ->
-                        if (hasKsuApi()) {
+                        if (hasPlatformApi()) {
                             state.saveConfig(newConfig)
                         } else {
                             state.config = newConfig
