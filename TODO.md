@@ -81,41 +81,54 @@
 - [x] 主项目 `includeBuild("external/Backdrop")` + `implementation("com.kyant.backdrop:backdrop")`
 - [x] Android 编译安装验证通过
 
-## 阶段 1：纯 Compose 文件移入 commonMain（零改动或仅删注解）
+## 阶段 1：纯 Compose 文件移入 commonMain（零改动或仅删注解） ✅
 
-- [ ] `Backdrop.kt` — interface，纯 Compose API，直接移
-- [ ] `InverseLayerScope.kt` — GraphicsLayerScope 实现，纯 Compose，直接移
-- [ ] `LayerRecorder.kt` — 用了 `context(node:)` 语法，API 全是 Compose，直接移
-- [ ] `Outline.kt` — Canvas.clipOutline 扩展，纯 Compose，直接移
-- [ ] `ShapeProvider.kt` — Shape 缓存，纯 Compose，直接移
-- [ ] `backdrops/` 全部 6 文件 — Backdrop, CanvasBackdrop, CombinedBackdrop, EmptyBackdrop, LayerBackdrop, LayerBackdropModifier，全部纯 Compose，直接移
-- [ ] `Shaders.kt` — 着色器字符串常量，删 `@Language("AGSL")` 注解后移入 commonMain
-- [ ] `Shadow.kt` — data class，删 `@FloatRange` 注解后移入 commonMain
-- [ ] `InnerShadow.kt` — data class，删 `@FloatRange` 注解后移入 commonMain
-- [ ] `Highlight.kt` — data class，删 `@FloatRange` 注解后移入 commonMain
+- [x] `Backdrop.kt` — interface，纯 Compose API，直接移
+- [x] `InverseLayerScope.kt` — GraphicsLayerScope 实现，纯 Compose，直接移
+- [x] `LayerRecorder.kt` — 用了 `context(node:)` 语法，API 全是 Compose，直接移
+- [x] `Outline.kt` — Canvas.clipOutline 扩展，纯 Compose，直接移
+- [x] `ShapeProvider.kt` — Shape 缓存，纯 Compose，直接移
+- [x] `backdrops/` 全部 6 文件 — Backdrop, CanvasBackdrop, CombinedBackdrop, EmptyBackdrop, LayerBackdrop, LayerBackdropModifier，全部纯 Compose，直接移
+- [x] `Shaders.kt` — 着色器字符串常量，删 `@Language("AGSL")` 注解后移入 commonMain
+- [x] `Shadow.kt` — data class，删 `@FloatRange` 注解后移入 commonMain
+- [x] `InnerShadow.kt` — data class，删 `@FloatRange` 注解后移入 commonMain
+- [ ] `Highlight.kt` — data class，删 `@FloatRange` 后暂留 androidMain（依赖 `HighlightStyle`，待阶段 4 拆分后再移）
+- [x] `build.gradle.kts` 添加 `commonMain.dependencies`（compose.runtime/foundation/ui）
+- [x] Android + wasmJs 双端安装验证通过
 
-## 阶段 2：expect/actual 拆分核心类型
+## 阶段 2：expect/actual 拆分核心类型 ✅
 
-- [ ] `RuntimeShaderCache` — commonMain 定义 expect 接口；androidMain 用 `android.graphics.RuntimeShader` 实现；wasmJsMain 用 `org.jetbrains.skia.RuntimeEffect` 实现
-- [ ] `BackdropEffectScope` — 核心难点：接口持有 `android.graphics.RenderEffect`，需抽象为跨平台类型（expect 类型别名或包装类）
-- [ ] `DrawBackdropModifier` — `updateEffects()` 用了 `Build.VERSION` + `asComposeRenderEffect()`，需要平台化
+- [x] `PlatformRenderEffect` — expect 类型别名（Android → `android.graphics.RenderEffect`，wasmJs → `org.jetbrains.skia.ImageFilter`）
+- [x] `RuntimeShaderCache` — commonMain expect sealed interface；androidMain 缓存 `RuntimeShader`；wasmJsMain 缓存 `RuntimeEffect` + `RuntimeShaderBuilder`
+- [x] `BackdropEffectScope` — 接口 + 抽象类移入 commonMain，`renderEffect` 类型改为 `PlatformRenderEffect`
+- [x] `CreateBackdropEffectScope` — expect/actual 工厂函数，各平台创建带正确 RuntimeShaderCache 的 scope
+- [x] `PlatformEffects` — expect/actual `toComposeRenderEffect()` + `isPlatformEffectsSupported`
+- [x] `DrawBackdropModifier` — 核心 Element/Node + `drawPlainBackdrop` 移入 commonMain；`drawBackdrop`（带 highlight/shadow）暂留 androidMain
+- [x] `build.gradle.kts` 添加 `wasmJs { browser() }` target
+- [x] Android + wasmJs 双端编译安装验证通过
 
-## 阶段 3：effects/ 目录拆分
+## 阶段 3：effects/ 目录拆分 ✅
 
-- [ ] `effects/RenderEffect.kt` — `effect()` 函数操作 `android.graphics.RenderEffect`，需 expect/actual
-- [ ] `effects/Blur.kt` — 围绕 `RenderEffect.createBlurEffect`，androidMain 保留原实现，wasmJsMain 用 Skia 替代
-- [ ] `effects/ColorFilter.kt` — 用 `android.graphics.ColorMatrix/ColorFilter/RenderEffect`，需拆分
-- [ ] `effects/Lens.kt` — 用 `RuntimeShader` + `RenderEffect.createRuntimeShaderEffect`，需拆分；同时 `fastCoerceAtLeast/Most` → `coerceAtLeast/Most`
+- [x] `effects/RenderEffect.kt` — Android: `RenderEffect.createChainEffect`；wasmJs: `ImageFilter.makeCompose`
+- [x] `effects/Blur.kt` — Android: `RenderEffect.createBlurEffect`；wasmJs: `ImageFilter.makeBlur` + `FilterTileMode`
+- [x] `effects/ColorFilter.kt` — Android: `android.graphics.ColorMatrix/ColorFilter/RenderEffect`；wasmJs: `org.jetbrains.skia.ColorFilter/ColorMatrix/ImageFilter`
+- [x] `effects/Lens.kt` — Android: `RuntimeShader` + `RenderEffect.createRuntimeShaderEffect`；wasmJs: `RuntimeShaderBuilder` + `ImageFilter.makeRuntimeShader`；`fastCoerceAtLeast/Most` → `coerceAtLeast/Most`
+- [x] Android + wasmJs 双端编译安装验证通过
 
-## 阶段 4：highlight/ 和 shadow/ 拆分
+## 阶段 4：highlight/ 和 shadow/ 拆分 ✅
 
-- [ ] `HighlightModifier.kt` — 用了 `BlurMaskFilter` + `asFrameworkPaint()`，需 expect/actual；`fastCoerceAtMost` → `coerceAtMost`
-- [ ] `HighlightStyle.kt` — 用了 `RuntimeShader` + `Build.VERSION` + `@RequiresApi`，需 expect/actual；`fastCoerceAtMost` → `coerceAtMost`
-- [ ] `ShadowModifier.kt` — 用了 `BlurMaskFilter` + `asFrameworkPaint()`，需 expect/actual
-- [ ] `InnerShadowModifier.kt` — 用了 `Build.VERSION` + `BlurEffect`，需 expect/actual
+- [x] `HighlightStyle.kt` — 接口 + Plain + getCornerRadii 移入 commonMain；Default/Ambient 用 expect 工厂（Android 用 RuntimeShader，wasmJs 暂返回 null 降级）
+- [x] `HighlightModifier.kt` — 移入 commonMain，用 `applyBlurMaskFilter` + `isPlatformEffectsSupported` + `coerceAtMost`
+- [x] `Highlight.kt` — 移入 commonMain
+- [x] `ShadowModifier.kt` — 移入 commonMain，用 `applyBlurMaskFilter`
+- [x] `InnerShadowModifier.kt` — 移入 commonMain，用 `isPlatformEffectsSupported`（`BlurEffect` 本身是跨平台 Compose API）
+- [x] `PlatformMaskFilter.kt` — expect/actual（Android: `BlurMaskFilter`；wasmJs: `MaskFilter.makeBlur`）
+- [x] `DrawBackdropExt.kt`（`drawBackdrop` 函数）— 移入 commonMain（所有依赖已跨平台）
+- [x] Android + wasmJs 双端编译安装验证通过
 
-## 阶段 5：收尾
+## 阶段 5：收尾 ✅
 
-- [ ] `build.gradle.kts` 添加 `wasmJs { browser() }` target + commonMain 依赖
-- [ ] 编译验证 Android + wasmJs 双端通过
-- [ ] 提交到 Backdrop 子仓库并 push
+- [x] `build.gradle.kts` 添加 `wasmJs { browser() }` target + commonMain 依赖（已在阶段 2 完成）
+- [x] 编译验证 Android + wasmJs 双端通过
+- [ ] Push Backdrop 子仓库到远端
+- [ ] 提交主仓库（更新子模块指针 + TODO.md）
