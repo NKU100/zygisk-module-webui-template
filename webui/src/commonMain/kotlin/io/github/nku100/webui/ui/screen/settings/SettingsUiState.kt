@@ -9,11 +9,9 @@ data class SettingsUiState(
     val enableBlur: Boolean = false,
     val enableFloatingBottomBar: Boolean = true,
     val enableFloatingBottomBarBlur: Boolean = true,
-    /** Whether to show advanced UI effects (Blur/FloatingBar/Glass). */
-    val showAdvancedEffects: Boolean = true,
 ) {
     companion object {
-        fun fromConfig(config: ModuleConfig, isAndroid: Boolean = true): SettingsUiState {
+        fun fromConfig(config: ModuleConfig): SettingsUiState {
             return SettingsUiState(
                 enabled = config.enabled,
                 themeMode = ThemeMode.entries.find { it.name == config.themeMode }
@@ -21,7 +19,6 @@ data class SettingsUiState(
                 enableBlur = config.enableBlur,
                 enableFloatingBottomBar = config.enableFloatingBottomBar,
                 enableFloatingBottomBarBlur = config.enableFloatingBottomBarBlur,
-                showAdvancedEffects = true,
             )
         }
     }

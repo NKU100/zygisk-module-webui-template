@@ -15,7 +15,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.nku100.webui.data.ModuleConfig
 import io.github.nku100.webui.platform.PackageInfo
-import io.github.nku100.webui.platform.isAndroidPlatform
 import io.github.nku100.webui.ui.screen.settings.SettingsActions
 import io.github.nku100.webui.ui.screen.settings.SettingsPage
 import io.github.nku100.webui.ui.screen.settings.SettingsUiState
@@ -35,7 +34,7 @@ fun PlaceholderPage(
 ) {
     when (tab) {
         BottomTab.SETTINGS -> {
-            val settingsState = SettingsUiState.fromConfig(config, isAndroidPlatform)
+            val settingsState = SettingsUiState.fromConfig(config)
             val settingsActions = SettingsActions(
                 onEnabledChange = { enabled ->
                     onConfigChange(config.copy(enabled = enabled))

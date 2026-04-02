@@ -118,22 +118,20 @@ fun SettingsPage(
                         .padding(top = 12.dp)
                         .fillMaxWidth(),
                 ) {
-                    if (uiState.showAdvancedEffects) {
-                        SuperSwitch(
-                            title = "Blur Effects",
-                            summary = "Enable background blur effects",
-                            startAction = {
-                                Icon(
-                                    Icons.Rounded.BlurOn,
-                                    modifier = Modifier.padding(end = 6.dp),
-                                    contentDescription = "Blur Effects",
-                                    tint = colorScheme.onBackground
-                                )
-                            },
-                            checked = uiState.enableBlur,
-                            onCheckedChange = actions.onEnableBlurChange
-                        )
-                    }
+                    SuperSwitch(
+                        title = "Blur Effects",
+                        summary = "Enable background blur effects",
+                        startAction = {
+                            Icon(
+                                Icons.Rounded.BlurOn,
+                                modifier = Modifier.padding(end = 6.dp),
+                                contentDescription = "Blur Effects",
+                                tint = colorScheme.onBackground
+                            )
+                        },
+                        checked = uiState.enableBlur,
+                        onCheckedChange = actions.onEnableBlurChange
+                    )
                     SuperSwitch(
                         title = "Floating Bottom Bar",
                         summary = "Use floating navigation bar style",
@@ -148,23 +146,21 @@ fun SettingsPage(
                         checked = uiState.enableFloatingBottomBar,
                         onCheckedChange = actions.onEnableFloatingBottomBarChange
                     )
-                    if (uiState.showAdvancedEffects) {
-                        AnimatedVisibility(visible = uiState.enableFloatingBottomBar) {
-                            SuperSwitch(
-                                title = "Bottom Bar Glass Effect",
-                                summary = "Enable glass blur on floating bottom bar",
-                                startAction = {
-                                    Icon(
-                                        Icons.Rounded.WaterDrop,
-                                        modifier = Modifier.padding(end = 6.dp),
-                                        contentDescription = "Bottom Bar Glass Effect",
-                                        tint = colorScheme.onBackground
-                                    )
-                                },
-                                checked = uiState.enableFloatingBottomBarBlur,
-                                onCheckedChange = actions.onEnableFloatingBottomBarBlurChange
-                            )
-                        }
+                    AnimatedVisibility(visible = uiState.enableFloatingBottomBar) {
+                        SuperSwitch(
+                            title = "Bottom Bar Glass Effect",
+                            summary = "Enable glass blur on floating bottom bar",
+                            startAction = {
+                                Icon(
+                                    Icons.Rounded.WaterDrop,
+                                    modifier = Modifier.padding(end = 6.dp),
+                                    contentDescription = "Bottom Bar Glass Effect",
+                                    tint = colorScheme.onBackground
+                                )
+                            },
+                            checked = uiState.enableFloatingBottomBarBlur,
+                            onCheckedChange = actions.onEnableFloatingBottomBarBlurChange
+                        )
                     }
                 }
             }
