@@ -39,12 +39,13 @@
 - [x] `fastFirstOrNull` → `firstOrNull`（wasmJs 无此扩展，功能一致）
 - [x] `fastRoundToInt`/`fastCoerceIn` → `roundToInt`/`coerceIn`（同上）
 
-### 无法对齐（平台限制）❌
-- [ ] 背景渲染：Android 用 `drawBackdrop`（vibrancy/blur/lens/shadow），wasmJs 用 haze + background
-- [ ] Layer 2 隐藏副本：Android 用透明 Row + layerBackdrop 供 backdrop 合成，wasmJs 无需
-- [ ] Indicator 底色：Android 在 drawBackdrop.onDrawSurface 中绘制（含 pressProgress 渐变），wasmJs 用固定 background
-- [ ] 容器 pressProgress 缩放：Android 在 backdrop layerBlock 中实现，wasmJs 无 backdrop
-- [ ] Icon/Text 颜色：Android 固定 onSurface（靠 backdrop ColorFilter 着色），wasmJs 用条件 primary/onSurface
+### 已对齐（通过 Backdrop KMP 改造） ✅
+- [x] 背景渲染：wasmJs 也使用 `drawBackdrop`（vibrancy/blur/lens/shadow），与 Android 一致
+- [x] Layer 2 隐藏副本：wasmJs 也使用透明 Row + layerBackdrop 供 backdrop 合成
+- [x] Indicator 底色：wasmJs 在 drawBackdrop.onDrawSurface 中绘制（含 pressProgress 渐变），与 Android 一致
+- [x] 容器 pressProgress 缩放：wasmJs 在 backdrop layerBlock 中实现，与 Android 一致
+- [x] Icon/Text 颜色：wasmJs 统一使用 onSurface（靠 backdrop ColorFilter 着色），与 Android 一致
+- [x] 设置界面：wasmJs 也显示 Blur Effects / Glass Effect 开关
 
 ---
 
@@ -92,7 +93,7 @@
 - [x] `Shaders.kt` — 着色器字符串常量，删 `@Language("AGSL")` 注解后移入 commonMain
 - [x] `Shadow.kt` — data class，删 `@FloatRange` 注解后移入 commonMain
 - [x] `InnerShadow.kt` — data class，删 `@FloatRange` 注解后移入 commonMain
-- [ ] `Highlight.kt` — data class，删 `@FloatRange` 后暂留 androidMain（依赖 `HighlightStyle`，待阶段 4 拆分后再移）
+- [x] `Highlight.kt` — data class，删 `@FloatRange` 后移入 commonMain（阶段 4 完成）
 - [x] `build.gradle.kts` 添加 `commonMain.dependencies`（compose.runtime/foundation/ui）
 - [x] Android + wasmJs 双端安装验证通过
 
@@ -117,7 +118,7 @@
 
 ## 阶段 4：highlight/ 和 shadow/ 拆分 ✅
 
-- [x] `HighlightStyle.kt` — 接口 + Plain + getCornerRadii 移入 commonMain；Default/Ambient 用 expect 工厂（Android 用 RuntimeShader，wasmJs 暂返回 null 降级）
+- [x] `HighlightStyle.kt` — 接口 + Plain + getCornerRadii 移入 commonMain；Default/Ambient 用 expect 工厂（Android 用 RuntimeShader，wasmJs 用 SkSL RuntimeShaderBuilder）
 - [x] `HighlightModifier.kt` — 移入 commonMain，用 `applyBlurMaskFilter` + `isPlatformEffectsSupported` + `coerceAtMost`
 - [x] `Highlight.kt` — 移入 commonMain
 - [x] `ShadowModifier.kt` — 移入 commonMain，用 `applyBlurMaskFilter`
@@ -130,5 +131,13 @@
 
 - [x] `build.gradle.kts` 添加 `wasmJs { browser() }` target + commonMain 依赖（已在阶段 2 完成）
 - [x] 编译验证 Android + wasmJs 双端通过
-- [ ] Push Backdrop 子仓库到远端
-- [ ] 提交主仓库（更新子模块指针 + TODO.md）
+- [x] Push Backdrop 子仓库到远端
+- [x] 提交主仓库（更新子模块指针 + TODO.md）
+
+## 阶段 6：主项目 wasmJs 接入 Backdrop ✅
+
+- [x] `WasmFloatingBottomBar` 从 haze 改为 Backdrop（drawBackdrop + vibrancy/blur/lens/shadow/highlight）
+- [x] `MainScreen.wasmJs.kt` 添加 rememberLayerBackdrop + layerBackdrop + enableFloatingBottomBarBlur
+- [x] 设置界面对齐：wasmJs 显示 Blur Effects / Glass Effect 开关（`showAdvancedEffects = true`）
+- [x] wasmJsMain 添加 `com.kyant.backdrop:backdrop` 依赖
+- [x] Android + wasmJs 双端编译安装验证通过

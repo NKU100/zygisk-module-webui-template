@@ -3,7 +3,6 @@ package io.github.nku100.webui.ui.component
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.EaseOut
 import androidx.compose.animation.core.spring
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -31,20 +30,32 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
+import com.kyant.backdrop.Backdrop
+import com.kyant.backdrop.backdrops.layerBackdrop
+import com.kyant.backdrop.backdrops.rememberCombinedBackdrop
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
+import com.kyant.backdrop.drawBackdrop
+import com.kyant.backdrop.effects.blur
+import com.kyant.backdrop.effects.lens
+import com.kyant.backdrop.effects.vibrancy
+import com.kyant.backdrop.highlight.Highlight
+import com.kyant.backdrop.shadow.InnerShadow
+import com.kyant.backdrop.shadow.Shadow
 import com.kyant.capsule.ContinuousCapsule
-import dev.chrisbanes.haze.HazeState
-import dev.chrisbanes.haze.HazeStyle
-import dev.chrisbanes.haze.hazeEffect
 import io.github.nku100.webui.ui.animation.DampedDragAnimation
 import io.github.nku100.webui.ui.animation.InteractiveHighlight
 import kotlinx.coroutines.flow.collectLatest
@@ -57,31 +68,55 @@ import kotlin.math.sign
 
 val LocalFloatingBottomBarTabScale = staticCompositionLocalOf { { 1f } }
 
-/**
- * wasmJs floating bottom bar — structure aligned with Android FloatingBottomBar.
- *
- * Uses DampedDragAnimation (same class as Android, only two platform API diffs).
- * Background uses haze instead of backdrop (Android-only library).
- * No InteractiveHighlight (AGSL shader not available on wasmJs).
- * No Layer 2 invisible backdrop Row (not needed without backdrop system).
- */
+@Composable
+fun RowScope.WasmFloatingBottomBarItem(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    val scale = LocalFloatingBottomBarTabScale.current
+    Column(
+        modifier
+            .clip(ContinuousCapsule)
+            .clickable(
+                interactionSource = null,
+                indication = null,
+                role = Role.Tab,
+                onClick = onClick
+            )
+            .fillMaxHeight()
+            .weight(1f)
+            .graphicsLayer {
+                val s = scale()
+                scaleX = s
+                scaleY = s
+            },
+        verticalArrangement = Arrangement.spacedBy(1.dp, Alignment.CenterVertically),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        content = content
+    )
+}
+
 @Composable
 fun WasmFloatingBottomBar(
     modifier: Modifier = Modifier,
     selectedIndex: () -> Int,
     onSelected: (index: Int) -> Unit,
-    hazeState: HazeState,
+    backdrop: Backdrop,
     tabsCount: Int,
+    isBlurEnabled: Boolean = true,
     isDark: Boolean = false,
     content: @Composable RowScope.() -> Unit
 ) {
-    val surfaceColor = MiuixTheme.colorScheme.surfaceContainer
-    val containerColor = surfaceColor.copy(alpha = 0.4f)
-    val style = HazeStyle(
-        backgroundColor = surfaceColor.copy(alpha = 0.5f),
-        tint = null,
-    )
+    val isInLightTheme = !isDark
+    val accentColor = MiuixTheme.colorScheme.primary
+    val containerColor = if (isBlurEnabled) {
+        MiuixTheme.colorScheme.surfaceContainer.copy(0.4f)
+    } else {
+        MiuixTheme.colorScheme.surfaceContainer
+    }
 
+    val tabsBackdrop = rememberLayerBackdrop()
     val density = LocalDensity.current
     val isLtr = LocalLayoutDirection.current == LayoutDirection.Ltr
     val animationScope = rememberCoroutineScope()
@@ -180,36 +215,91 @@ fun WasmFloatingBottomBar(
         contentAlignment = Alignment.CenterStart
     ) {
         // Layer 1: Background container
+        Row(
+            Modifier
+                .onGloballyPositioned { coords ->
+                    totalWidthPx = coords.size.width.toFloat()
+                    val contentWidthPx = totalWidthPx - with(density) { 8.dp.toPx() }
+                    tabWidthPx = contentWidthPx / tabsCount
+                }
+                .graphicsLayer { translationX = panelOffset }
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null,
+                    onClick = {}
+                )
+                .drawBackdrop(
+                    backdrop = backdrop,
+                    shape = { ContinuousCapsule },
+                    effects = {
+                        if (isBlurEnabled) {
+                            vibrancy()
+                            blur(8f.dp.toPx())
+                            lens(24f.dp.toPx(), 24f.dp.toPx())
+                        }
+                    },
+                    highlight = {
+                        Highlight.Default.copy(alpha = if (isBlurEnabled) 1f else 0f)
+                    },
+                    shadow = {
+                        Shadow.Default.copy(
+                            color = Color.Black.copy(if (isInLightTheme) 0.1f else 0.2f),
+                        )
+                    },
+                    layerBlock = {
+                        if (isBlurEnabled) {
+                            val progress = dampedDragAnimation.pressProgress
+                            val scale = lerp(1f, 1f + 16f.dp.toPx() / size.width, progress)
+                            scaleX = scale
+                            scaleY = scale
+                        }
+                    },
+                    onDrawSurface = { drawRect(containerColor) }
+                )
+                .then(if (isBlurEnabled) interactiveHighlight.modifier else Modifier)
+                .height(64.dp)
+                .padding(4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            content = content
+        )
+
+        // Layer 2: Invisible backdrop Row (for indicator compositing)
         CompositionLocalProvider(
             LocalFloatingBottomBarTabScale provides {
-                lerp(1f, 1.2f, dampedDragAnimation.pressProgress)
+                if (isBlurEnabled) lerp(1f, 1.2f, dampedDragAnimation.pressProgress)
+                else 1f
             }
         ) {
             Row(
-                modifier = Modifier
-                    .onGloballyPositioned { coords ->
-                        totalWidthPx = coords.size.width.toFloat()
-                        val contentWidthPx = totalWidthPx - with(density) { 8.dp.toPx() }
-                        tabWidthPx = contentWidthPx / tabsCount
-                    }
+                Modifier
+                    .clearAndSetSemantics {}
+                    .alpha(0f)
+                    .layerBackdrop(tabsBackdrop)
                     .graphicsLayer { translationX = panelOffset }
-                    .clickable(
-                        interactionSource = remember { MutableInteractionSource() },
-                        indication = null,
-                        onClick = {}
+                    .drawBackdrop(
+                        backdrop = backdrop,
+                        shape = { ContinuousCapsule },
+                        effects = {
+                            if (isBlurEnabled) {
+                                val progress = dampedDragAnimation.pressProgress
+                                vibrancy()
+                                blur(8f.dp.toPx())
+                                lens(24f.dp.toPx() * progress, 24f.dp.toPx() * progress)
+                            }
+                        },
+                        highlight = {
+                            Highlight.Default.copy(alpha = if (isBlurEnabled) dampedDragAnimation.pressProgress else 0f)
+                        },
+                        onDrawSurface = { drawRect(containerColor) }
                     )
-                    .clip(ContinuousCapsule)
-                    .hazeEffect(state = hazeState, style = style)
-                    .background(containerColor)
-                    .then(interactiveHighlight.modifier)
-                    .height(64.dp)
-                    .padding(4.dp),
+                    .then(if (isBlurEnabled) interactiveHighlight.modifier else Modifier)
+                    .height(56.dp)
+                    .padding(horizontal = 4.dp)
+                    .graphicsLayer(colorFilter = ColorFilter.tint(accentColor)),
                 verticalAlignment = Alignment.CenterVertically,
                 content = content
             )
         }
-
-        // Layer 2: skipped (Android uses invisible backdrop Row here)
 
         // Layer 3: Indicator pill
         if (tabWidthPx > 0f) {
@@ -226,52 +316,54 @@ fun WasmFloatingBottomBar(
                             -progressOffset + panelOffset
                         }
                     }
-                    .then(interactiveHighlight.gestureModifier)
+                    .then(if (isBlurEnabled) interactiveHighlight.gestureModifier else Modifier)
                     .then(dampedDragAnimation.modifier)
-                    .graphicsLayer {
-                        scaleX = dampedDragAnimation.scaleX
-                        scaleY = dampedDragAnimation.scaleY
-                        val vel = dampedDragAnimation.velocity / 10f
-                        scaleX /= 1f - (vel * 0.75f).coerceIn(-0.2f, 0.2f)
-                        scaleY *= 1f - (vel * 0.25f).coerceIn(-0.2f, 0.2f)
-                    }
-                    .clip(ContinuousCapsule)
-                    .background(
-                        if (isDark) MiuixTheme.colorScheme.primary.copy(alpha = 0.15f)
-                        else MiuixTheme.colorScheme.primary.copy(alpha = 0.1f)
+                    .drawBackdrop(
+                        backdrop = rememberCombinedBackdrop(backdrop, tabsBackdrop),
+                        shape = { ContinuousCapsule },
+                        effects = {
+                            if (isBlurEnabled) {
+                                val progress = dampedDragAnimation.pressProgress
+                                lens(10f.dp.toPx() * progress, 14f.dp.toPx() * progress, true)
+                            }
+                        },
+                        highlight = {
+                            Highlight.Default.copy(alpha = if (isBlurEnabled) dampedDragAnimation.pressProgress else 0f)
+                        },
+                        shadow = { Shadow(alpha = if (isBlurEnabled) dampedDragAnimation.pressProgress else 0f) },
+                        innerShadow = {
+                            InnerShadow(
+                                radius = 8f.dp * dampedDragAnimation.pressProgress,
+                                alpha = if (isBlurEnabled) dampedDragAnimation.pressProgress else 0f
+                            )
+                        },
+                        layerBlock = {
+                            if (isBlurEnabled) {
+                                scaleX = dampedDragAnimation.scaleX
+                                scaleY = dampedDragAnimation.scaleY
+                                val velocity = dampedDragAnimation.velocity / 10f
+                                scaleX /= 1f - (velocity * 0.75f).coerceIn(-0.2f, 0.2f)
+                                scaleY *= 1f - (velocity * 0.25f).coerceIn(-0.2f, 0.2f)
+                            }
+                        },
+                        onDrawSurface = {
+                            val progress = if (isBlurEnabled) dampedDragAnimation.pressProgress else 0f
+                            drawRect(
+                                color = if (isInLightTheme) {
+                                    Color.Black.copy(0.1f)
+                                } else {
+                                    Color.White.copy(0.1f)
+                                },
+                                alpha = 1f - progress
+                            )
+                            drawRect(
+                                Color.Black.copy(alpha = 0.03f * progress)
+                            )
+                        }
                     )
                     .height(56.dp)
                     .width(with(density) { ((totalWidthPx - 8.dp.toPx()) / tabsCount).toDp() })
             )
         }
     }
-}
-
-@Composable
-fun RowScope.WasmFloatingBottomBarItem(
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    content: @Composable ColumnScope.() -> Unit
-) {
-    val scale = LocalFloatingBottomBarTabScale.current
-    Column(
-        modifier
-            .clip(ContinuousCapsule)
-            .clickable(
-                interactionSource = null,
-                indication = null,
-                role = Role.Tab,
-                onClick = onClick
-            )
-            .fillMaxHeight()
-            .weight(1f)
-            .graphicsLayer {
-                val s = scale()
-                scaleX = s
-                scaleY = s
-            },
-        verticalArrangement = Arrangement.spacedBy(1.dp, Alignment.CenterVertically),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        content = content
-    )
 }

@@ -1,5 +1,7 @@
 package io.github.nku100.webui.ui.screen
 
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,6 +21,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.kyant.backdrop.backdrops.layerBackdrop
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
 import io.github.nku100.webui.ui.component.WasmFloatingBottomBar
@@ -57,7 +61,15 @@ actual fun MainScreen() {
     AppTheme(themeMode = state.themeMode) {
         val config = state.config
         val enableFloatingBottomBar = config.enableFloatingBottomBar
+        val enableFloatingBottomBarBlur = config.enableFloatingBottomBarBlur && enableFloatingBottomBar
+
+        val surfaceColor = MiuixTheme.colorScheme.surface
         val hazeState = remember { HazeState() }
+
+        val backdrop = rememberLayerBackdrop {
+            drawRect(surfaceColor)
+            drawContent()
+        }
 
         val pagerState = rememberPagerState(pageCount = { BottomTab.entries.size })
 
@@ -70,21 +82,26 @@ actual fun MainScreen() {
             NavigationItem(label = tab.label, icon = tab.icon)
         }
 
-        // Floating bar in bottomBar (same structure as Android)
         val bottomBar = @Composable {
             Box(modifier = Modifier.fillMaxWidth()) {
                 if (enableFloatingBottomBar) {
                     WasmFloatingBottomBar(
                         modifier = Modifier
                             .align(Alignment.BottomCenter)
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null,
+                                onClick = {},
+                            )
                             .padding(bottom = 12.dp),
                         selectedIndex = { selectedPage },
                         onSelected = { index ->
                             selectedPage = index
                             scope.launch { pagerState.animateScrollToPage(index) }
                         },
-                        hazeState = hazeState,
+                        backdrop = backdrop,
                         tabsCount = items.size,
+                        isBlurEnabled = enableFloatingBottomBarBlur,
                         isDark = state.themeMode == ThemeMode.DARK,
                     ) {
                         items.forEachIndexed { index, item ->
@@ -98,19 +115,13 @@ actual fun MainScreen() {
                                 Icon(
                                     imageVector = item.icon,
                                     contentDescription = item.label,
-                                    tint = if (selectedPage == index)
-                                        MiuixTheme.colorScheme.primary
-                                    else
-                                        MiuixTheme.colorScheme.onSurface
+                                    tint = MiuixTheme.colorScheme.onSurface
                                 )
                                 Text(
                                     text = item.label,
                                     fontSize = 11.sp,
                                     lineHeight = 14.sp,
-                                    color = if (selectedPage == index)
-                                        MiuixTheme.colorScheme.primary
-                                    else
-                                        MiuixTheme.colorScheme.onSurface,
+                                    color = MiuixTheme.colorScheme.onSurface,
                                     maxLines = 1,
                                     softWrap = false,
                                     overflow = TextOverflow.Visible
@@ -144,7 +155,8 @@ actual fun MainScreen() {
             HorizontalPager(
                 modifier = Modifier
                     .fillMaxSize()
-                    .hazeSource(state = hazeState),
+                    .hazeSource(state = hazeState)
+                    .then(if (enableFloatingBottomBarBlur) Modifier.layerBackdrop(backdrop) else Modifier),
                 state = pagerState,
                 beyondViewportPageCount = 3,
                 userScrollEnabled = true,

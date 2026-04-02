@@ -121,7 +121,7 @@ fun SettingsPage(
                     if (uiState.showAdvancedEffects) {
                         SuperSwitch(
                             title = "Blur Effects",
-                            summary = "Enable blur effects (Android 13+)",
+                            summary = "Enable background blur effects",
                             startAction = {
                                 Icon(
                                     Icons.Rounded.BlurOn,

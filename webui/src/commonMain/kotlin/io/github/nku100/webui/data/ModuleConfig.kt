@@ -18,7 +18,7 @@ data class ModuleConfig(
     val themeMode: String = "FOLLOW_SYSTEM",
     /** Color style: DYNAMIC, DEFAULT, TEAL, ORANGE, PINK */
     val colorStyle: String = "DEFAULT",
-    /** Enable blur effects (Android 13+ only) */
+    /** Enable blur effects */
     val enableBlur: Boolean = false,
     /** Enable floating bottom bar */
     val enableFloatingBottomBar: Boolean = true,

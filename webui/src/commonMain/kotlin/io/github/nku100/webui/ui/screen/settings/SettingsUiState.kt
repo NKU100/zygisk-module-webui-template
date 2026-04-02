@@ -9,7 +9,7 @@ data class SettingsUiState(
     val enableBlur: Boolean = false,
     val enableFloatingBottomBar: Boolean = true,
     val enableFloatingBottomBarBlur: Boolean = true,
-    /** Whether to show advanced UI effects (Blur/FloatingBar/Glass). False on wasmJs. */
+    /** Whether to show advanced UI effects (Blur/FloatingBar/Glass). */
     val showAdvancedEffects: Boolean = true,
 ) {
     companion object {
@@ -21,7 +21,7 @@ data class SettingsUiState(
                 enableBlur = config.enableBlur,
                 enableFloatingBottomBar = config.enableFloatingBottomBar,
                 enableFloatingBottomBarBlur = config.enableFloatingBottomBarBlur,
-                showAdvancedEffects = isAndroid,
+                showAdvancedEffects = true,
             )
         }
     }

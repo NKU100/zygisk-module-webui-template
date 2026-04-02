@@ -56,6 +56,7 @@ kotlin {
             // KMP main artifacts — Gradle auto-resolves to wasmJs variant
             implementation(libs.miuix)
             implementation(libs.miuix.icons)
+            implementation("com.kyant.backdrop:backdrop")
             implementation(libs.haze)
             implementation(libs.material.kolor)
         }
