@@ -15,6 +15,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.nku100.webui.data.ModuleConfig
 import io.github.nku100.webui.platform.PackageInfo
+import io.github.nku100.webui.ui.navigation.LocalNavigator
+import io.github.nku100.webui.ui.navigation.Route
 import io.github.nku100.webui.ui.screen.settings.SettingsActions
 import io.github.nku100.webui.ui.screen.settings.SettingsPage
 import io.github.nku100.webui.ui.screen.settings.SettingsUiState
@@ -30,10 +32,10 @@ fun PlaceholderPage(
     loading: Boolean,
     bottomPadding: Dp,
     onConfigChange: (ModuleConfig) -> Unit,
-    onNavigateToPage: (Int) -> Unit,
 ) {
     when (tab) {
         BottomTab.SETTINGS -> {
+            val navigator = LocalNavigator.current
             val settingsState = SettingsUiState.fromConfig(config)
             val settingsActions = SettingsActions(
                 onEnabledChange = { enabled ->
@@ -51,6 +53,7 @@ fun PlaceholderPage(
                 onEnableFloatingBottomBarBlurChange = { enabled ->
                     onConfigChange(config.copy(enableFloatingBottomBarBlur = enabled))
                 },
+                onOpenAbout = { navigator.push(Route.About) },
             )
             SettingsPage(
                 uiState = settingsState,
@@ -60,32 +63,32 @@ fun PlaceholderPage(
             )
         }
         else -> {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(bottom = bottomPadding)
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-    ) {
-        Text(
-            text = tab.label,
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Bold,
-            color = MiuixTheme.colorScheme.onBackground,
-        )
-        Spacer(Modifier.height(8.dp))
-        Text(
-            text = when (tab) {
-                BottomTab.HOME -> "Module Active • ${config.targetPackages.size} apps targeted"
-                BottomTab.APPS -> "${packages.size} apps available • ${if (loading) "Loading..." else "Ready"}"
-                BottomTab.LOGS -> "View runtime logs"
-                BottomTab.SETTINGS -> "Theme & module settings"
-            },
-            fontSize = 14.sp,
-            color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
-        )
-    }
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(bottom = bottomPadding)
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+            ) {
+                Text(
+                    text = tab.label,
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MiuixTheme.colorScheme.onBackground,
+                )
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    text = when (tab) {
+                        BottomTab.HOME -> "Module Active • ${config.targetPackages.size} apps targeted"
+                        BottomTab.APPS -> "${packages.size} apps available • ${if (loading) "Loading..." else "Ready"}"
+                        BottomTab.LOGS -> "View runtime logs"
+                        BottomTab.SETTINGS -> "Theme & module settings"
+                    },
+                    fontSize = 14.sp,
+                    color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
+                )
+            }
         }
     }
 }

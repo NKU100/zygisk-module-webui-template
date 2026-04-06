@@ -39,6 +39,7 @@ kotlin {
             implementation(compose.ui)
             implementation(compose.components.resources)
             implementation(libs.kotlinx.serialization.json)
+            implementation(libs.navigation3.ui)
             implementation("com.kyant.capsule:capsule")
         }
         androidMain.dependencies {

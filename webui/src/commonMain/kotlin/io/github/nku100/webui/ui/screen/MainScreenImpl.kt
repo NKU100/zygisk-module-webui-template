@@ -15,6 +15,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -81,9 +82,13 @@ fun MainScreen() {
             drawContent()
         }
 
-        val pagerState = rememberPagerState(pageCount = { BottomTab.entries.size })
+        var selectedPage by rememberSaveable { mutableStateOf(0) }
 
-        var selectedPage by remember { mutableStateOf(0) }
+        val pagerState = rememberPagerState(
+            initialPage = selectedPage,
+            pageCount = { BottomTab.entries.size },
+        )
+
         LaunchedEffect(pagerState.settledPage) {
             selectedPage = pagerState.settledPage
         }
@@ -185,9 +190,6 @@ fun MainScreen() {
                         } else {
                             state.config = newConfig
                         }
-                    },
-                    onNavigateToPage = { target ->
-                        scope.launch { pagerState.animateScrollToPage(target) }
                     },
                 )
             }
