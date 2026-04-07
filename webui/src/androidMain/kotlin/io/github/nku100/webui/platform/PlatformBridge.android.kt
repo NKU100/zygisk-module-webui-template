@@ -1,13 +1,21 @@
 package io.github.nku100.webui.platform
 
 import android.content.Context
+import android.content.Intent
 import android.content.pm.ApplicationInfo
+import android.net.Uri
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 actual val isAndroidPlatform: Boolean = true
 
 actual fun hasPlatformApi(): Boolean = true
+
+actual fun openUrl(url: String) {
+    val context = PlatformBridge.appContext ?: return
+    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    context.startActivity(intent)
+}
 
 actual object PlatformBridge {
     // Set by the Activity on creation

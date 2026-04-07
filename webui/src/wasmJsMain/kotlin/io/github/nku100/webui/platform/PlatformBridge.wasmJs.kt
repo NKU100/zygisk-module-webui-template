@@ -90,6 +90,26 @@ private external fun hasKsuApiJs(): Boolean
 
 actual fun hasPlatformApi(): Boolean = hasKsuApiJs()
 
+@JsFun("""(url) => {
+    if (typeof window.ksu !== 'undefined' && window.ksu.exec) {
+        if (window.ksu.toast) window.ksu.toast('Redirecting to ' + url);
+        setTimeout(function() {
+            var cb = '__open_url_' + Date.now() + '_' + Math.random().toString(36).slice(2);
+            window[cb] = function(errno, stdout, stderr) {
+                delete window[cb];
+                if (errno !== 0) window.open(url, '_blank');
+            };
+            try { window.ksu.exec('am start -a android.intent.action.VIEW -d ' + url, '{}', cb); }
+            catch(e) { delete window[cb]; window.open(url, '_blank'); }
+        }, 100);
+    } else {
+        window.open(url, '_blank');
+    }
+}""")
+private external fun openUrlJs(url: String)
+
+actual fun openUrl(url: String) = openUrlJs(url)
+
 actual object PlatformBridge {
     actual suspend fun exec(command: String): ShellResult {
         val result = ksuExecJs(command, emptyJsObject()).await<JsAny>()

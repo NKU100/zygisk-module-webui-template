@@ -29,6 +29,13 @@ expect val isAndroidPlatform: Boolean
 expect fun hasPlatformApi(): Boolean
 
 /**
+ * Open a URL in the platform's default browser/handler.
+ * - Android: uses Intent.ACTION_VIEW
+ * - wasmJs: creates a temporary <a> element to avoid WebView blocking window.open()
+ */
+expect fun openUrl(url: String)
+
+/**
  * Platform abstraction for KernelSU / Root operations.
  * - wasmJs: bridges to window.ksu via JS interop
  * - Android: executes commands via root shell
