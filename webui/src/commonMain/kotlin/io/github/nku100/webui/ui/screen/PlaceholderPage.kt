@@ -17,6 +17,9 @@ import io.github.nku100.webui.data.ModuleConfig
 import io.github.nku100.webui.platform.PackageInfo
 import io.github.nku100.webui.ui.navigation.LocalNavigator
 import io.github.nku100.webui.ui.navigation.Route
+import io.github.nku100.webui.ui.screen.apps.AppsActions
+import io.github.nku100.webui.ui.screen.apps.AppsPage
+import io.github.nku100.webui.ui.screen.apps.AppsUiState
 import io.github.nku100.webui.ui.screen.home.HomeActions
 import io.github.nku100.webui.ui.screen.home.HomePage
 import io.github.nku100.webui.ui.screen.home.HomeUiState
@@ -80,6 +83,27 @@ fun PlaceholderPage(
                 enableBlur = config.enableBlur,
             )
         }
+        BottomTab.APPS -> {
+            AppsPage(
+                state = AppsUiState(
+                    packages = packages,
+                    targetPackages = config.targetPackages.toSet(),
+                    loading = loading,
+                ),
+                actions = AppsActions(
+                    onToggleTarget = { packageName, enabled ->
+                        val newTargets = if (enabled) {
+                            config.targetPackages + packageName
+                        } else {
+                            config.targetPackages - packageName
+                        }
+                        onConfigChange(config.copy(targetPackages = newTargets))
+                    },
+                ),
+                bottomPadding = bottomPadding,
+                enableBlur = config.enableBlur,
+            )
+        }
         else -> {
             Column(
                 modifier = Modifier
@@ -98,7 +122,6 @@ fun PlaceholderPage(
                 Spacer(Modifier.height(8.dp))
                 Text(
                     text = when (tab) {
-                        BottomTab.APPS -> "${packages.size} apps available • ${if (loading) "Loading..." else "Ready"}"
                         BottomTab.LOGS -> "View runtime logs"
                         else -> ""
                     },
