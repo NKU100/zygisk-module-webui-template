@@ -13,6 +13,7 @@ data class PackageInfo(
     val packageName: String,
     val label: String = packageName,
     val iconModel: Any? = null,
+    val isSystemApp: Boolean = false,
 )
 
 /**

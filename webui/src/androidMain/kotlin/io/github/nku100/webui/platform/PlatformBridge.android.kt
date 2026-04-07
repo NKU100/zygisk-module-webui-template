@@ -44,18 +44,18 @@ actual object PlatformBridge {
             // Use PackageManager for label + icon
             val pm = ctx.packageManager
             pm.getInstalledApplications(0)
-                .filter { it.flags and ApplicationInfo.FLAG_SYSTEM == 0 }
                 .map { info ->
                     PackageInfo(
                         packageName = info.packageName,
                         label = info.loadLabel(pm).toString(),
                         iconModel = info.loadIcon(pm),
+                        isSystemApp = (info.flags and ApplicationInfo.FLAG_SYSTEM) != 0,
                     )
                 }
                 .sortedBy { it.label.lowercase() }
         } else {
             // Fallback: shell command
-            val result = exec("pm list packages -3")
+            val result = exec("pm list packages")
             if (result.errno != 0) return@withContext emptyList()
             result.stdout.lines()
                 .filter { it.startsWith("package:") }
