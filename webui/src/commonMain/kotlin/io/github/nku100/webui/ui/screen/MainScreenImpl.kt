@@ -33,7 +33,6 @@ import io.github.nku100.webui.platform.hasPlatformApi
 import io.github.nku100.webui.platform.navigationBarBottomPadding
 import io.github.nku100.webui.ui.component.FloatingBottomBar
 import io.github.nku100.webui.ui.component.FloatingBottomBarItem
-import io.github.nku100.webui.ui.theme.AppTheme
 import io.github.nku100.webui.ui.theme.ThemeMode
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.basic.Icon
@@ -45,158 +44,143 @@ import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
-fun MainScreen() {
+fun MainScreen(state: MainScreenState) {
     val scope = rememberCoroutineScope()
-    val state = remember { MainScreenState(scope) }
 
-    LaunchedEffect(Unit) {
-        if (hasPlatformApi()) {
-            try {
-                state.loadFromPlatform()
-            } catch (_: Exception) {
-                state.loading = false
-            }
-        } else {
-            state.loadMockData()
-        }
+    val config = state.config
+    val enableFloatingBottomBar = config.enableFloatingBottomBar
+    val enableFloatingBottomBarBlur = config.enableFloatingBottomBarBlur && enableFloatingBottomBar
+
+    val surfaceColor = MiuixTheme.colorScheme.surface
+    val hazeState = remember { HazeState() }
+    val hazeStyle = if (config.enableBlur) {
+        HazeStyle(
+            backgroundColor = surfaceColor,
+            tint = HazeTint(surfaceColor.copy(0.8f))
+        )
+    } else {
+        HazeStyle.Unspecified
     }
 
-    AppTheme(themeMode = state.themeMode) {
-        val config = state.config
-        val enableFloatingBottomBar = config.enableFloatingBottomBar
-        val enableFloatingBottomBarBlur = config.enableFloatingBottomBarBlur && enableFloatingBottomBar
+    val backdrop = rememberLayerBackdrop {
+        drawRect(surfaceColor)
+        drawContent()
+    }
 
-        val surfaceColor = MiuixTheme.colorScheme.surface
-        val hazeState = remember { HazeState() }
-        val hazeStyle = if (config.enableBlur) {
-            HazeStyle(
-                backgroundColor = surfaceColor,
-                tint = HazeTint(surfaceColor.copy(0.8f))
-            )
-        } else {
-            HazeStyle.Unspecified
-        }
+    var selectedPage by rememberSaveable { mutableStateOf(0) }
 
-        val backdrop = rememberLayerBackdrop {
-            drawRect(surfaceColor)
-            drawContent()
-        }
+    val pagerState = rememberPagerState(
+        initialPage = selectedPage,
+        pageCount = { BottomTab.entries.size },
+    )
 
-        var selectedPage by rememberSaveable { mutableStateOf(0) }
+    LaunchedEffect(pagerState.currentPage) {
+        selectedPage = pagerState.currentPage
+    }
 
-        val pagerState = rememberPagerState(
-            initialPage = selectedPage,
-            pageCount = { BottomTab.entries.size },
-        )
+    val items = BottomTab.entries.map { tab ->
+        NavigationItem(label = tab.label, icon = tab.icon)
+    }
 
-        LaunchedEffect(pagerState.currentPage) {
-            selectedPage = pagerState.currentPage
-        }
-
-        val items = BottomTab.entries.map { tab ->
-            NavigationItem(label = tab.label, icon = tab.icon)
-        }
-
-        val bottomBar = @Composable {
-            Box(modifier = Modifier.fillMaxWidth()) {
-                if (enableFloatingBottomBar) {
-                    FloatingBottomBar(
-                        modifier = Modifier
-                            .align(Alignment.BottomCenter)
-                            .clickable(
-                                interactionSource = remember { MutableInteractionSource() },
-                                indication = null,
-                                onClick = {},
-                            )
-                            .padding(
-                                bottom = 12.dp + navigationBarBottomPadding()
-                            ),
-                        selectedIndex = { selectedPage },
-                        onSelected = { index ->
-                            selectedPage = index
-                            scope.launch { pagerState.animateScrollToPage(index) }
-                        },
-                        backdrop = backdrop,
-                        tabsCount = items.size,
-                        isBlurEnabled = enableFloatingBottomBarBlur,
-                        isDark = state.themeMode == ThemeMode.DARK,
-                    ) {
-                        items.forEachIndexed { index, item ->
-                            FloatingBottomBarItem(
-                                onClick = {
-                                    selectedPage = index
-                                    scope.launch { pagerState.animateScrollToPage(index) }
-                                },
-                                modifier = Modifier.defaultMinSize(minWidth = 76.dp)
-                            ) {
-                                Icon(
-                                    imageVector = item.icon,
-                                    contentDescription = item.label,
-                                    tint = MiuixTheme.colorScheme.onSurface
-                                )
-                                Text(
-                                    text = item.label,
-                                    fontSize = 11.sp,
-                                    lineHeight = 14.sp,
-                                    color = MiuixTheme.colorScheme.onSurface,
-                                    maxLines = 1,
-                                    softWrap = false,
-                                    overflow = TextOverflow.Visible
-                                )
-                            }
-                        }
-                    }
-                } else {
-                    NavigationBar(
-                        color = if (config.enableBlur) Color.Transparent else MiuixTheme.colorScheme.surface,
-                        content = {
-                            items.forEachIndexed { index, item ->
-                                NavigationBarItem(
-                                    modifier = Modifier.weight(1f),
-                                    icon = item.icon,
-                                    label = item.label,
-                                    selected = selectedPage == index,
-                                    onClick = {
-                                        selectedPage = index
-                                        scope.launch { pagerState.animateScrollToPage(index) }
-                                    }
-                                )
-                            }
-                        }
-                    )
-                }
-            }
-        }
-
-        Scaffold(bottomBar = bottomBar) { innerPadding ->
-            HorizontalPager(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .then(if (config.enableBlur) Modifier.hazeSource(state = hazeState) else Modifier)
-                    .then(if (enableFloatingBottomBarBlur) Modifier.layerBackdrop(backdrop) else Modifier),
-                state = pagerState,
-                beyondViewportPageCount = 3,
-                userScrollEnabled = true,
-            ) { page ->
-                PlaceholderPage(
-                    tab = BottomTab.entries[page],
-                    config = config,
-                    packages = state.packages,
-                    loading = state.loading,
-                    bottomPadding = innerPadding.calculateBottomPadding(),
-                    onConfigChange = { newConfig ->
-                        if (hasPlatformApi()) {
-                            state.saveConfig(newConfig)
-                        } else {
-                            state.config = newConfig
-                        }
-                    },
-                    onNavigateToTab = { index ->
+    val bottomBar = @Composable {
+        Box(modifier = Modifier.fillMaxWidth()) {
+            if (enableFloatingBottomBar) {
+                FloatingBottomBar(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null,
+                            onClick = {},
+                        )
+                        .padding(
+                            bottom = 12.dp + navigationBarBottomPadding()
+                        ),
+                    selectedIndex = { selectedPage },
+                    onSelected = { index ->
                         selectedPage = index
                         scope.launch { pagerState.animateScrollToPage(index) }
                     },
+                    backdrop = backdrop,
+                    tabsCount = items.size,
+                    isBlurEnabled = enableFloatingBottomBarBlur,
+                    isDark = state.themeMode == ThemeMode.DARK,
+                ) {
+                    items.forEachIndexed { index, item ->
+                        FloatingBottomBarItem(
+                            onClick = {
+                                selectedPage = index
+                                scope.launch { pagerState.animateScrollToPage(index) }
+                            },
+                            modifier = Modifier.defaultMinSize(minWidth = 76.dp)
+                        ) {
+                            Icon(
+                                imageVector = item.icon,
+                                contentDescription = item.label,
+                                tint = MiuixTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                text = item.label,
+                                fontSize = 11.sp,
+                                lineHeight = 14.sp,
+                                color = MiuixTheme.colorScheme.onSurface,
+                                maxLines = 1,
+                                softWrap = false,
+                                overflow = TextOverflow.Visible
+                            )
+                        }
+                    }
+                }
+            } else {
+                NavigationBar(
+                    color = if (config.enableBlur) Color.Transparent else MiuixTheme.colorScheme.surface,
+                    content = {
+                        items.forEachIndexed { index, item ->
+                            NavigationBarItem(
+                                modifier = Modifier.weight(1f),
+                                icon = item.icon,
+                                label = item.label,
+                                selected = selectedPage == index,
+                                onClick = {
+                                    selectedPage = index
+                                    scope.launch { pagerState.animateScrollToPage(index) }
+                                }
+                            )
+                        }
+                    }
                 )
             }
+        }
+    }
+
+    Scaffold(bottomBar = bottomBar) { innerPadding ->
+        HorizontalPager(
+            modifier = Modifier
+                .fillMaxSize()
+                .then(if (config.enableBlur) Modifier.hazeSource(state = hazeState) else Modifier)
+                .then(if (enableFloatingBottomBarBlur) Modifier.layerBackdrop(backdrop) else Modifier),
+            state = pagerState,
+            beyondViewportPageCount = 3,
+            userScrollEnabled = true,
+        ) { page ->
+            PlaceholderPage(
+                tab = BottomTab.entries[page],
+                config = config,
+                packages = state.packages,
+                loading = state.loading,
+                bottomPadding = innerPadding.calculateBottomPadding(),
+                onConfigChange = { newConfig ->
+                    if (hasPlatformApi()) {
+                        state.saveConfig(newConfig)
+                    } else {
+                        state.config = newConfig
+                    }
+                },
+                onNavigateToTab = { index ->
+                    selectedPage = index
+                    scope.launch { pagerState.animateScrollToPage(index) }
+                },
+            )
         }
     }
 }
