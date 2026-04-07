@@ -18,6 +18,8 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.github.nku100.webui.ModuleInfo
+import io.github.nku100.webui.platform.openUrl
+import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
@@ -68,7 +70,7 @@ fun AboutPage(
                         .padding(top = 12.dp)
                         .fillMaxWidth(),
                 ) {
-                    SuperArrow(
+                    BasicComponent(
                         title = "Module ID",
                         summary = ModuleInfo.MODULE_ID,
                         startAction = {
@@ -79,7 +81,6 @@ fun AboutPage(
                                 tint = colorScheme.onBackground
                             )
                         },
-                        onClick = {},
                     )
                 }
             }
@@ -91,9 +92,9 @@ fun AboutPage(
                         .padding(top = 12.dp)
                         .fillMaxWidth(),
                 ) {
-                    SuperArrow(
+                    BasicComponent(
                         title = "Author",
-                        summary = "NKU100",
+                        summary = ModuleInfo.MODULE_AUTHOR,
                         startAction = {
                             Icon(
                                 Icons.Rounded.Person,
@@ -102,7 +103,6 @@ fun AboutPage(
                                 tint = colorScheme.onBackground
                             )
                         },
-                        onClick = {},
                     )
                 }
             }
@@ -116,7 +116,7 @@ fun AboutPage(
                 ) {
                     SuperArrow(
                         title = "Source Code",
-                        summary = "github.com/NKU100/zygisk-module-webui-template",
+                        summary = ModuleInfo.MODULE_REPO.removePrefix("https://"),
                         startAction = {
                             Icon(
                                 Icons.Rounded.Code,
@@ -125,7 +125,7 @@ fun AboutPage(
                                 tint = colorScheme.onBackground
                             )
                         },
-                        onClick = {},
+                        onClick = { openUrl(ModuleInfo.MODULE_REPO) },
                     )
                 }
             }
@@ -137,7 +137,7 @@ fun AboutPage(
                         .padding(vertical = 12.dp)
                         .fillMaxWidth(),
                 ) {
-                    SuperArrow(
+                    BasicComponent(
                         title = "License",
                         summary = "Apache License 2.0",
                         startAction = {
@@ -148,7 +148,6 @@ fun AboutPage(
                                 tint = colorScheme.onBackground
                             )
                         },
-                        onClick = {},
                     )
                 }
                 Spacer(Modifier.height(bottomPadding))

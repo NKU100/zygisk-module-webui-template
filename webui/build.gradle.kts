@@ -7,6 +7,11 @@ plugins {
 }
 
 val moduleId: String by rootProject.extra
+val moduleName: String by rootProject.extra
+val moduleVersion: String by rootProject.extra
+val moduleVersionCode: Int by rootProject.extra
+val moduleAuthor: String by rootProject.extra
+val moduleRepo: String by rootProject.extra
 val moduleApplicationId: String by rootProject.extra
 val androidCompileSdkVersion: Int by rootProject.extra
 val androidMinSdkVersion: Int by rootProject.extra
@@ -91,6 +96,11 @@ val generateModuleInfo = tasks.register("generateModuleInfo") {
             |/** Auto-generated from module.gradle.kts — do not edit. */
             |object ModuleInfo {
             |    const val MODULE_ID = "$moduleId"
+            |    const val MODULE_NAME = "$moduleName"
+            |    const val MODULE_VERSION = "$moduleVersion"
+            |    const val MODULE_VERSION_CODE = $moduleVersionCode
+            |    const val MODULE_AUTHOR = "$moduleAuthor"
+            |    const val MODULE_REPO = "$moduleRepo"
             |    const val CONFIG_PATH = "/data/adb/modules/$moduleId/config.json"
             |}
             """.trimMargin()

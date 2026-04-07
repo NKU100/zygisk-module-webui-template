@@ -17,6 +17,9 @@ import io.github.nku100.webui.data.ModuleConfig
 import io.github.nku100.webui.platform.PackageInfo
 import io.github.nku100.webui.ui.navigation.LocalNavigator
 import io.github.nku100.webui.ui.navigation.Route
+import io.github.nku100.webui.ui.screen.home.HomeActions
+import io.github.nku100.webui.ui.screen.home.HomePage
+import io.github.nku100.webui.ui.screen.home.HomeUiState
 import io.github.nku100.webui.ui.screen.settings.SettingsActions
 import io.github.nku100.webui.ui.screen.settings.SettingsPage
 import io.github.nku100.webui.ui.screen.settings.SettingsUiState
@@ -32,6 +35,7 @@ fun PlaceholderPage(
     loading: Boolean,
     bottomPadding: Dp,
     onConfigChange: (ModuleConfig) -> Unit,
+    onNavigateToTab: (Int) -> Unit,
 ) {
     when (tab) {
         BottomTab.SETTINGS -> {
@@ -62,6 +66,20 @@ fun PlaceholderPage(
                 enableBlur = config.enableBlur,
             )
         }
+        BottomTab.HOME -> {
+            HomePage(
+                state = HomeUiState(
+                    moduleEnabled = config.enabled,
+                    targetPackageCount = config.targetPackages.size,
+                ),
+                actions = HomeActions(
+                    onStatusClick = { onNavigateToTab(BottomTab.SETTINGS.ordinal) },
+                    onTargetAppsClick = { onNavigateToTab(BottomTab.APPS.ordinal) },
+                ),
+                bottomPadding = bottomPadding,
+                enableBlur = config.enableBlur,
+            )
+        }
         else -> {
             Column(
                 modifier = Modifier
@@ -80,10 +98,9 @@ fun PlaceholderPage(
                 Spacer(Modifier.height(8.dp))
                 Text(
                     text = when (tab) {
-                        BottomTab.HOME -> "Module Active • ${config.targetPackages.size} apps targeted"
                         BottomTab.APPS -> "${packages.size} apps available • ${if (loading) "Loading..." else "Ready"}"
                         BottomTab.LOGS -> "View runtime logs"
-                        BottomTab.SETTINGS -> "Theme & module settings"
+                        else -> ""
                     },
                     fontSize = 14.sp,
                     color = MiuixTheme.colorScheme.onSurfaceVariantSummary,

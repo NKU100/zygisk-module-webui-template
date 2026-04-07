@@ -191,6 +191,10 @@ fun MainScreen() {
                             state.config = newConfig
                         }
                     },
+                    onNavigateToTab = { index ->
+                        selectedPage = index
+                        scope.launch { pagerState.animateScrollToPage(index) }
+                    },
                 )
             }
         }

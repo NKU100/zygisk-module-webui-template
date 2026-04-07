@@ -12,8 +12,8 @@
 ## 阶段 2：逐页面搬运（页面 + 依赖组件一起搬，每搬一个编译验证）
 
 - [x] Settings 主页面（Module Enabled / Theme Mode / UI Effects / About 入口）→ 双平台编译验证通过
-- [ ] Settings → About 子页面 → 编译验证
-- [ ] Home 页面（模块状态、版本信息 + StatusTag 等依赖组件）→ 编译验证
+- [x] Settings → About 子页面（Navigation 3 + NavDisplay 横向滑动转场 + 液态玻璃返回按钮）→ 双平台编译验证通过
+- [x] Home 页面（StatusCard + InfoCard + SourceCodeCard + ModuleInfo 注入 + 跨平台 openUrl）→ 双平台编译验证通过
 - [ ] Apps 页面（SuperUser / 应用列表 + SuperSearchBar + Dialog 等依赖组件）→ 编译验证
 - [ ] 最终双平台效果对比
 
