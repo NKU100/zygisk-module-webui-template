@@ -6,7 +6,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -59,6 +58,7 @@ import dev.chrisbanes.haze.HazeStyle
 import dev.chrisbanes.haze.HazeTint
 import dev.chrisbanes.haze.hazeSource
 import io.github.nku100.webui.platform.PackageInfo
+import io.github.nku100.webui.ui.component.AppIconImage
 import io.github.nku100.webui.ui.component.SearchBox
 import io.github.nku100.webui.ui.component.SearchPager
 import io.github.nku100.webui.ui.component.SearchStatus
@@ -337,32 +337,14 @@ private fun AppItem(
         insideMargin = PaddingValues(start = 10.dp, end = 16.dp, top = 8.dp, bottom = 8.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            // Letter avatar icon
-            Box(
-                modifier = Modifier
-                    .padding(end = 10.dp)
-                    .size(48.dp)
-                    .clip(ContinuousRoundedRectangle(12.dp)),
-                contentAlignment = Alignment.Center,
-            ) {
-                val initial = packageInfo.label.firstOrNull()?.uppercase() ?: "?"
-                val bgColor = remember(packageInfo.packageName) {
-                    val hash = packageInfo.packageName.hashCode()
-                    Color(
-                        red = ((hash and 0xFF0000) shr 16) / 255f * 0.6f + 0.2f,
-                        green = ((hash and 0x00FF00) shr 8) / 255f * 0.6f + 0.2f,
-                        blue = (hash and 0x0000FF) / 255f * 0.6f + 0.2f,
-                        alpha = 1f,
-                    )
-                }
-                Canvas(modifier = Modifier.fillMaxSize()) { drawRect(color = bgColor) }
-                Text(
-                    text = initial,
-                    color = Color.White,
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
+            // App icon
+            AppIconImage(
+                    iconModel = packageInfo.iconModel,
+                    packageName = packageInfo.packageName,
+                    contentDescription = packageInfo.label,
+                    modifier = Modifier.padding(end = 10.dp),
+                    size = 48.dp,
                 )
-            }
 
             // Label + package name
             Column(modifier = Modifier.weight(1f)) {

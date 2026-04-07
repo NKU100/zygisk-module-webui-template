@@ -1,6 +1,5 @@
 package io.github.nku100.webui.ui.screen.apps
 
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -41,6 +40,7 @@ import dev.chrisbanes.haze.HazeTint
 import dev.chrisbanes.haze.hazeSource
 import io.github.nku100.webui.data.PackageSettings
 import io.github.nku100.webui.platform.PackageInfo
+import io.github.nku100.webui.ui.component.AppIconImage
 import io.github.nku100.webui.ui.util.defaultHazeEffect
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Icon
@@ -181,32 +181,14 @@ fun AppProfilePage(
                         .padding(vertical = 20.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    // Letter avatar
+                    // App icon
                     val pkg = state.packageInfo
-                    val initial = pkg.label.firstOrNull()?.uppercase() ?: "?"
-                    val bgColor = androidx.compose.runtime.remember(pkg.packageName) {
-                        val hash = pkg.packageName.hashCode()
-                        Color(
-                            red = ((hash and 0xFF0000) shr 16) / 255f * 0.6f + 0.2f,
-                            green = ((hash and 0x00FF00) shr 8) / 255f * 0.6f + 0.2f,
-                            blue = (hash and 0x0000FF) / 255f * 0.6f + 0.2f,
-                            alpha = 1f,
-                        )
-                    }
-                    Box(
-                        modifier = Modifier
-                            .size(64.dp)
-                            .clip(ContinuousRoundedRectangle(16.dp)),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Canvas(modifier = Modifier.fillMaxSize()) { drawRect(color = bgColor) }
-                        Text(
-                            text = initial,
-                            color = Color.White,
-                            fontSize = 28.sp,
-                            fontWeight = FontWeight.Bold,
-                        )
-                    }
+                    AppIconImage(
+                        iconModel = pkg.iconModel,
+                        packageName = pkg.packageName,
+                        contentDescription = pkg.label,
+                        size = 64.dp,
+                    )
                     Spacer(Modifier.height(12.dp))
                     Text(
                         text = pkg.label,

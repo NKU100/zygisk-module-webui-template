@@ -141,12 +141,16 @@ actual object PlatformBridge {
                             val obj = element.jsonObject
                             val pkgName = obj["packageName"]?.jsonPrimitive?.content ?: ""
                             val label = obj["appLabel"]?.jsonPrimitive?.content ?: pkgName
-                            PackageInfo(packageName = pkgName, label = label.ifBlank { pkgName })
+                            PackageInfo(
+                                packageName = pkgName,
+                                label = label.ifBlank { pkgName },
+                                iconModel = "ksu://icon/$pkgName",
+                            )
                         }
                     }
                 } catch (_: Exception) { /* getPackagesInfo not available */ }
 
-                return packageNames.map { PackageInfo(packageName = it) }
+                return packageNames.map { PackageInfo(packageName = it, iconModel = "ksu://icon/$it") }
             }
         } catch (_: Exception) { /* listPackages not available (e.g. KsuWebUIStandalone) */ }
 

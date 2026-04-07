@@ -58,6 +58,7 @@ kotlin {
             implementation("com.kyant.backdrop:backdrop")
             implementation(libs.haze.android)
             implementation(libs.material.kolor)
+            implementation(libs.appiconloader)
         }
         wasmJsMain.dependencies {
             implementation(compose.materialIconsExtended)

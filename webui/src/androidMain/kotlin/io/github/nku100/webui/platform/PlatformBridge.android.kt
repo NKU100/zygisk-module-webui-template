@@ -48,7 +48,7 @@ actual object PlatformBridge {
                     PackageInfo(
                         packageName = info.packageName,
                         label = info.loadLabel(pm).toString(),
-                        iconModel = info.loadIcon(pm),
+                        iconModel = info,
                         isSystemApp = (info.flags and ApplicationInfo.FLAG_SYSTEM) != 0,
                     )
                 }

@@ -15,6 +15,7 @@
 - [x] Settings → About 子页面（Navigation 3 + NavDisplay 横向滑动转场 + 液态玻璃返回按钮）→ 双平台编译验证通过
 - [x] Home 页面（StatusCard + InfoCard + SourceCodeCard + ModuleInfo 注入 + 跨平台 openUrl）→ 双平台编译验证通过
 - [x] Apps 页面（应用列表 + SuperSearchBar + MoreCircle 菜单 + 显示系统应用过滤 + 下拉刷新 + 搜索结果显示全部）→ 双平台编译验证通过
+- [x] 应用图标（AppIconImage expect/actual：Android 用 AppIconLoader+AppIconCache；wasmJs 用 ksu://icon/ + Skia 解码；fallback LetterIcon）→ 双平台编译验证通过
 - [ ] 最终双平台效果对比
 
 ## wasmJs 悬浮底栏对齐进度
@@ -145,6 +146,8 @@
 - [x] `isCurrentPage` 条件渲染 — HorizontalPager 每个 page 用 `settledPage` 判断是否渲染内容
 - [x] `LocalMainPagerState` CompositionLocal — 在 MainScreenImpl 提供，子页面可通过它跳 tab
 - [x] StatusCard 深色模式颜色适配 — 深色下背景/icon 颜色应换为深色友好值
+- [ ] wasmJs 图标加载 fallback — `ksu.getPackagesInfo` 不可用时（如 KsuWebUIStandalone），通过 exec `pm list packages` + `pm dump` 或其他方式获取图标
+- [ ] KsuWebUIStandalone 补全 KSU API — 移植 `listPackages`、`getPackagesInfo`、`ksu://icon/` 拦截到 KsuWebUIStandalone，方便本地调试
 
 ## 🟡 Medium
 

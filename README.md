@@ -24,6 +24,8 @@ A Zygisk module template with **Compose Multiplatform** WebUI, based on [zygisk-
 - **Apps page** fully aligned with KernelSU SuperUserMiuix
   - System app filter toggle, SuperSearchBar with full expand/collapse animation
   - Pull-to-refresh, IME-aware bottom padding, `contentWindowInsets` display cutout support
+  - App icons via `AppIconImage` (expect/actual): Android uses `AppIconLoader` + `AppIconCache` (LRU, Semaphore, Hardware Bitmap); wasmJs fetches `ksu://icon/<pkg>` and decodes via Skia; falls back to `LetterIcon` when unavailable
+- **App Profile page** — per-app settings with targeted toggle, log level, note, and app management actions (launch / force stop / restart)
 - **JSON-based configuration** with kotlinx.serialization
 - Supports **Magisk** and **KernelSU**
 - GitHub Actions CI/CD with auto-release
@@ -51,11 +53,14 @@ A Zygisk module template with **Compose Multiplatform** WebUI, based on [zygisk-
 │       ├── androidMain/            # Android target
 │       │   ├── platform/           # PlatformBridge.android, PlatformBackHandler.android
 │       │   └── ui/
+│       │       ├── component/      # AppIconImage.android (AppIconLoader + AppIconCache)
 │       │       ├── modifier/       # DragGestureInspector (AGSL)
+│       │       ├── util/           # AppIconCache (LRU, Semaphore, Hardware Bitmap)
 │       │       └── theme/          # MaterialKolor dynamic color
 │       └── wasmJsMain/             # Web (Wasm) target
 │           ├── platform/           # KernelSU JS API bridge (v3.0.2), PlatformBackHandler.wasmJs
 │           └── ui/
+│               ├── component/      # AppIconImage.wasmJs (ksu://icon/ + Skia decode)
 │               └── modifier/       # DragGestureInspector (SkSL)
 ├── external/
 │   └── Capsule/                     # Cross-platform Capsule library (git submodule)
