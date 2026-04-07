@@ -10,9 +10,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -29,6 +31,7 @@ import io.github.nku100.webui.platform.navigationBarBottomPadding
 import io.github.nku100.webui.ui.component.FloatingBottomBar
 import io.github.nku100.webui.ui.component.FloatingBottomBarItem
 import io.github.nku100.webui.ui.theme.ThemeMode
+import io.github.nku100.webui.ui.util.rememberContentReady
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.NavigationBar
 import top.yukonga.miuix.kmp.basic.NavigationBarItem
@@ -36,6 +39,11 @@ import top.yukonga.miuix.kmp.basic.NavigationItem
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+
+/** Provides MainPagerState to the entire pager subtree, mirroring KSU's LocalMainPagerState. */
+val LocalMainPagerState = staticCompositionLocalOf<MainPagerState> {
+    error("LocalMainPagerState not provided")
+}
 
 @Composable
 fun MainScreen(viewModel: MainViewModel, uiState: MainUiState) {
@@ -134,23 +142,30 @@ fun MainScreen(viewModel: MainViewModel, uiState: MainUiState) {
         }
     }
 
-    Scaffold(bottomBar = bottomBar) { innerPadding ->
-        HorizontalPager(
-            modifier = Modifier
-                .fillMaxSize()
-                .then(if (config.enableBlur) Modifier.hazeSource(state = hazeState) else Modifier)
-                .then(if (enableFloatingBottomBarBlur) Modifier.layerBackdrop(backdrop) else Modifier),
-            state = pagerState,
-            beyondViewportPageCount = 3,
-            userScrollEnabled = true,
-        ) { page ->
-            PlaceholderPage(
-                tab = BottomTab.entries[page],
-                uiState = uiState,
-                bottomPadding = innerPadding.calculateBottomPadding(),
-                onNavigateToTab = { mainPagerState.animateToPage(it) },
-                viewModel = viewModel,
-            )
+    CompositionLocalProvider(LocalMainPagerState provides mainPagerState) {
+        val contentReady = rememberContentReady()
+
+        Scaffold(bottomBar = bottomBar) { innerPadding ->
+            HorizontalPager(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .then(if (config.enableBlur) Modifier.hazeSource(state = hazeState) else Modifier)
+                    .then(if (enableFloatingBottomBarBlur) Modifier.layerBackdrop(backdrop) else Modifier),
+                state = pagerState,
+                beyondViewportPageCount = if (contentReady) 3 else 0,
+                userScrollEnabled = true,
+            ) { page ->
+                val isCurrentPage = page == pagerState.settledPage
+                if (isCurrentPage || contentReady) {
+                    PlaceholderPage(
+                        tab = BottomTab.entries[page],
+                        uiState = uiState,
+                        bottomPadding = innerPadding.calculateBottomPadding(),
+                        onNavigateToTab = { mainPagerState.animateToPage(it) },
+                        viewModel = viewModel,
+                    )
+                }
+            }
         }
     }
 }

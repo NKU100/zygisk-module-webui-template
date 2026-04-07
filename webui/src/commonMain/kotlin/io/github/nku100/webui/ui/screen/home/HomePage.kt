@@ -34,6 +34,7 @@ import dev.chrisbanes.haze.HazeTint
 import dev.chrisbanes.haze.hazeSource
 import io.github.nku100.webui.ModuleInfo
 import io.github.nku100.webui.platform.openUrl
+import io.github.nku100.webui.ui.theme.isSystemDarkTheme
 import io.github.nku100.webui.ui.util.defaultHazeEffect
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.Card
@@ -120,6 +121,7 @@ fun HomePage(
 
 @Composable
 private fun StatusCard(state: HomeUiState, actions: HomeActions) {
+    val isDark = isSystemDarkTheme()
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -132,7 +134,12 @@ private fun StatusCard(state: HomeUiState, actions: HomeActions) {
                 .weight(1f)
                 .fillMaxHeight(),
             colors = CardDefaults.defaultColors(
-                color = if (state.moduleEnabled) Color(0xFFDFFAE4) else Color(0xFFF8E2E2)
+                color = when {
+                    state.moduleEnabled && isDark -> Color(0xFF1A3825)
+                    state.moduleEnabled -> Color(0xFFDFFAE4)
+                    isDark -> Color(0xFF310808)
+                    else -> Color(0xFFF8E2E2)
+                }
             ),
             onClick = actions.onStatusClick,
             showIndication = true,
@@ -152,7 +159,12 @@ private fun StatusCard(state: HomeUiState, actions: HomeActions) {
                         } else {
                             Icons.Rounded.ErrorOutline
                         },
-                        tint = if (state.moduleEnabled) Color(0xFF36D167) else Color(0xFFF72727),
+                        tint = if (state.moduleEnabled) {
+                                if (isDark) colorScheme.primary.copy(alpha = 0.8f)
+                                else Color(0xFF36D167)
+                            } else {
+                                Color(0xFFF72727)
+                            },
                         contentDescription = null
                     )
                 }
