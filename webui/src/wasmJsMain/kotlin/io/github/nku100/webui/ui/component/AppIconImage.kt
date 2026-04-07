@@ -24,16 +24,30 @@ import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.js.Promise
 
-// Fetch URL and convert ArrayBuffer to Base64 string in JS — avoids per-byte Kotlin/JS boundary calls
+// XHR supports custom URL schemes intercepted by WebView's shouldInterceptRequest.
+// Requires shouldInterceptRequest to return Access-Control-Allow-Origin: * header.
+// fetch() does NOT support ksu:// scheme in WebView.
+// Uses FileReader.readAsDataURL for efficient binary→base64 conversion (no per-byte JS loop).
 @JsFun("""
-(url) => fetch(url).then(r => r.arrayBuffer()).then(buf => {
-    const bytes = new Uint8Array(buf);
-    let binary = '';
-    for (let i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i]);
-    return btoa(binary);
+(url) => new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', url, true);
+    xhr.responseType = 'blob';
+    xhr.onload = () => {
+        if (xhr.status === 200 || xhr.status === 0) {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result.split(',')[1]);
+            reader.onerror = () => reject(new Error('FileReader error'));
+            reader.readAsDataURL(xhr.response);
+        } else {
+            reject(new Error('XHR failed: ' + xhr.status));
+        }
+    };
+    xhr.onerror = () => reject(new Error('XHR error'));
+    xhr.send();
 })
 """)
-private external fun fetchAsBase64(url: String): Promise<JsString>
+private external fun xhrAsBase64(url: String): Promise<JsString>
 
 private val iconCache = mutableMapOf<String, ImageBitmap>()
 private val loadSemaphore = Semaphore(4)
@@ -60,13 +74,13 @@ actual fun AppIconImage(
             if (cached != null) { bitmap = cached; return@LaunchedEffect }
             try {
                 val bmp = loadSemaphore.withPermit {
-                    val base64 = fetchAsBase64(url).await<JsString>().toString()
+                    val base64 = xhrAsBase64(url).await<JsString>().toString()
                     val bytes = Base64.decode(base64)
                     skiaImageToImageBitmap(SkiaImage.makeFromEncoded(bytes))
                 }
                 iconCache[url] = bmp
                 bitmap = bmp
-            } catch (_: Exception) { }
+            } catch (_: Throwable) { }
         }
     }
 

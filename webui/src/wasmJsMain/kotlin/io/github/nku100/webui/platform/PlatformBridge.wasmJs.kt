@@ -3,6 +3,7 @@ package io.github.nku100.webui.platform
 import kotlinx.coroutines.await
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.booleanOrNull
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
@@ -42,7 +43,7 @@ private external fun ksuToastJs(message: String)
 
 // listPackages: ksu.listPackages(type) — synchronous, returns JSON string
 @JsFun("(type) => { try { return ksu.listPackages(type); } catch(e) { return '[]'; } }")
-private external fun ksuListPackagesJs(type: Int): String
+private external fun ksuListPackagesJs(type: String): String
 
 // moduleInfo: ksu.moduleInfo() — synchronous, returns string
 @JsFun("() => ksu.moduleInfo()")
@@ -127,14 +128,22 @@ actual object PlatformBridge {
     actual suspend fun listPackages(): List<PackageInfo> {
         // Try ksu.listPackages API first (KernelSU manager)
         try {
-            val listJson = ksuListPackagesJs(0)
-            if (listJson.isNotBlank() && listJson != "[]") {
-                val packageNames = Json.parseToJsonElement(listJson).jsonArray
-                    .map { it.jsonPrimitive.content }
+            val userJson = ksuListPackagesJs("user")
+            val systemJson = ksuListPackagesJs("system")
+            val userPkgs = if (userJson.isNotBlank() && userJson != "[]")
+                Json.parseToJsonElement(userJson).jsonArray.map { it.jsonPrimitive.content }
+            else emptyList()
+            val systemPkgs = if (systemJson.isNotBlank() && systemJson != "[]")
+                Json.parseToJsonElement(systemJson).jsonArray.map { it.jsonPrimitive.content }
+            else emptyList()
+
+            if (userPkgs.isNotEmpty() || systemPkgs.isNotEmpty()) {
+                val allPkgs = userPkgs + systemPkgs
+                val systemSet = systemPkgs.toSet()
 
                 // Try getPackagesInfo for labels
                 try {
-                    val infoJson = ksuGetPackagesInfoJs(Json.encodeToString(packageNames))
+                    val infoJson = ksuGetPackagesInfoJs(Json.encodeToString(allPkgs))
                     if (infoJson.isNotBlank() && infoJson != "[]") {
                         val infoArray = Json.parseToJsonElement(infoJson).jsonArray
                         return infoArray.map { element ->
@@ -145,12 +154,19 @@ actual object PlatformBridge {
                                 packageName = pkgName,
                                 label = label.ifBlank { pkgName },
                                 iconModel = "ksu://icon/$pkgName",
+                                isSystemApp = pkgName in systemSet,
                             )
                         }
                     }
                 } catch (_: Exception) { /* getPackagesInfo not available */ }
 
-                return packageNames.map { PackageInfo(packageName = it, iconModel = "ksu://icon/$it") }
+                return allPkgs.map {
+                    PackageInfo(
+                        packageName = it,
+                        iconModel = "ksu://icon/$it",
+                        isSystemApp = it in systemSet,
+                    )
+                }
             }
         } catch (_: Exception) { /* listPackages not available (e.g. KsuWebUIStandalone) */ }
 
