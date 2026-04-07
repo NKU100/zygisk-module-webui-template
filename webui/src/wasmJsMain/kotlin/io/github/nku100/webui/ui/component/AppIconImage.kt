@@ -17,25 +17,31 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.github.nku100.webui.ui.LetterIcon
 import kotlinx.coroutines.await
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
 import org.jetbrains.skia.Image as SkiaImage
+import kotlin.io.encoding.Base64
+import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.js.Promise
 
-@JsFun("(url) => fetch(url).then(r => r.arrayBuffer())")
-private external fun fetchArrayBuffer(url: String): Promise<JsAny>
-
-@JsFun("(buf) => new Uint8Array(buf)")
-private external fun toUint8Array(buf: JsAny): JsAny
-
-@JsFun("(arr) => arr.length")
-private external fun arrLength(arr: JsAny): Int
-
-@JsFun("(arr, i) => arr[i]")
-private external fun arrGet(arr: JsAny, i: Int): Int
+// Fetch URL and convert ArrayBuffer to Base64 string in JS — avoids per-byte Kotlin/JS boundary calls
+@JsFun("""
+(url) => fetch(url).then(r => r.arrayBuffer()).then(buf => {
+    const bytes = new Uint8Array(buf);
+    let binary = '';
+    for (let i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i]);
+    return btoa(binary);
+})
+""")
+private external fun fetchAsBase64(url: String): Promise<JsString>
 
 private val iconCache = mutableMapOf<String, ImageBitmap>()
+private val loadSemaphore = Semaphore(4)
 
+@OptIn(ExperimentalEncodingApi::class)
 private fun skiaImageToImageBitmap(image: SkiaImage): ImageBitmap = image.toComposeImageBitmap()
 
+@OptIn(ExperimentalEncodingApi::class)
 @Composable
 actual fun AppIconImage(
     iconModel: Any?,
@@ -53,11 +59,11 @@ actual fun AppIconImage(
             val cached = iconCache[url]
             if (cached != null) { bitmap = cached; return@LaunchedEffect }
             try {
-                val buf = fetchArrayBuffer(url).await<JsAny>()
-                val arr = toUint8Array(buf)
-                val len = arrLength(arr)
-                val bytes = ByteArray(len) { arrGet(arr, it).toByte() }
-                val bmp = skiaImageToImageBitmap(SkiaImage.makeFromEncoded(bytes))
+                val bmp = loadSemaphore.withPermit {
+                    val base64 = fetchAsBase64(url).await<JsString>().toString()
+                    val bytes = Base64.decode(base64)
+                    skiaImageToImageBitmap(SkiaImage.makeFromEncoded(bytes))
+                }
                 iconCache[url] = bmp
                 bitmap = bmp
             } catch (_: Exception) { }

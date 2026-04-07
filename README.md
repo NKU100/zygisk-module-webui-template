@@ -16,6 +16,7 @@ A Zygisk module template with **Compose Multiplatform** WebUI, based on [zygisk-
 - **KernelSU API abstraction** via `expect/actual` pattern (`PlatformBridge`)
   - Full v3.0.2 API: exec (async callback), toast, listPackages, getPackagesInfo, moduleInfo, fullScreen, enableEdgeToEdge, exit
   - Browser mock data for development preview
+  - All APIs also available under **[KsuWebUIStandalone](https://github.com/NKU100/KsuWebUIStandalone)** (Magisk users without KernelSU can run the WebUI standalone)
 - **ViewModel architecture** (Compose Multiplatform lifecycle 2.9.0)
   - `MainViewModel` with `viewModelScope`, `StateFlow<MainUiState>`, auto-managed search debounce
   - `MainPagerState` — cross-tab navigation with `isNavigating` guard (ported from KernelSU)
@@ -165,6 +166,7 @@ The module zip will be generated under `module/release/`.
 
 - [zygisk-module-sample](https://github.com/topjohnwu/zygisk-module-sample)
 - [KernelSU Module WebUI](https://kernelsu.org/guide/module-webui.html)
+- [KsuWebUIStandalone](https://github.com/NKU100/KsuWebUIStandalone) — run module WebUI standalone on Magisk (full KSU JS API aligned)
 - [Compose Multiplatform](https://github.com/JetBrains/compose-multiplatform)
 - [Miuix](https://compose-miuix-ui.github.io/miuix/)
 - [KernelSU JS API](https://www.npmjs.com/package/kernelsu)
