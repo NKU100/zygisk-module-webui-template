@@ -102,6 +102,7 @@ data class AppsActions(
     val onRefresh: () -> Unit = {},
     val onToggleShowSystemApps: () -> Unit = {},
     val onSearchStatusChange: (SearchStatus) -> Unit = {},
+    val onNavigateToProfile: (packageName: String) -> Unit = {},
 )
 
 @Composable
@@ -137,10 +138,11 @@ fun AppsPage(
     prevRefreshing[0] = state.isRefreshing
 
     // displayPackages: list filtered by showSystemApps (for main list)
-    val displayPackages by remember(state.packages, state.showSystemApps) {
+    // Targeted apps are always shown even if showSystemApps=false, mirroring KSU's filterAndSort
+    val displayPackages by remember(state.packages, state.showSystemApps, state.targetPackages) {
         derivedStateOf {
             if (state.showSystemApps) state.packages
-            else state.packages.filter { !it.isSystemApp }
+            else state.packages.filter { !it.isSystemApp || it.packageName in state.targetPackages }
         }
     }
     // searchResults come from ViewModel (already filtered + resultStatus managed)
@@ -207,7 +209,7 @@ fun AppsPage(
                             AppItem(
                                 packageInfo = pkg,
                                 isTarget = isTarget,
-                                onClick = { actions.onToggleTarget(pkg.packageName, !isTarget) },
+                                onClick = { actions.onNavigateToProfile(pkg.packageName) },
                             )
                         }
                         item { Spacer(Modifier.height(maxOf(bottomPadding, imeBottomPadding))) }
@@ -232,7 +234,7 @@ fun AppsPage(
                             AppItem(
                                 packageInfo = pkg,
                                 isTarget = isTarget,
-                                onClick = { actions.onToggleTarget(pkg.packageName, !isTarget) },
+                                onClick = { actions.onNavigateToProfile(pkg.packageName) },
                             )
                         }
                     }
@@ -306,7 +308,7 @@ fun AppsPage(
                             AppItem(
                                 packageInfo = pkg,
                                 isTarget = isTarget,
-                                onClick = { actions.onToggleTarget(pkg.packageName, !isTarget) },
+                                onClick = { actions.onNavigateToProfile(pkg.packageName) },
                             )
                         }
                         item { Spacer(Modifier.height(bottomPadding)) }

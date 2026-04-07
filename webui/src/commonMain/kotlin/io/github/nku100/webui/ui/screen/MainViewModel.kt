@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.github.nku100.webui.data.ConfigRepository
 import io.github.nku100.webui.data.ModuleConfig
+import io.github.nku100.webui.data.PackageSettings
 import io.github.nku100.webui.platform.PackageInfo
 import io.github.nku100.webui.platform.PlatformBridge
 import io.github.nku100.webui.platform.awaitNextFrame
@@ -67,7 +68,9 @@ class MainViewModel : ViewModel() {
         _uiState.update { it.copy(isLoading = true) }
         try {
             val config = ConfigRepository.load()
-            val packages = PlatformBridge.listPackages()
+            val rawPackages = PlatformBridge.listPackages()
+            val targets = config.targetPackages.toSet()
+            val packages = withContext(Dispatchers.Default) { sortPackages(rawPackages, targets) }
             _uiState.update {
                 it.copy(
                     config = config,
@@ -86,7 +89,9 @@ class MainViewModel : ViewModel() {
         _uiState.update { it.copy(isRefreshing = true) }
         awaitNextFrame()
         try {
-            val packages = PlatformBridge.listPackages()
+            val rawPackages = PlatformBridge.listPackages()
+            val targets = _uiState.value.config.targetPackages.toSet()
+            val packages = withContext(Dispatchers.Default) { sortPackages(rawPackages, targets) }
             awaitNextFrame()
             _uiState.update { it.copy(packages = packages, isRefreshing = false) }
         } catch (e: Exception) {
@@ -95,24 +100,26 @@ class MainViewModel : ViewModel() {
     }
 
     private fun loadMockData() {
+        val targets = setOf("com.example.app", "com.android.chrome", "org.telegram.messenger")
+        val rawPackages = listOf(
+            PackageInfo(packageName = "com.android.chrome", label = "Chrome"),
+            PackageInfo(packageName = "org.telegram.messenger", label = "Telegram"),
+            PackageInfo(packageName = "com.example.app", label = "Example App"),
+            PackageInfo(packageName = "com.whatsapp", label = "WhatsApp"),
+            PackageInfo(packageName = "com.spotify.music", label = "Spotify"),
+            PackageInfo(packageName = "com.instagram.android", label = "Instagram"),
+            PackageInfo(packageName = "com.twitter.android", label = "X (Twitter)"),
+            PackageInfo(packageName = "com.android.settings", label = "Settings", isSystemApp = true),
+            PackageInfo(packageName = "com.android.systemui", label = "System UI", isSystemApp = true),
+        )
         _uiState.update {
             it.copy(
                 config = ModuleConfig(
-                    targetPackages = listOf("com.example.app", "com.android.chrome", "org.telegram.messenger"),
+                    targetPackages = targets.toList(),
                     enabled = true,
                     enableFloatingBottomBar = true,
                 ),
-                packages = listOf(
-                    PackageInfo(packageName = "com.android.chrome", label = "Chrome"),
-                    PackageInfo(packageName = "org.telegram.messenger", label = "Telegram"),
-                    PackageInfo(packageName = "com.example.app", label = "Example App"),
-                    PackageInfo(packageName = "com.whatsapp", label = "WhatsApp"),
-                    PackageInfo(packageName = "com.spotify.music", label = "Spotify"),
-                    PackageInfo(packageName = "com.instagram.android", label = "Instagram"),
-                    PackageInfo(packageName = "com.twitter.android", label = "X (Twitter)"),
-                    PackageInfo(packageName = "com.android.settings", label = "Settings", isSystemApp = true),
-                    PackageInfo(packageName = "com.android.systemui", label = "System UI", isSystemApp = true),
-                ),
+                packages = sortPackages(rawPackages, targets),
                 isLoading = false,
                 hasLoaded = true,
             )
@@ -145,8 +152,21 @@ class MainViewModel : ViewModel() {
         val config = _uiState.value.config
         val newTargets = if (enabled) config.targetPackages + packageName
                          else config.targetPackages - packageName
-        saveConfig(config.copy(targetPackages = newTargets))
+        val newConfig = config.copy(targetPackages = newTargets)
+        // Don't re-sort here — mirrors KSU behavior where sort order updates on next refresh,
+        // preventing the list from jumping while user is on the AppProfile page.
+        _uiState.update { it.copy(config = newConfig, themeMode = resolveThemeMode(newConfig)) }
+        viewModelScope.launch { ConfigRepository.save(newConfig) }
     }
+
+    fun savePackageSettings(packageName: String, settings: PackageSettings) {
+        val config = _uiState.value.config
+        val newMap = config.packageSettings + (packageName to settings)
+        saveConfig(config.copy(packageSettings = newMap))
+    }
+
+    fun getPackageSettings(packageName: String): PackageSettings =
+        _uiState.value.config.packageSettings[packageName] ?: PackageSettings()
 
     // ── Apps filtering ──────────────────────────────────────────────
 
@@ -192,14 +212,16 @@ class MainViewModel : ViewModel() {
         }
 
         val state = _uiState.value
+        val targets = state.config.targetPackages.toSet()
         val sourceList = if (state.showSystemApps) state.packages
-                         else state.packages.filter { !it.isSystemApp }
+                         else state.packages.filter { !it.isSystemApp || it.packageName in targets }
 
         val result = withContext(Dispatchers.Default) {
-            sourceList.filter {
+            val filtered = sourceList.filter {
                 it.label.contains(text, ignoreCase = true) ||
                     it.packageName.contains(text, ignoreCase = true)
             }
+            sortPackages(filtered, targets)
         }
 
         _uiState.update {
@@ -221,4 +243,11 @@ class MainViewModel : ViewModel() {
     private fun searchLoadingStatusFor(text: String): SearchStatus.ResultStatus =
         if (text.isEmpty()) SearchStatus.ResultStatus.DEFAULT
         else SearchStatus.ResultStatus.LOAD
+
+    /** Sort packages: targeted first (0), others last (1); within each group, sort by label. */
+    private fun sortPackages(list: List<PackageInfo>, targetPackages: Set<String>): List<PackageInfo> =
+        list.sortedWith(
+            compareBy<PackageInfo> { if (it.packageName in targetPackages) 0 else 1 }
+                .thenBy { it.label.lowercase() }
+        )
 }

@@ -31,8 +31,12 @@ data class ModuleConfig(
  */
 @Serializable
 data class PackageSettings(
-    /** Whether this package is enabled for the module. */
-    val enabled: Boolean = true,
+    /** Log level: DEBUG, INFO, WARN */
+    val logLevel: String = "INFO",
+    /** Custom log tag. Defaults to the app's short package name. */
+    val logTag: String = "",
+    /** Whether to dump the call stack trace in log output. */
+    val dumpStackTrace: Boolean = false,
     /** Optional note/description for this package. */
     val note: String = "",
 )

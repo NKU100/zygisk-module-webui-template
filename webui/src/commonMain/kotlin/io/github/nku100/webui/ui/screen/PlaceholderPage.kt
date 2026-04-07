@@ -69,6 +69,7 @@ fun PlaceholderPage(
             )
         }
         BottomTab.APPS -> {
+            val navigator = LocalNavigator.current
             AppsPage(
                 state = AppsUiState(
                     packages = uiState.packages,
@@ -87,6 +88,9 @@ fun PlaceholderPage(
                     onRefresh = { viewModel.refresh() },
                     onToggleShowSystemApps = { viewModel.toggleShowSystemApps() },
                     onSearchStatusChange = { viewModel.updateSearchStatus(it) },
+                    onNavigateToProfile = { packageName ->
+                        navigator.push(Route.AppProfile(packageName))
+                    },
                 ),
                 bottomPadding = bottomPadding,
                 enableBlur = config.enableBlur,

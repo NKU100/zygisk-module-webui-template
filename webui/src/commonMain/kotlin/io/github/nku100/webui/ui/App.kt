@@ -8,6 +8,8 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.viewmodel.compose.viewModel
+import io.github.nku100.webui.platform.PlatformBridge
+import kotlinx.coroutines.launch
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
@@ -16,6 +18,9 @@ import io.github.nku100.webui.ui.navigation.Route
 import io.github.nku100.webui.ui.navigation.rememberNavigator
 import io.github.nku100.webui.ui.screen.MainScreen
 import io.github.nku100.webui.ui.screen.MainViewModel
+import io.github.nku100.webui.ui.screen.apps.AppProfileActions
+import io.github.nku100.webui.ui.screen.apps.AppProfilePage
+import io.github.nku100.webui.ui.screen.apps.AppProfileUiState
 import io.github.nku100.webui.ui.screen.settings.AboutPage
 import io.github.nku100.webui.ui.theme.AppTheme
 
@@ -56,6 +61,49 @@ fun App() {
                         AboutPage(
                             bottomPadding = io.github.nku100.webui.platform.navigationBarBottomPadding(),
                             onBack = { navigator.pop() },
+                            enableBlur = uiState.config.enableBlur,
+                        )
+                    }
+                    entry<Route.AppProfile> { key ->
+                        val pkg = uiState.packages.find { it.packageName == key.packageName }
+                            ?: return@entry
+                        val scope = androidx.compose.runtime.rememberCoroutineScope()
+                        AppProfilePage(
+                            state = AppProfileUiState(
+                                packageInfo = pkg,
+                                settings = viewModel.getPackageSettings(key.packageName),
+                                isTargeted = uiState.config.targetPackages.contains(key.packageName),
+                            ),
+                            actions = AppProfileActions(
+                                onBack = { navigator.pop() },
+                                onSaveSettings = { settings ->
+                                    viewModel.savePackageSettings(key.packageName, settings)
+                                },
+                                onToggleTarget = { enabled ->
+                                    viewModel.toggleTargetPackage(key.packageName, enabled)
+                                },
+                                onLaunchApp = {
+                                    scope.launch {
+                                        PlatformBridge.exec(
+                                            "cmd package resolve-activity --brief ${key.packageName} | tail -n 1 | xargs cmd activity start-activity -n"
+                                        )
+                                    }
+                                },
+                                onForceStopApp = {
+                                    scope.launch {
+                                        PlatformBridge.exec("am force-stop ${key.packageName}")
+                                    }
+                                },
+                                onRestartApp = {
+                                    scope.launch {
+                                        PlatformBridge.exec("am force-stop ${key.packageName}")
+                                        PlatformBridge.exec(
+                                            "cmd package resolve-activity --brief ${key.packageName} | tail -n 1 | xargs cmd activity start-activity -n"
+                                        )
+                                    }
+                                },
+                            ),
+                            bottomPadding = io.github.nku100.webui.platform.navigationBarBottomPadding(),
                             enableBlur = uiState.config.enableBlur,
                         )
                     }
