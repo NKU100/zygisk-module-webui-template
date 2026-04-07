@@ -1,0 +1,224 @@
+package io.github.nku100.webui.ui.screen
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import io.github.nku100.webui.data.ConfigRepository
+import io.github.nku100.webui.data.ModuleConfig
+import io.github.nku100.webui.platform.PackageInfo
+import io.github.nku100.webui.platform.PlatformBridge
+import io.github.nku100.webui.platform.awaitNextFrame
+import io.github.nku100.webui.platform.hasPlatformApi
+import io.github.nku100.webui.ui.component.SearchStatus
+import io.github.nku100.webui.ui.theme.ThemeMode
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+
+data class MainUiState(
+    val config: ModuleConfig = ModuleConfig(),
+    val packages: List<PackageInfo> = emptyList(),
+    val isLoading: Boolean = true,
+    val hasLoaded: Boolean = false,
+    val isRefreshing: Boolean = false,
+    val showSystemApps: Boolean = false,
+    val appsSearchStatus: SearchStatus = SearchStatus(label = "Search apps..."),
+    val searchResults: List<PackageInfo> = emptyList(),
+    val themeMode: ThemeMode = ThemeMode.FOLLOW_SYSTEM,
+)
+
+class MainViewModel : ViewModel() {
+
+    private val _uiState = MutableStateFlow(MainUiState())
+    val uiState: StateFlow<MainUiState> = _uiState.asStateFlow()
+
+    private val searchQuery = MutableStateFlow("")
+
+    init {
+        // Launch search query collector with debounce, mirroring KSU's launchSearchQueryCollector
+        viewModelScope.launch {
+            var debounceJob: Job? = null
+            searchQuery.collect { text ->
+                debounceJob?.cancel()
+                debounceJob = launch {
+                    kotlinx.coroutines.delay(300)
+                    applySearchText(text)
+                }
+            }
+        }
+
+        // Auto-load data on init
+        viewModelScope.launch {
+            if (hasPlatformApi()) {
+                fetchData()
+            } else {
+                loadMockData()
+            }
+        }
+    }
+
+    // ── Data loading ────────────────────────────────────────────────
+
+    private suspend fun fetchData() {
+        _uiState.update { it.copy(isLoading = true) }
+        try {
+            val config = ConfigRepository.load()
+            val packages = PlatformBridge.listPackages()
+            _uiState.update {
+                it.copy(
+                    config = config,
+                    packages = packages,
+                    isLoading = false,
+                    hasLoaded = true,
+                    themeMode = resolveThemeMode(config),
+                )
+            }
+        } catch (e: Exception) {
+            _uiState.update { it.copy(isLoading = false, hasLoaded = true) }
+        }
+    }
+
+    fun refresh(): Job = viewModelScope.launch {
+        _uiState.update { it.copy(isRefreshing = true) }
+        awaitNextFrame()
+        try {
+            val packages = PlatformBridge.listPackages()
+            awaitNextFrame()
+            _uiState.update { it.copy(packages = packages, isRefreshing = false) }
+        } catch (e: Exception) {
+            _uiState.update { it.copy(isRefreshing = false) }
+        }
+    }
+
+    private fun loadMockData() {
+        _uiState.update {
+            it.copy(
+                config = ModuleConfig(
+                    targetPackages = listOf("com.example.app", "com.android.chrome", "org.telegram.messenger"),
+                    enabled = true,
+                    enableFloatingBottomBar = true,
+                ),
+                packages = listOf(
+                    PackageInfo(packageName = "com.android.chrome", label = "Chrome"),
+                    PackageInfo(packageName = "org.telegram.messenger", label = "Telegram"),
+                    PackageInfo(packageName = "com.example.app", label = "Example App"),
+                    PackageInfo(packageName = "com.whatsapp", label = "WhatsApp"),
+                    PackageInfo(packageName = "com.spotify.music", label = "Spotify"),
+                    PackageInfo(packageName = "com.instagram.android", label = "Instagram"),
+                    PackageInfo(packageName = "com.twitter.android", label = "X (Twitter)"),
+                    PackageInfo(packageName = "com.android.settings", label = "Settings", isSystemApp = true),
+                    PackageInfo(packageName = "com.android.systemui", label = "System UI", isSystemApp = true),
+                ),
+                isLoading = false,
+                hasLoaded = true,
+            )
+        }
+    }
+
+    // ── Config mutations ────────────────────────────────────────────
+
+    private fun saveConfig(newConfig: ModuleConfig) {
+        _uiState.update { it.copy(config = newConfig, themeMode = resolveThemeMode(newConfig)) }
+        viewModelScope.launch { ConfigRepository.save(newConfig) }
+    }
+
+    fun setEnabled(enabled: Boolean) =
+        saveConfig(_uiState.value.config.copy(enabled = enabled))
+
+    fun setThemeMode(mode: ThemeMode) =
+        saveConfig(_uiState.value.config.copy(themeMode = mode.name))
+
+    fun setEnableBlur(enabled: Boolean) =
+        saveConfig(_uiState.value.config.copy(enableBlur = enabled))
+
+    fun setEnableFloatingBottomBar(enabled: Boolean) =
+        saveConfig(_uiState.value.config.copy(enableFloatingBottomBar = enabled))
+
+    fun setEnableFloatingBottomBarBlur(enabled: Boolean) =
+        saveConfig(_uiState.value.config.copy(enableFloatingBottomBarBlur = enabled))
+
+    fun toggleTargetPackage(packageName: String, enabled: Boolean) {
+        val config = _uiState.value.config
+        val newTargets = if (enabled) config.targetPackages + packageName
+                         else config.targetPackages - packageName
+        saveConfig(config.copy(targetPackages = newTargets))
+    }
+
+    // ── Apps filtering ──────────────────────────────────────────────
+
+    fun toggleShowSystemApps(): Job {
+        val newValue = !_uiState.value.showSystemApps
+        _uiState.update { it.copy(showSystemApps = newValue) }
+        // Re-apply search with new filter setting
+        return viewModelScope.launch {
+            applySearchText(_uiState.value.appsSearchStatus.searchText)
+        }
+    }
+
+    // ── Search ──────────────────────────────────────────────────────
+
+    fun updateSearchStatus(status: SearchStatus) {
+        val previous = _uiState.value.appsSearchStatus
+        _uiState.update { it.copy(appsSearchStatus = status) }
+        if (previous.searchText != status.searchText) {
+            searchQuery.value = status.searchText
+        }
+    }
+
+    private suspend fun applySearchText(text: String) {
+        // Set LOAD status while computing
+        _uiState.update {
+            it.copy(
+                appsSearchStatus = it.appsSearchStatus.copy(
+                    resultStatus = searchLoadingStatusFor(text)
+                )
+            )
+        }
+
+        if (text.isEmpty()) {
+            _uiState.update {
+                it.copy(
+                    searchResults = emptyList(),
+                    appsSearchStatus = it.appsSearchStatus.copy(
+                        resultStatus = SearchStatus.ResultStatus.DEFAULT
+                    )
+                )
+            }
+            return
+        }
+
+        val state = _uiState.value
+        val sourceList = if (state.showSystemApps) state.packages
+                         else state.packages.filter { !it.isSystemApp }
+
+        val result = withContext(Dispatchers.Default) {
+            sourceList.filter {
+                it.label.contains(text, ignoreCase = true) ||
+                    it.packageName.contains(text, ignoreCase = true)
+            }
+        }
+
+        _uiState.update {
+            it.copy(
+                searchResults = result,
+                appsSearchStatus = it.appsSearchStatus.copy(
+                    resultStatus = if (result.isEmpty()) SearchStatus.ResultStatus.EMPTY
+                                   else SearchStatus.ResultStatus.SHOW
+                )
+            )
+        }
+    }
+
+    // ── Helpers ─────────────────────────────────────────────────────
+
+    private fun resolveThemeMode(config: ModuleConfig): ThemeMode =
+        ThemeMode.entries.find { it.name == config.themeMode } ?: ThemeMode.FOLLOW_SYSTEM
+
+    private fun searchLoadingStatusFor(text: String): SearchStatus.ResultStatus =
+        if (text.isEmpty()) SearchStatus.ResultStatus.DEFAULT
+        else SearchStatus.ResultStatus.LOAD
+}

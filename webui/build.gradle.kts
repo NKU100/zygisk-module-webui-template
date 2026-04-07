@@ -45,6 +45,8 @@ kotlin {
             implementation(compose.components.resources)
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.navigation3.ui)
+            implementation(libs.lifecycle.viewmodel)
+            implementation(libs.lifecycle.viewmodel.compose)
             implementation("com.kyant.capsule:capsule")
         }
         androidMain.dependencies {

@@ -11,12 +11,8 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -29,12 +25,10 @@ import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeStyle
 import dev.chrisbanes.haze.HazeTint
 import dev.chrisbanes.haze.hazeSource
-import io.github.nku100.webui.platform.hasPlatformApi
 import io.github.nku100.webui.platform.navigationBarBottomPadding
 import io.github.nku100.webui.ui.component.FloatingBottomBar
 import io.github.nku100.webui.ui.component.FloatingBottomBarItem
 import io.github.nku100.webui.ui.theme.ThemeMode
-import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.NavigationBar
 import top.yukonga.miuix.kmp.basic.NavigationBarItem
@@ -44,10 +38,10 @@ import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
-fun MainScreen(state: MainScreenState) {
+fun MainScreen(viewModel: MainViewModel, uiState: MainUiState) {
     val scope = rememberCoroutineScope()
 
-    val config = state.config
+    val config = uiState.config
     val enableFloatingBottomBar = config.enableFloatingBottomBar
     val enableFloatingBottomBarBlur = config.enableFloatingBottomBarBlur && enableFloatingBottomBar
 
@@ -67,15 +61,11 @@ fun MainScreen(state: MainScreenState) {
         drawContent()
     }
 
-    var selectedPage by rememberSaveable { mutableStateOf(0) }
-
-    val pagerState = rememberPagerState(
-        initialPage = selectedPage,
-        pageCount = { BottomTab.entries.size },
-    )
+    val pagerState = rememberPagerState(pageCount = { BottomTab.entries.size })
+    val mainPagerState = rememberMainPagerState(pagerState, scope)
 
     LaunchedEffect(pagerState.currentPage) {
-        selectedPage = pagerState.currentPage
+        mainPagerState.syncPage()
     }
 
     val items = BottomTab.entries.map { tab ->
@@ -96,22 +86,16 @@ fun MainScreen(state: MainScreenState) {
                         .padding(
                             bottom = 12.dp + navigationBarBottomPadding()
                         ),
-                    selectedIndex = { selectedPage },
-                    onSelected = { index ->
-                        selectedPage = index
-                        scope.launch { pagerState.animateScrollToPage(index) }
-                    },
+                    selectedIndex = { mainPagerState.selectedPage },
+                    onSelected = { mainPagerState.animateToPage(it) },
                     backdrop = backdrop,
                     tabsCount = items.size,
                     isBlurEnabled = enableFloatingBottomBarBlur,
-                    isDark = state.themeMode == ThemeMode.DARK,
+                    isDark = uiState.themeMode == ThemeMode.DARK,
                 ) {
                     items.forEachIndexed { index, item ->
                         FloatingBottomBarItem(
-                            onClick = {
-                                selectedPage = index
-                                scope.launch { pagerState.animateScrollToPage(index) }
-                            },
+                            onClick = { mainPagerState.animateToPage(index) },
                             modifier = Modifier.defaultMinSize(minWidth = 76.dp)
                         ) {
                             Icon(
@@ -140,11 +124,8 @@ fun MainScreen(state: MainScreenState) {
                                 modifier = Modifier.weight(1f),
                                 icon = item.icon,
                                 label = item.label,
-                                selected = selectedPage == index,
-                                onClick = {
-                                    selectedPage = index
-                                    scope.launch { pagerState.animateScrollToPage(index) }
-                                }
+                                selected = mainPagerState.selectedPage == index,
+                                onClick = { mainPagerState.animateToPage(index) }
                             )
                         }
                     }
@@ -165,21 +146,10 @@ fun MainScreen(state: MainScreenState) {
         ) { page ->
             PlaceholderPage(
                 tab = BottomTab.entries[page],
-                config = config,
-                packages = state.packages,
-                loading = state.loading,
+                uiState = uiState,
                 bottomPadding = innerPadding.calculateBottomPadding(),
-                onConfigChange = { newConfig ->
-                    if (hasPlatformApi()) {
-                        state.saveConfig(newConfig)
-                    } else {
-                        state.config = newConfig
-                    }
-                },
-                onNavigateToTab = { index ->
-                    selectedPage = index
-                    scope.launch { pagerState.animateScrollToPage(index) }
-                },
+                onNavigateToTab = { mainPagerState.animateToPage(it) },
+                viewModel = viewModel,
             )
         }
     }

@@ -13,8 +13,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import io.github.nku100.webui.data.ModuleConfig
-import io.github.nku100.webui.platform.PackageInfo
 import io.github.nku100.webui.ui.navigation.LocalNavigator
 import io.github.nku100.webui.ui.navigation.Route
 import io.github.nku100.webui.ui.screen.apps.AppsActions
@@ -26,45 +24,32 @@ import io.github.nku100.webui.ui.screen.home.HomeUiState
 import io.github.nku100.webui.ui.screen.settings.SettingsActions
 import io.github.nku100.webui.ui.screen.settings.SettingsPage
 import io.github.nku100.webui.ui.screen.settings.SettingsUiState
-import io.github.nku100.webui.ui.theme.ThemeMode
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
 fun PlaceholderPage(
     tab: BottomTab,
-    config: ModuleConfig,
-    packages: List<PackageInfo>,
-    loading: Boolean,
+    uiState: MainUiState,
     bottomPadding: Dp,
-    onConfigChange: (ModuleConfig) -> Unit,
     onNavigateToTab: (Int) -> Unit,
+    viewModel: MainViewModel,
 ) {
+    val config = uiState.config
+
     when (tab) {
         BottomTab.SETTINGS -> {
             val navigator = LocalNavigator.current
-            val settingsState = SettingsUiState.fromConfig(config)
-            val settingsActions = SettingsActions(
-                onEnabledChange = { enabled ->
-                    onConfigChange(config.copy(enabled = enabled))
-                },
-                onThemeModeChange = { mode ->
-                    onConfigChange(config.copy(themeMode = mode.name))
-                },
-                onEnableBlurChange = { enabled ->
-                    onConfigChange(config.copy(enableBlur = enabled))
-                },
-                onEnableFloatingBottomBarChange = { enabled ->
-                    onConfigChange(config.copy(enableFloatingBottomBar = enabled))
-                },
-                onEnableFloatingBottomBarBlurChange = { enabled ->
-                    onConfigChange(config.copy(enableFloatingBottomBarBlur = enabled))
-                },
-                onOpenAbout = { navigator.push(Route.About) },
-            )
             SettingsPage(
-                uiState = settingsState,
-                actions = settingsActions,
+                uiState = SettingsUiState.fromConfig(config),
+                actions = SettingsActions(
+                    onEnabledChange = { viewModel.setEnabled(it) },
+                    onThemeModeChange = { viewModel.setThemeMode(it) },
+                    onEnableBlurChange = { viewModel.setEnableBlur(it) },
+                    onEnableFloatingBottomBarChange = { viewModel.setEnableFloatingBottomBar(it) },
+                    onEnableFloatingBottomBarBlurChange = { viewModel.setEnableFloatingBottomBarBlur(it) },
+                    onOpenAbout = { navigator.push(Route.About) },
+                ),
                 bottomPadding = bottomPadding,
                 enableBlur = config.enableBlur,
             )
@@ -86,19 +71,22 @@ fun PlaceholderPage(
         BottomTab.APPS -> {
             AppsPage(
                 state = AppsUiState(
-                    packages = packages,
+                    packages = uiState.packages,
                     targetPackages = config.targetPackages.toSet(),
-                    loading = loading,
+                    loading = uiState.isLoading,
+                    hasLoaded = uiState.hasLoaded,
+                    isRefreshing = uiState.isRefreshing,
+                    showSystemApps = uiState.showSystemApps,
+                    searchStatus = uiState.appsSearchStatus,
+                    searchResults = uiState.searchResults,
                 ),
                 actions = AppsActions(
                     onToggleTarget = { packageName, enabled ->
-                        val newTargets = if (enabled) {
-                            config.targetPackages + packageName
-                        } else {
-                            config.targetPackages - packageName
-                        }
-                        onConfigChange(config.copy(targetPackages = newTargets))
+                        viewModel.toggleTargetPackage(packageName, enabled)
                     },
+                    onRefresh = { viewModel.refresh() },
+                    onToggleShowSystemApps = { viewModel.toggleShowSystemApps() },
+                    onSearchStatusChange = { viewModel.updateSearchStatus(it) },
                 ),
                 bottomPadding = bottomPadding,
                 enableBlur = config.enableBlur,
