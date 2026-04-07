@@ -89,8 +89,8 @@ fun MainScreen() {
             pageCount = { BottomTab.entries.size },
         )
 
-        LaunchedEffect(pagerState.settledPage) {
-            selectedPage = pagerState.settledPage
+        LaunchedEffect(pagerState.currentPage) {
+            selectedPage = pagerState.currentPage
         }
 
         val items = BottomTab.entries.map { tab ->
