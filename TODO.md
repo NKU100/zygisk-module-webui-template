@@ -14,7 +14,7 @@
 - [x] Settings 主页面（Module Enabled / Theme Mode / UI Effects / About 入口）→ 双平台编译验证通过
 - [x] Settings → About 子页面（Navigation 3 + NavDisplay 横向滑动转场 + 液态玻璃返回按钮）→ 双平台编译验证通过
 - [x] Home 页面（StatusCard + InfoCard + SourceCodeCard + ModuleInfo 注入 + 跨平台 openUrl）→ 双平台编译验证通过
-- [ ] Apps 页面（SuperUser / 应用列表 + SuperSearchBar + Dialog 等依赖组件）→ 编译验证
+- [x] Apps 页面（应用列表 + SuperSearchBar + MoreCircle 菜单 + 显示系统应用过滤 + 下拉刷新 + 搜索结果显示全部）→ 双平台编译验证通过
 - [ ] 最终双平台效果对比
 
 ## wasmJs 悬浮底栏对齐进度
@@ -134,10 +134,27 @@
 - [x] Push Backdrop 子仓库到远端
 - [x] 提交主仓库（更新子模块指针 + TODO.md）
 
-## 阶段 6：主项目 wasmJs 接入 Backdrop ✅
 
-- [x] `WasmFloatingBottomBar` 从 haze 改为 Backdrop（drawBackdrop + vibrancy/blur/lens/shadow/highlight）
-- [x] `MainScreen.wasmJs.kt` 添加 rememberLayerBackdrop + layerBackdrop + enableFloatingBottomBarBlur
-- [x] 设置界面对齐：wasmJs 显示 Blur Effects / Glass Effect 开关（`showAdvancedEffects = true`）
-- [x] wasmJsMain 添加 `com.kyant.backdrop:backdrop` 依赖
-- [x] Android + wasmJs 双端编译安装验证通过
+---
+
+# KSU 对齐待办（按优先级）
+
+## 🔴 High
+
+- [ ] `rememberContentReady` — MainScreen 进入动画期间 `beyondViewportPageCount = 0`，动画结束后变 3
+- [ ] `isCurrentPage` 条件渲染 — HorizontalPager 每个 page 用 `settledPage` 判断是否渲染内容
+- [ ] `LocalMainPagerState` CompositionLocal — 在 MainScreenImpl 提供，子页面可通过它跳 tab
+- [ ] StatusCard 深色模式颜色适配 — 深色下背景/icon 颜色应换为深色友好值
+
+## 🟡 Medium
+
+- [ ] `MainScreenBackHandler` — 返回键不在 tab 0 时先跳回 tab 0，而非直接退出
+- [ ] `rememberViewModelStoreNavEntryDecorator` — NavDisplay entryDecorators 补充 ViewModel 作用域绑定
+- [ ] `scrollEndHaptic()` — HomePage / SettingsPage / AppsPage 的 LazyColumn 补充滚动末端震动反馈
+- [ ] `contentWindowInsets` 横屏刘海屏 — HomePage / SettingsPage Scaffold 补充 displayCutout 处理
+
+## 🟢 Low（平台差异，已确认不需要修改）
+
+- [x] `isDark` 参数（FloatingBottomBar）— KSU 用 `isInDarkTheme()` CompositionLocal，我们用显式参数；KMP 适配，功能等价，无需改
+- [x] `fastCoerceIn/fastRoundToInt`（FloatingBottomBar）— wasmJs 无此扩展，已在 InteractiveHighlight 等处统一降级，无需改
+
