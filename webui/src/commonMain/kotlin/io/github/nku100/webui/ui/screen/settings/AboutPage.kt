@@ -13,12 +13,19 @@ import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.Policy
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.HazeStyle
+import dev.chrisbanes.haze.HazeTint
+import dev.chrisbanes.haze.hazeSource
 import io.github.nku100.webui.ModuleInfo
 import io.github.nku100.webui.platform.openUrl
+import io.github.nku100.webui.ui.util.defaultHazeEffect
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Icon
@@ -33,13 +40,24 @@ import top.yukonga.miuix.kmp.utils.overScrollVertical
 fun AboutPage(
     bottomPadding: Dp,
     onBack: () -> Unit,
+    enableBlur: Boolean = false,
 ) {
     val scrollBehavior = MiuixScrollBehavior()
+    val hazeState = remember { HazeState() }
+    val hazeStyle = if (enableBlur) {
+        HazeStyle(
+            backgroundColor = colorScheme.surface,
+            tint = HazeTint(colorScheme.surface.copy(0.8f))
+        )
+    } else {
+        HazeStyle.Unspecified
+    }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                color = colorScheme.surface,
+                modifier = if (enableBlur) Modifier.defaultHazeEffect(hazeState, hazeStyle) else Modifier,
+                color = if (enableBlur) Color.Transparent else colorScheme.surface,
                 title = "About",
                 scrollBehavior = scrollBehavior,
                 navigationIcon = {
@@ -59,6 +77,7 @@ fun AboutPage(
                 .fillMaxHeight()
                 .overScrollVertical()
                 .nestedScroll(scrollBehavior.nestedScrollConnection)
+                .let { if (enableBlur) it.hazeSource(state = hazeState) else it }
                 .padding(horizontal = 12.dp),
             contentPadding = innerPadding,
             overscrollEffect = null,
