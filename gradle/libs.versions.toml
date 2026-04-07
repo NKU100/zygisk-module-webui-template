@@ -11,6 +11,7 @@ haze = "1.7.2"
 materialKolor = "4.1.1"
 navigation3 = "1.0.0-alpha05"
 lifecycle = "2.9.0"
+lifecycle-viewmodel-navigation3 = "2.11.0-alpha02"
 
 [libraries]
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
@@ -29,6 +30,7 @@ haze = { module = "dev.chrisbanes.haze:haze", version.ref = "haze" }
 navigation3-ui = { module = "org.jetbrains.androidx.navigation3:navigation3-ui", version.ref = "navigation3" }
 lifecycle-viewmodel = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel", version.ref = "lifecycle" }
 lifecycle-viewmodel-compose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycle" }
+lifecycle-viewmodel-navigation3 = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-navigation3", version.ref = "lifecycle-viewmodel-navigation3" }
 
 [plugins]
 agp-app = { id = "com.android.application", version.ref = "agp" }

@@ -12,9 +12,12 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.staticCompositionLocalOf
+import io.github.nku100.webui.platform.PlatformBackHandler
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -74,6 +77,13 @@ fun MainScreen(viewModel: MainViewModel, uiState: MainUiState) {
 
     LaunchedEffect(pagerState.currentPage) {
         mainPagerState.syncPage()
+    }
+
+    val isBackHandlerEnabled by remember {
+        derivedStateOf { mainPagerState.selectedPage != 0 }
+    }
+    PlatformBackHandler(enabled = isBackHandlerEnabled) {
+        mainPagerState.animateToPage(0)
     }
 
     val items = BottomTab.entries.map { tab ->

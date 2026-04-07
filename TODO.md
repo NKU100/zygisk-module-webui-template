@@ -141,17 +141,17 @@
 
 ## 🔴 High
 
-- [ ] `rememberContentReady` — MainScreen 进入动画期间 `beyondViewportPageCount = 0`，动画结束后变 3
-- [ ] `isCurrentPage` 条件渲染 — HorizontalPager 每个 page 用 `settledPage` 判断是否渲染内容
-- [ ] `LocalMainPagerState` CompositionLocal — 在 MainScreenImpl 提供，子页面可通过它跳 tab
-- [ ] StatusCard 深色模式颜色适配 — 深色下背景/icon 颜色应换为深色友好值
+- [x] `rememberContentReady` — MainScreen 进入动画期间 `beyondViewportPageCount = 0`，动画结束后变 3
+- [x] `isCurrentPage` 条件渲染 — HorizontalPager 每个 page 用 `settledPage` 判断是否渲染内容
+- [x] `LocalMainPagerState` CompositionLocal — 在 MainScreenImpl 提供，子页面可通过它跳 tab
+- [x] StatusCard 深色模式颜色适配 — 深色下背景/icon 颜色应换为深色友好值
 
 ## 🟡 Medium
 
-- [ ] `MainScreenBackHandler` — 返回键不在 tab 0 时先跳回 tab 0，而非直接退出
-- [ ] `rememberViewModelStoreNavEntryDecorator` — NavDisplay entryDecorators 补充 ViewModel 作用域绑定
-- [ ] `scrollEndHaptic()` — HomePage / SettingsPage / AppsPage 的 LazyColumn 补充滚动末端震动反馈
-- [ ] `contentWindowInsets` 横屏刘海屏 — HomePage / SettingsPage Scaffold 补充 displayCutout 处理
+- [x] `MainScreenBackHandler` — 返回键不在 tab 0 时先跳回 tab 0，而非直接退出
+- [ ] `rememberViewModelStoreNavEntryDecorator` — NavDisplay entryDecorators 补充 ViewModel 作用域绑定（KMP commonMain 暂不支持，跳过）
+- [x] `scrollEndHaptic()` — HomePage / SettingsPage / AppsPage 的 LazyColumn 补充滚动末端震动反馈
+- [x] `contentWindowInsets` 横屏刘海屏 — HomePage / SettingsPage Scaffold 补充 displayCutout 处理
 
 ## 🟢 Low（平台差异，已确认不需要修改）
 

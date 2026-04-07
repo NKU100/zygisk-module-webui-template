@@ -8,14 +8,22 @@ A Zygisk module template with **Compose Multiplatform** WebUI, based on [zygisk-
 - **Compose Multiplatform WebUI** — single codebase, dual platform:
   - **Web (Wasm)**: Renders in KernelSU manager's WebView via `webroot/`
   - **Android APK**: Standalone config app for Magisk users (no WebUI support)
-- **Miuix UI framework** — KernelSU-style Material You theme on both platforms
-  - Android: FloatingBottomBar with liquid glass (backdrop), haze blur, AGSL shader highlights
-  - Web: FloatingBottomBar with ContinuousCapsule shape + haze blur + Skia SkSL shader highlights
-  - Shared: DampedDragAnimation (spring physics, velocity deformation, press/release scale), DragGestureInspector, InteractiveHighlight
+- **Miuix UI framework** — KernelSU-style UI on both platforms, closely aligned with [KernelSU manager](https://github.com/tiann/KernelSU)
+  - FloatingBottomBar with liquid glass (backdrop), haze blur, AGSL/SkSL shader highlights
+  - Shared: DampedDragAnimation (spring physics, velocity deformation), InteractiveHighlight
+  - SuperSearchBar, SearchStatus state machine, StatusTag — ported from KernelSU
 - **[Capsule][capsule]** — G2 continuous smooth corners (cross-platform fork, included as git submodule)
 - **KernelSU API abstraction** via `expect/actual` pattern (`PlatformBridge`)
   - Full v3.0.2 API: exec (async callback), toast, listPackages, getPackagesInfo, moduleInfo, fullScreen, enableEdgeToEdge, exit
   - Browser mock data for development preview
+- **ViewModel architecture** (Compose Multiplatform lifecycle 2.9.0)
+  - `MainViewModel` with `viewModelScope`, `StateFlow<MainUiState>`, auto-managed search debounce
+  - `MainPagerState` — cross-tab navigation with `isNavigating` guard (ported from KernelSU)
+  - `LocalMainPagerState` CompositionLocal for child pages to trigger tab navigation
+  - `rememberContentReady` — deferred pager rendering during enter animation
+- **Apps page** fully aligned with KernelSU SuperUserMiuix
+  - System app filter toggle, SuperSearchBar with full expand/collapse animation
+  - Pull-to-refresh, IME-aware bottom padding, `contentWindowInsets` display cutout support
 - **JSON-based configuration** with kotlinx.serialization
 - Supports **Magisk** and **KernelSU**
 - GitHub Actions CI/CD with auto-release
@@ -28,25 +36,27 @@ A Zygisk module template with **Compose Multiplatform** WebUI, based on [zygisk-
 │   └── template/                    # Magisk module template files
 ├── webui/                           # Compose Multiplatform UI
 │   └── src/
-│       ├── commonMain/              # Shared data & expect declarations
+│       ├── commonMain/              # Shared UI, data, platform expect declarations
 │       │   ├── data/               # ModuleConfig, ConfigRepository
-│       │   ├── platform/           # expect PlatformBridge
-│       │   └── ui/                 # expect MainScreen, AppTheme, shared components
-│       ├── androidMain/            # Android target (Miuix + FloatingBottomBar)
+│       │   ├── platform/           # expect PlatformBridge, awaitNextFrame, PlatformBackHandler
 │       │   └── ui/
 │       │       ├── animation/      # DampedDragAnimation, InteractiveHighlight
-│       │       ├── component/      # FloatingBottomBar (liquid glass)
-│       │       ├── modifier/       # DragGestureInspector
-│       │       ├── screen/         # MainScreen (Miuix Scaffold + Pager)
-│       │       ├── theme/          # MiuixTheme
-│       │       └── util/           # HazeExt
-│       └── wasmJsMain/             # Web target (Miuix + FloatingBottomBar)
-│           ├── platform/           # KernelSU JS API bridge (v3.0.2)
+│       │       ├── component/      # FloatingBottomBar, SuperSearchBar, SearchStatus, StatusTag
+│       │       ├── screen/         # MainViewModel, MainPagerState, all page composables
+│       │       │   ├── home/       # HomePage
+│       │       │   ├── apps/       # AppsPage (+ AppsViewModel search logic)
+│       │       │   └── settings/   # SettingsPage, AboutPage
+│       │       ├── theme/          # AppTheme, ThemeMode, isSystemDarkTheme
+│       │       └── util/           # DeferredContent (rememberContentReady), defaultHazeEffect
+│       ├── androidMain/            # Android target
+│       │   ├── platform/           # PlatformBridge.android, PlatformBackHandler.android
+│       │   └── ui/
+│       │       ├── modifier/       # DragGestureInspector (AGSL)
+│       │       └── theme/          # MaterialKolor dynamic color
+│       └── wasmJsMain/             # Web (Wasm) target
+│           ├── platform/           # KernelSU JS API bridge (v3.0.2), PlatformBackHandler.wasmJs
 │           └── ui/
-│               ├── animation/      # DampedDragAnimation (SkSL), InteractiveHighlight (SkSL)
-│               ├── component/      # WasmFloatingBottomBar (Capsule + Haze)
-│               ├── modifier/       # DragGestureInspector
-│               └── screen/         # MainScreen (Miuix Scaffold + Pager)
+│               └── modifier/       # DragGestureInspector (SkSL)
 ├── external/
 │   └── Capsule/                     # Cross-platform Capsule library (git submodule)
 ├── module.gradle.kts                # Module metadata (id, name, author)
@@ -81,11 +91,14 @@ Edit `module/src/main/cpp/example.cpp` with your Zygisk logic.
 
 ### 4. Customize WebUI
 
-Edit files under `webui/src/` to build your configuration UI:
-- `commonMain/data/ModuleConfig.kt` — add config fields (auto-serialized to JSON)
-- `commonMain/platform/PlatformBridge.kt` — add `expect` platform APIs
-- `androidMain/ui/screen/` — Android UI with Miuix components
-- `wasmJsMain/ui/screen/` — Web UI with Miuix components
+Edit files under `webui/src/commonMain/` to build your configuration UI:
+
+- `data/ModuleConfig.kt` — add config fields (auto-serialized to JSON)
+- `platform/PlatformBridge.kt` — add `expect` platform APIs
+- `ui/screen/MainViewModel.kt` — add business logic, state fields
+- `ui/screen/home/HomePage.kt` — Home tab
+- `ui/screen/apps/AppsPage.kt` — Apps tab (target package selection)
+- `ui/screen/settings/SettingsPage.kt` — Settings tab
 
 ### 5. Build
 
@@ -123,9 +136,10 @@ The module zip will be generated under `module/release/`.
 
 ## Extending
 
-- **Add config fields**: Edit `ModuleConfig.kt`, they auto-serialize to JSON
+- **Add config fields**: Edit `ModuleConfig.kt`, add corresponding state/actions in `MainViewModel.kt`
 - **Add platform APIs**: Add `expect` methods in `PlatformBridge.kt`, implement in `wasmJsMain` and `androidMain`
-- **Add UI pages**: Create new `@Composable` functions in each platform's `screen/` directory
+- **Add UI pages**: Add a new entry to `BottomTab`, create a page composable in `ui/screen/`, wire it up in `PlaceholderPage.kt`
+- **Add ViewModel state**: Extend `MainUiState` and add methods in `MainViewModel`
 
 ## Tech Stack
 
@@ -135,9 +149,10 @@ The module zip will be generated under `module/release/`.
 | UI framework | Compose Multiplatform 1.10.3 |
 | Language | Kotlin 2.3.20 |
 | Web target | Kotlin/Wasm |
-| Android UI | Miuix 0.8.8 + Backdrop 1.0.6 + Capsule (KMP fork) + Haze 1.7.2 |
-| Web UI | Miuix 0.8.8 + Capsule (KMP fork) + Haze 1.7.2 + MaterialKolor 4.1.1 |
+| UI library | Miuix 0.8.8 |
+| Glass effects | Backdrop 1.0.6 + Haze 1.7.2 |
 | Smooth corners | [Capsule][capsule] — G2 continuous rounded rectangles (cross-platform) |
+| Architecture | ViewModel (lifecycle-viewmodel 2.9.0) + StateFlow + Navigation 3 |
 | Serialization | kotlinx.serialization (JSON) |
 | Build system | Gradle 9.3, AGP 9.0 |
 

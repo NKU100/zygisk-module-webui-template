@@ -47,6 +47,7 @@ kotlin {
             implementation(libs.navigation3.ui)
             implementation(libs.lifecycle.viewmodel)
             implementation(libs.lifecycle.viewmodel.compose)
+            implementation(libs.lifecycle.viewmodel.navigation3)
             implementation("com.kyant.capsule:capsule")
         }
         androidMain.dependencies {
