@@ -16,9 +16,13 @@ val commitCount = providers.exec { commandLine("git", "rev-list", "HEAD", "--cou
 val commitHash = providers.exec { commandLine("git", "rev-parse", "--verify", "--short", "HEAD") }
     .standardOutput.asText.map { it.trim() }
 val tag = providers.exec {
-    commandLine("git", "describe", "--tags", "--abbrev=0")
+    commandLine("git", "tag", "--points-at", "HEAD", "--sort=-v:refname")
     isIgnoreExitValue = true
-}.standardOutput.asText.map { it.trim().ifEmpty { "ci" } }
+}.standardOutput.asText.map { text ->
+    // Pick the first v* tag on HEAD; fall back to "ci" for untagged commits
+    text.lineSequence().map { it.trim() }.firstOrNull { it.startsWith("v") }.orEmpty()
+        .ifEmpty { "ci" }
+}
 
 val remoteUrl = providers.exec { commandLine("git", "remote", "get-url", "origin") }
     .standardOutput.asText.map { it.trim() }
