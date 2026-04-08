@@ -2,6 +2,7 @@ package io.github.nku100.webui.ui.screen
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import io.github.nku100.webui.ModuleInfo
 import io.github.nku100.webui.data.ConfigRepository
 import io.github.nku100.webui.data.ModuleConfig
 import io.github.nku100.webui.data.PackageSettings
@@ -11,6 +12,7 @@ import io.github.nku100.webui.platform.awaitNextFrame
 import io.github.nku100.webui.platform.hasPlatformApi
 import io.github.nku100.webui.ui.component.SearchStatus
 import io.github.nku100.webui.ui.theme.ThemeMode
+import io.github.nku100.webui.ui.screen.settings.UpdateChannel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -30,6 +32,8 @@ data class MainUiState(
     val appsSearchStatus: SearchStatus = SearchStatus(label = "Search apps..."),
     val searchResults: List<PackageInfo> = emptyList(),
     val themeMode: ThemeMode = ThemeMode.FOLLOW_SYSTEM,
+    val updateChannel: UpdateChannel = UpdateChannel.STABLE,
+    val updateChannelVisible: Boolean = false,
 )
 
 class MainViewModel : ViewModel() {
@@ -71,6 +75,7 @@ class MainViewModel : ViewModel() {
             val rawPackages = PlatformBridge.listPackages()
             val targets = config.targetPackages.toSet()
             val packages = withContext(Dispatchers.Default) { sortPackages(rawPackages, targets) }
+            val channel = readUpdateChannelFromProp()
             _uiState.update {
                 it.copy(
                     config = config,
@@ -78,6 +83,8 @@ class MainViewModel : ViewModel() {
                     isLoading = false,
                     hasLoaded = true,
                     themeMode = resolveThemeMode(config),
+                    updateChannel = channel ?: UpdateChannel.STABLE,
+                    updateChannelVisible = channel != null,
                 )
             }
         } catch (e: Exception) {
@@ -147,6 +154,59 @@ class MainViewModel : ViewModel() {
 
     fun setEnableFloatingBottomBarBlur(enabled: Boolean) =
         saveConfig(_uiState.value.config.copy(enableFloatingBottomBarBlur = enabled))
+
+    fun setUpdateChannel(channel: UpdateChannel) {
+        _uiState.update { it.copy(updateChannel = channel) }
+        viewModelScope.launch { writeUpdateChannelToProp(channel) }
+    }
+
+    /**
+     * Read the current updateJson URL from module.prop and determine the channel.
+     * Stable URLs contain "/releases/latest/download/";
+     * Beta (CI) URLs contain "/releases/download/ci/".
+     * Returns null if no updateJson is found or the URL doesn't match either pattern.
+     */
+    private suspend fun readUpdateChannelFromProp(): UpdateChannel? {
+        return try {
+            val content = PlatformBridge.readFile(ModuleInfo.MODULE_PROP_PATH)
+            val url = content.lines()
+                .firstOrNull { it.startsWith("updateJson=") }
+                ?.removePrefix("updateJson=")
+                ?.trim()
+                ?: return null
+            when {
+                url.contains(STABLE_PATH) -> UpdateChannel.STABLE
+                url.contains(BETA_PATH) -> UpdateChannel.BETA
+                else -> null
+            }
+        } catch (_: Exception) {
+            null
+        }
+    }
+
+    /**
+     * Rewrite the updateJson line in module.prop by swapping the release path segment.
+     * Stable ↔ Beta is a simple text replacement of the path portion.
+     */
+    private suspend fun writeUpdateChannelToProp(channel: UpdateChannel) {
+        try {
+            val content = PlatformBridge.readFile(ModuleInfo.MODULE_PROP_PATH)
+            if (content.isBlank()) return
+            val (from, to) = when (channel) {
+                UpdateChannel.STABLE -> BETA_PATH to STABLE_PATH
+                UpdateChannel.BETA -> STABLE_PATH to BETA_PATH
+            }
+            val newContent = content.lines().joinToString("\n") { line ->
+                if (line.startsWith("updateJson=")) line.replace(from, to) else line
+            }
+            PlatformBridge.writeFile(ModuleInfo.MODULE_PROP_PATH, newContent)
+        } catch (_: Exception) { /* best-effort */ }
+    }
+
+    companion object {
+        private const val STABLE_PATH = "/releases/latest/download/"
+        private const val BETA_PATH = "/releases/download/ci/"
+    }
 
     fun toggleTargetPackage(packageName: String, enabled: Boolean) {
         val config = _uiState.value.config

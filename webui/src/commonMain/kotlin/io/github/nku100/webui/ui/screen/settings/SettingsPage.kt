@@ -33,6 +33,7 @@ import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeStyle
 import dev.chrisbanes.haze.HazeTint
 import dev.chrisbanes.haze.hazeSource
+import androidx.compose.material.icons.rounded.Update
 import io.github.nku100.webui.ui.theme.ThemeMode
 import io.github.nku100.webui.ui.util.defaultHazeEffect
 import top.yukonga.miuix.kmp.basic.Card
@@ -142,6 +143,41 @@ fun SettingsPage(
                             actions.onThemeModeChange(ThemeMode.entries[index])
                         }
                     )
+                }
+            }
+
+            // Update Channel (only visible when module.prop updateJson matches known pattern)
+            item {
+                AnimatedVisibility(visible = uiState.updateChannelVisible) {
+                    Card(
+                        modifier = Modifier
+                            .padding(top = 12.dp)
+                            .fillMaxWidth(),
+                    ) {
+                        val channelItems = UpdateChannel.entries.map { channel ->
+                            when (channel) {
+                                UpdateChannel.STABLE -> stringResource(Res.string.update_channel_stable)
+                                UpdateChannel.BETA -> stringResource(Res.string.update_channel_beta)
+                            }
+                        }
+                        SuperDropdown(
+                            title = stringResource(Res.string.update_channel),
+                            summary = stringResource(Res.string.update_channel_summary),
+                            items = channelItems,
+                            startAction = {
+                                Icon(
+                                    Icons.Rounded.Update,
+                                    modifier = Modifier.padding(end = 6.dp),
+                                    contentDescription = stringResource(Res.string.update_channel),
+                                    tint = colorScheme.onBackground
+                                )
+                            },
+                            selectedIndex = UpdateChannel.entries.indexOf(uiState.updateChannel),
+                            onSelectedIndexChange = { index ->
+                                actions.onUpdateChannelChange(UpdateChannel.entries[index])
+                            }
+                        )
+                    }
                 }
             }
 

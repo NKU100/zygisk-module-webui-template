@@ -121,6 +121,7 @@ val generateModuleInfo = tasks.register("generateModuleInfo") {
             |    const val MODULE_REPO = "$moduleRepo"
             |    const val DATA_DIR = "/data/adb/$moduleId"
             |    const val CONFIG_PATH = "/data/adb/$moduleId/config.json"
+            |    const val MODULE_PROP_PATH = "/data/adb/modules/$moduleId/module.prop"
             |}
             """.trimMargin()
         )

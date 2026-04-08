@@ -35,10 +35,11 @@ fun PlaceholderPage(
         BottomTab.SETTINGS -> {
             val navigator = LocalNavigator.current
             SettingsPage(
-                uiState = SettingsUiState.fromConfig(config),
+                uiState = SettingsUiState.fromConfig(config, uiState.updateChannel, uiState.updateChannelVisible),
                 actions = SettingsActions(
                     onEnabledChange = { viewModel.setEnabled(it) },
                     onThemeModeChange = { viewModel.setThemeMode(it) },
+                    onUpdateChannelChange = { viewModel.setUpdateChannel(it) },
                     onEnableBlurChange = { viewModel.setEnableBlur(it) },
                     onEnableFloatingBottomBarChange = { viewModel.setEnableFloatingBottomBar(it) },
                     onEnableFloatingBottomBarBlurChange = { viewModel.setEnableFloatingBottomBarBlur(it) },

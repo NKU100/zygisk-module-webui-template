@@ -59,6 +59,10 @@
     <string name="bottom_bar_glass_effect_summary">Enable glass blur on floating bottom bar</string>
     <string name="about">About</string>
     <string name="about_summary">Module info and version</string>
+    <string name="update_channel">Update Channel</string>
+    <string name="update_channel_summary">Choose the update channel for module manager</string>
+    <string name="update_channel_stable">Stable</string>
+    <string name="update_channel_beta">Beta</string>
 
     <!-- AboutPage -->
     <string name="author">Author</string>

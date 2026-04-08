@@ -6,16 +6,24 @@ import io.github.nku100.webui.ui.theme.ThemeMode
 data class SettingsUiState(
     val enabled: Boolean = true,
     val themeMode: ThemeMode = ThemeMode.FOLLOW_SYSTEM,
+    val updateChannel: UpdateChannel = UpdateChannel.STABLE,
+    val updateChannelVisible: Boolean = false,
     val enableBlur: Boolean = true,
     val enableFloatingBottomBar: Boolean = true,
     val enableFloatingBottomBarBlur: Boolean = true,
 ) {
     companion object {
-        fun fromConfig(config: ModuleConfig): SettingsUiState {
+        fun fromConfig(
+            config: ModuleConfig,
+            updateChannel: UpdateChannel = UpdateChannel.STABLE,
+            updateChannelVisible: Boolean = false,
+        ): SettingsUiState {
             return SettingsUiState(
                 enabled = config.enabled,
                 themeMode = ThemeMode.entries.find { it.name == config.themeMode }
                     ?: ThemeMode.FOLLOW_SYSTEM,
+                updateChannel = updateChannel,
+                updateChannelVisible = updateChannelVisible,
                 enableBlur = config.enableBlur,
                 enableFloatingBottomBar = config.enableFloatingBottomBar,
                 enableFloatingBottomBarBlur = config.enableFloatingBottomBarBlur,
@@ -27,6 +35,7 @@ data class SettingsUiState(
 data class SettingsActions(
     val onEnabledChange: (Boolean) -> Unit,
     val onThemeModeChange: (ThemeMode) -> Unit,
+    val onUpdateChannelChange: (UpdateChannel) -> Unit,
     val onEnableBlurChange: (Boolean) -> Unit,
     val onEnableFloatingBottomBarChange: (Boolean) -> Unit,
     val onEnableFloatingBottomBarBlurChange: (Boolean) -> Unit,
