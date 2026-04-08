@@ -43,8 +43,9 @@ using zygisk::ServerSpecializeArgs;
 
 #define LOG_TAG    "ZygiskWebUI"
 #define MODULE_ID  "zygisk_sample"
-#define CONFIG_PATH "/data/adb/modules/" MODULE_ID "/config.json"
-#define LOG_PATH    "/data/adb/modules/" MODULE_ID "/module.log"
+#define DATA_DIR    "/data/adb/" MODULE_ID
+#define CONFIG_PATH DATA_DIR "/config.json"
+#define LOG_PATH    DATA_DIR "/module.log"
 
 // IPC opcodes
 static constexpr uint8_t OP_READ_CONFIG = 0;

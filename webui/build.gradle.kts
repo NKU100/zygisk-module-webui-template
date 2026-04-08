@@ -104,7 +104,8 @@ val generateModuleInfo = tasks.register("generateModuleInfo") {
             |    const val MODULE_VERSION_CODE = $moduleVersionCode
             |    const val MODULE_AUTHOR = "$moduleAuthor"
             |    const val MODULE_REPO = "$moduleRepo"
-            |    const val CONFIG_PATH = "/data/adb/modules/$moduleId/config.json"
+            |    const val DATA_DIR = "/data/adb/$moduleId"
+            |    const val CONFIG_PATH = "/data/adb/$moduleId/config.json"
             |}
             """.trimMargin()
         )

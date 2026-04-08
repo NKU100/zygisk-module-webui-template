@@ -19,7 +19,7 @@ data class ModuleConfig(
     /** Color style: DYNAMIC, DEFAULT, TEAL, ORANGE, PINK */
     val colorStyle: String = "DEFAULT",
     /** Enable blur effects */
-    val enableBlur: Boolean = false,
+    val enableBlur: Boolean = true,
     /** Enable floating bottom bar */
     val enableFloatingBottomBar: Boolean = true,
     /** Enable glass effect on floating bottom bar */

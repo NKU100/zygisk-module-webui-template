@@ -117,7 +117,8 @@ androidComponents.onVariants { variant ->
                 val tokens = mapOf(
                     "DEBUG" to if (buildTypeLowered == "debug") "true" else "false",
                     "SONAME" to moduleLibName,
-                    "SUPPORTED_ABIS" to supportedAbis
+                    "SUPPORTED_ABIS" to supportedAbis,
+                    "MODULE_ID" to moduleId,
                 )
                 filter<ReplaceTokens>("tokens" to tokens)
                 filter<FixCrLfFilter>("eol" to FixCrLfFilter.CrLf.newInstance("lf"))

@@ -6,7 +6,7 @@ import io.github.nku100.webui.ui.theme.ThemeMode
 data class SettingsUiState(
     val enabled: Boolean = true,
     val themeMode: ThemeMode = ThemeMode.FOLLOW_SYSTEM,
-    val enableBlur: Boolean = false,
+    val enableBlur: Boolean = true,
     val enableFloatingBottomBar: Boolean = true,
     val enableFloatingBottomBarBlur: Boolean = true,
 ) {
