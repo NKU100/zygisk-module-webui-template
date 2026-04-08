@@ -3,7 +3,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.platform.Font
 import androidx.compose.ui.platform.LocalFontFamilyResolver
@@ -60,7 +59,6 @@ private suspend fun fetchFontBytes(url: String): ByteArray? {
 
 // ── Entry point ──────────────────────────────────────────────────────────────
 
-@OptIn(ExperimentalComposeUiApi::class)
 fun main() {
     val body = document.body ?: return
     ComposeViewport(body) {

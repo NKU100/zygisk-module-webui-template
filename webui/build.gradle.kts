@@ -36,6 +36,14 @@ kotlin {
 
     androidTarget()
 
+    compilerOptions {
+        freeCompilerArgs.addAll(
+            "-Xexpect-actual-classes",
+            "-opt-in=kotlin.js.ExperimentalWasmJsInterop",
+            "-opt-in=androidx.compose.ui.ExperimentalComposeUiApi",
+        )
+    }
+
     sourceSets {
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -88,6 +96,13 @@ android {
 val generateModuleInfo = tasks.register("generateModuleInfo") {
     val outputDir = layout.buildDirectory.dir("generated/moduleInfo/commonMain/kotlin")
     val pkg = "io.github.nku100.webui"
+    // Declare inputs so Gradle re-runs this task when module metadata changes
+    inputs.property("moduleId", moduleId)
+    inputs.property("moduleName", moduleName)
+    inputs.property("moduleVersion", moduleVersion)
+    inputs.property("moduleVersionCode", moduleVersionCode)
+    inputs.property("moduleAuthor", moduleAuthor)
+    inputs.property("moduleRepo", moduleRepo)
     outputs.dir(outputDir)
     doLast {
         val dir = outputDir.get().asFile.resolve(pkg.replace('.', '/'))
@@ -127,7 +142,9 @@ tasks.register("buildWebUI") {
 val pushTask = tasks.register<Exec>("push") {
     group = "webui"
     dependsOn("buildWebUI")
-    commandLine("adb", "push", webDistDir.get().asFile.path, "/data/local/tmp/webroot")
+    doFirst {
+        commandLine("adb", "push", webDistDir.get().asFile.path, "/data/local/tmp/webroot")
+    }
 }
 
 val removeTask = tasks.register<Exec>("remove") {
