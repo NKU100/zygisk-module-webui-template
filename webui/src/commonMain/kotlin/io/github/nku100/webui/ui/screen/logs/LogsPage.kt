@@ -26,7 +26,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Article
+import androidx.compose.material.icons.automirrored.rounded.Article
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -386,7 +386,7 @@ private fun LogMessageCard(message: String) {
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Icon(
-                imageVector = Icons.Rounded.Article,
+                imageVector = Icons.AutoMirrored.Rounded.Article,
                 contentDescription = null,
                 tint = colorScheme.onSurfaceVariantSummary,
                 modifier = Modifier.padding(bottom = 8.dp),
