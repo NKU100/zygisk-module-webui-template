@@ -40,6 +40,7 @@ import dev.chrisbanes.haze.HazeTint
 import dev.chrisbanes.haze.hazeSource
 import io.github.nku100.webui.ModuleInfo
 import io.github.nku100.webui.platform.openUrl
+import org.jetbrains.compose.resources.stringResource
 import io.github.nku100.webui.ui.theme.isSystemDarkTheme
 import io.github.nku100.webui.ui.util.defaultHazeEffect
 import top.yukonga.miuix.kmp.basic.BasicComponent
@@ -57,6 +58,7 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
 import top.yukonga.miuix.kmp.utils.PressFeedbackType
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
+import zygisk_module_webui_template.webui.generated.resources.*
 
 data class HomeUiState(
     val moduleEnabled: Boolean = true,
@@ -184,7 +186,11 @@ private fun StatusCard(state: HomeUiState, actions: HomeActions) {
                 ) {
                     Text(
                         modifier = Modifier.fillMaxWidth(),
-                        text = if (state.moduleEnabled) "Working" else "Disabled",
+                        text = if (state.moduleEnabled) {
+                            stringResource(Res.string.status_working)
+                        } else {
+                            stringResource(Res.string.status_disabled)
+                        },
                         fontSize = 20.sp,
                         fontWeight = FontWeight.SemiBold,
                     )
@@ -219,7 +225,7 @@ private fun StatusCard(state: HomeUiState, actions: HomeActions) {
                 ) {
                     Text(
                         modifier = Modifier.fillMaxWidth(),
-                        text = "Target Apps",
+                        text = stringResource(Res.string.target_apps),
                         fontWeight = FontWeight.Medium,
                         fontSize = 15.sp,
                         color = colorScheme.onSurfaceVariantSummary,
@@ -245,10 +251,10 @@ private fun InfoCard(state: HomeUiState) {
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
-            InfoText(title = "Module ID", content = state.moduleId)
-            InfoText(title = "Version", content = state.moduleVersion)
+            InfoText(title = stringResource(Res.string.module_id), content = state.moduleId)
+            InfoText(title = stringResource(Res.string.version), content = state.moduleVersion)
             InfoText(
-                title = "Config Path",
+                title = stringResource(Res.string.config_path),
                 content = state.configPath,
                 bottomPadding = 0.dp,
             )
@@ -280,8 +286,8 @@ private fun InfoText(
 private fun SourceCodeCard(onOpenUrl: () -> Unit) {
     Card(modifier = Modifier.fillMaxWidth()) {
         BasicComponent(
-            title = "Source Code",
-            summary = "View on GitHub",
+            title = stringResource(Res.string.source_code),
+            summary = stringResource(Res.string.view_on_github),
             endActions = {
                 Icon(
                     imageVector = MiuixIcons.Link,

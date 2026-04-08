@@ -18,6 +18,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.staticCompositionLocalOf
 import io.github.nku100.webui.platform.PlatformBackHandler
+import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -87,7 +88,7 @@ fun MainScreen(viewModel: MainViewModel, uiState: MainUiState) {
     }
 
     val items = BottomTab.entries.map { tab ->
-        NavigationItem(label = tab.label, icon = tab.icon)
+        NavigationItem(label = stringResource(tab.labelRes), icon = tab.icon)
     }
 
     val bottomBar = @Composable {

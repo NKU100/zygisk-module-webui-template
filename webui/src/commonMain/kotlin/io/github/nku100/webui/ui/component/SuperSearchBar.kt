@@ -1,4 +1,6 @@
 package io.github.nku100.webui.ui.component
+import org.jetbrains.compose.resources.stringResource
+import zygisk_module_webui_template.webui.generated.resources.*
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -211,7 +213,7 @@ fun SearchStatus.SearchPager(
                 exit = shrinkHorizontally() + slideOutHorizontally(targetOffsetX = { it })
             ) {
                 Text(
-                    text = "Cancel",
+                    text = stringResource(Res.string.cancel),
                     fontWeight = FontWeight.Bold,
                     color = colorScheme.primary,
                     modifier = Modifier
@@ -280,7 +282,7 @@ fun SearchBar(
         leadingIcon = {
             Icon(
                 imageVector = MiuixIcons.Basic.Search,
-                contentDescription = "Search",
+                contentDescription = stringResource(Res.string.search),
                 modifier = Modifier
                     .size(44.dp)
                     .padding(start = 16.dp, end = 8.dp),
@@ -296,7 +298,7 @@ fun SearchBar(
                 Icon(
                     imageVector = MiuixIcons.Basic.SearchCleanup,
                     tint = colorScheme.onSurface,
-                    contentDescription = "Clear",
+                    contentDescription = stringResource(Res.string.clear),
                     modifier = Modifier
                         .size(44.dp)
                         .padding(start = 8.dp, end = 16.dp)
@@ -347,7 +349,7 @@ fun SearchBarFake(
         leadingIcon = {
             Icon(
                 imageVector = MiuixIcons.Basic.Search,
-                contentDescription = "Search",
+                contentDescription = stringResource(Res.string.search),
                 modifier = Modifier
                     .size(44.dp)
                     .padding(start = 16.dp, end = 8.dp),

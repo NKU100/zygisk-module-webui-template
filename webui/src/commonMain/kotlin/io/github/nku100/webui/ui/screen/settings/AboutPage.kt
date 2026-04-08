@@ -1,4 +1,6 @@
 package io.github.nku100.webui.ui.screen.settings
+import org.jetbrains.compose.resources.stringResource
+import zygisk_module_webui_template.webui.generated.resources.*
 
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -58,13 +60,13 @@ fun AboutPage(
             TopAppBar(
                 modifier = if (enableBlur) Modifier.defaultHazeEffect(hazeState, hazeStyle) else Modifier,
                 color = if (enableBlur) Color.Transparent else colorScheme.surface,
-                title = "About",
+                title = stringResource(Res.string.about),
                 scrollBehavior = scrollBehavior,
                 navigationIcon = {
                     top.yukonga.miuix.kmp.basic.IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                            contentDescription = "Back",
+                            contentDescription = stringResource(Res.string.back),
                             tint = colorScheme.onBackground
                         )
                     }
@@ -90,13 +92,13 @@ fun AboutPage(
                         .fillMaxWidth(),
                 ) {
                     BasicComponent(
-                        title = "Module ID",
+                        title = stringResource(Res.string.module_id),
                         summary = ModuleInfo.MODULE_ID,
                         startAction = {
                             Icon(
                                 Icons.Rounded.Info,
                                 modifier = Modifier.padding(end = 6.dp),
-                                contentDescription = "Module ID",
+                                contentDescription = stringResource(Res.string.module_id),
                                 tint = colorScheme.onBackground
                             )
                         },
@@ -112,13 +114,13 @@ fun AboutPage(
                         .fillMaxWidth(),
                 ) {
                     BasicComponent(
-                        title = "Author",
+                        title = stringResource(Res.string.author),
                         summary = ModuleInfo.MODULE_AUTHOR,
                         startAction = {
                             Icon(
                                 Icons.Rounded.Person,
                                 modifier = Modifier.padding(end = 6.dp),
-                                contentDescription = "Author",
+                                contentDescription = stringResource(Res.string.author),
                                 tint = colorScheme.onBackground
                             )
                         },
@@ -134,13 +136,13 @@ fun AboutPage(
                         .fillMaxWidth(),
                 ) {
                     SuperArrow(
-                        title = "Source Code",
+                        title = stringResource(Res.string.source_code),
                         summary = ModuleInfo.MODULE_REPO.removePrefix("https://"),
                         startAction = {
                             Icon(
                                 Icons.Rounded.Code,
                                 modifier = Modifier.padding(end = 6.dp),
-                                contentDescription = "Source Code",
+                                contentDescription = stringResource(Res.string.source_code),
                                 tint = colorScheme.onBackground
                             )
                         },
@@ -157,13 +159,13 @@ fun AboutPage(
                         .fillMaxWidth(),
                 ) {
                     BasicComponent(
-                        title = "License",
-                        summary = "Apache License 2.0",
+                        title = stringResource(Res.string.license),
+                        summary = stringResource(Res.string.license_value),
                         startAction = {
                             Icon(
                                 Icons.Rounded.Policy,
                                 modifier = Modifier.padding(end = 6.dp),
-                                contentDescription = "License",
+                                contentDescription = stringResource(Res.string.license),
                                 tint = colorScheme.onBackground
                             )
                         },

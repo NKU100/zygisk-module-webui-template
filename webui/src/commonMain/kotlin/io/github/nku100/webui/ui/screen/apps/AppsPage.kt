@@ -1,4 +1,6 @@
 package io.github.nku100.webui.ui.screen.apps
+import org.jetbrains.compose.resources.stringResource
+import zygisk_module_webui_template.webui.generated.resources.*
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
@@ -156,7 +158,7 @@ fun AppsPage(
             ) {
                 TopAppBar(
                     color = if (enableBlur) Color.Transparent else colorScheme.surface,
-                    title = "Apps",
+                    title = stringResource(Res.string.tab_apps),
                     actions = {
                         val showTopPopup = remember { mutableStateOf(false) }
                         SuperListPopup(
@@ -167,7 +169,7 @@ fun AppsPage(
                             content = {
                                 ListPopupColumn {
                                     DropdownImpl(
-                                        text = "Show system apps",
+                                        text = stringResource(Res.string.show_system_apps),
                                         isSelected = state.showSystemApps,
                                         optionSize = 1,
                                         onSelectedIndexChange = {
@@ -278,7 +280,12 @@ fun AppsPage(
                     isRefreshing = state.isRefreshing,
                     pullToRefreshState = pullToRefreshState,
                     onRefresh = actions.onRefresh,
-                    refreshTexts = listOf("Pull to refresh", "Release to refresh", "Refreshing...", "Done"),
+                    refreshTexts = listOf(
+                        stringResource(Res.string.pull_to_refresh),
+                        stringResource(Res.string.release_to_refresh),
+                        stringResource(Res.string.refreshing),
+                        stringResource(Res.string.done),
+                    ),
                     contentPadding = PaddingValues(
                         top = innerPadding.calculateTopPadding() + boxHeight.value + 6.dp,
                         start = innerPadding.calculateStartPadding(layoutDirection),
@@ -374,7 +381,7 @@ private fun AppItem(
                     horizontalAlignment = Alignment.End,
                     verticalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
-                    StatusTag(label = "TARGETED", backgroundColor = bg, contentColor = fg)
+                    StatusTag(label = stringResource(Res.string.targeted), backgroundColor = bg, contentColor = fg)
                 }
             }
 

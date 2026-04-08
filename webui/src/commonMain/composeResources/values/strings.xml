@@ -1,0 +1,83 @@
+<resources>
+    <!-- BottomTab -->
+    <string name="tab_home">Home</string>
+    <string name="tab_apps">Apps</string>
+    <string name="tab_logs">Logs</string>
+    <string name="tab_settings">Settings</string>
+
+    <!-- HomePage -->
+    <string name="status_working">Working</string>
+    <string name="status_disabled">Disabled</string>
+    <string name="target_apps">Target Apps</string>
+    <string name="module_id">Module ID</string>
+    <string name="version">Version</string>
+    <string name="config_path">Config Path</string>
+    <string name="source_code">Source Code</string>
+    <string name="view_on_github">View on GitHub</string>
+
+    <!-- AppsPage -->
+    <string name="search_apps">Search apps…</string>
+    <string name="show_system_apps">Show system apps</string>
+    <string name="pull_to_refresh">Pull to refresh</string>
+    <string name="release_to_refresh">Release to refresh</string>
+    <string name="refreshing">Refreshing…</string>
+    <string name="done">Done</string>
+    <string name="targeted">TARGETED</string>
+
+    <!-- AppProfilePage -->
+    <string name="back">Back</string>
+    <string name="launch_app">Launch app</string>
+    <string name="force_stop">Force stop</string>
+    <string name="restart_app">Restart app</string>
+    <string name="section_module">Module</string>
+    <string name="enable_for_this_app">Enable for this app</string>
+    <string name="enable_for_this_app_summary">Hook this app on launch and output log</string>
+    <string name="section_log_settings">Log Settings</string>
+    <string name="log_level">Log level</string>
+    <string name="log_level_summary">Minimum severity level to output</string>
+    <string name="dump_stack_trace">Dump stack trace</string>
+    <string name="dump_stack_trace_summary">Include call stack in each log entry</string>
+    <string name="section_log_tag">Log Tag</string>
+    <string name="custom_tag">Custom tag</string>
+    <string name="custom_tag_hint">Leave blank to use the app\'s package name</string>
+    <string name="section_note">Note</string>
+    <string name="note_placeholder">Optional note about this app</string>
+
+    <!-- SettingsPage -->
+    <string name="module_enabled">Module Enabled</string>
+    <string name="module_enabled_summary">Enable or disable the Zygisk module</string>
+    <string name="theme_mode">Theme Mode</string>
+    <string name="theme_mode_summary">Choose light, dark, or follow system</string>
+    <string name="theme_follow_system">Follow System</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+    <string name="blur_effects">Blur Effects</string>
+    <string name="blur_effects_summary">Enable background blur effects</string>
+    <string name="floating_bottom_bar">Floating Bottom Bar</string>
+    <string name="floating_bottom_bar_summary">Use floating navigation bar style</string>
+    <string name="bottom_bar_glass_effect">Bottom Bar Glass Effect</string>
+    <string name="bottom_bar_glass_effect_summary">Enable glass blur on floating bottom bar</string>
+    <string name="about">About</string>
+    <string name="about_summary">Module info and version</string>
+
+    <!-- AboutPage -->
+    <string name="author">Author</string>
+    <string name="license">License</string>
+    <string name="license_value">Apache License 2.0</string>
+
+    <!-- LogsPage -->
+    <string name="search_logs">Search logs…</string>
+    <string name="filter">Filter</string>
+    <string name="clear_logs">Clear logs</string>
+    <string name="level_all">All</string>
+    <string name="loading">Loading…</string>
+    <string name="error_prefix">Error: %1$s</string>
+    <string name="no_matching_logs">No matching logs.</string>
+    <string name="no_logs_yet">No logs yet. Tap refresh or trigger activity in a target app.</string>
+    <string name="lines_count">%1$d lines</string>
+
+    <!-- SuperSearchBar -->
+    <string name="cancel">Cancel</string>
+    <string name="search">Search</string>
+    <string name="clear">Clear</string>
+</resources>

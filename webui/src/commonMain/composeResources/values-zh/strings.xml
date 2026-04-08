@@ -1,0 +1,83 @@
+<resources>
+    <!-- BottomTab -->
+    <string name="tab_home">首页</string>
+    <string name="tab_apps">应用</string>
+    <string name="tab_logs">日志</string>
+    <string name="tab_settings">设置</string>
+
+    <!-- HomePage -->
+    <string name="status_working">运行中</string>
+    <string name="status_disabled">已禁用</string>
+    <string name="target_apps">目标应用</string>
+    <string name="module_id">模块 ID</string>
+    <string name="version">版本</string>
+    <string name="config_path">配置路径</string>
+    <string name="source_code">源代码</string>
+    <string name="view_on_github">在 GitHub 上查看</string>
+
+    <!-- AppsPage -->
+    <string name="search_apps">搜索应用…</string>
+    <string name="show_system_apps">显示系统应用</string>
+    <string name="pull_to_refresh">下拉刷新</string>
+    <string name="release_to_refresh">释放刷新</string>
+    <string name="refreshing">刷新中…</string>
+    <string name="done">完成</string>
+    <string name="targeted">已选中</string>
+
+    <!-- AppProfilePage -->
+    <string name="back">返回</string>
+    <string name="launch_app">启动应用</string>
+    <string name="force_stop">强制停止</string>
+    <string name="restart_app">重启应用</string>
+    <string name="section_module">模块</string>
+    <string name="enable_for_this_app">为此应用启用</string>
+    <string name="enable_for_this_app_summary">在应用启动时进行 Hook 并输出日志</string>
+    <string name="section_log_settings">日志设置</string>
+    <string name="log_level">日志级别</string>
+    <string name="log_level_summary">输出的最低严重级别</string>
+    <string name="dump_stack_trace">输出堆栈跟踪</string>
+    <string name="dump_stack_trace_summary">在每条日志中包含调用堆栈</string>
+    <string name="section_log_tag">日志标签</string>
+    <string name="custom_tag">自定义标签</string>
+    <string name="custom_tag_hint">留空则使用应用包名</string>
+    <string name="section_note">备注</string>
+    <string name="note_placeholder">为此应用添加备注（可选）</string>
+
+    <!-- SettingsPage -->
+    <string name="module_enabled">模块开关</string>
+    <string name="module_enabled_summary">启用或禁用 Zygisk 模块</string>
+    <string name="theme_mode">主题模式</string>
+    <string name="theme_mode_summary">选择浅色、深色或跟随系统</string>
+    <string name="theme_follow_system">跟随系统</string>
+    <string name="theme_light">浅色</string>
+    <string name="theme_dark">深色</string>
+    <string name="blur_effects">模糊效果</string>
+    <string name="blur_effects_summary">启用背景模糊效果</string>
+    <string name="floating_bottom_bar">悬浮底栏</string>
+    <string name="floating_bottom_bar_summary">使用悬浮导航栏样式</string>
+    <string name="bottom_bar_glass_effect">底栏毛玻璃效果</string>
+    <string name="bottom_bar_glass_effect_summary">在悬浮底栏上启用毛玻璃模糊</string>
+    <string name="about">关于</string>
+    <string name="about_summary">模块信息与版本</string>
+
+    <!-- AboutPage -->
+    <string name="author">作者</string>
+    <string name="license">许可证</string>
+    <string name="license_value">Apache License 2.0</string>
+
+    <!-- LogsPage -->
+    <string name="search_logs">搜索日志…</string>
+    <string name="filter">筛选</string>
+    <string name="clear_logs">清空日志</string>
+    <string name="level_all">全部</string>
+    <string name="loading">加载中…</string>
+    <string name="error_prefix">错误：%1$s</string>
+    <string name="no_matching_logs">没有匹配的日志。</string>
+    <string name="no_logs_yet">暂无日志。下拉刷新或在目标应用中触发活动。</string>
+    <string name="lines_count">%1$d 行</string>
+
+    <!-- SuperSearchBar -->
+    <string name="cancel">取消</string>
+    <string name="search">搜索</string>
+    <string name="clear">清除</string>
+</resources>

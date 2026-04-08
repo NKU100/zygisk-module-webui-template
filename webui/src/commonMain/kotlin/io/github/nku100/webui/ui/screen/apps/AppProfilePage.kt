@@ -1,4 +1,6 @@
 package io.github.nku100.webui.ui.screen.apps
+import org.jetbrains.compose.resources.stringResource
+import zygisk_module_webui_template.webui.generated.resources.*
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -113,7 +115,7 @@ fun AppProfilePage(
                         Icon(
                             imageVector = MiuixIcons.Back,
                             tint = colorScheme.onSurface,
-                            contentDescription = "Back",
+                            contentDescription = stringResource(Res.string.back),
                         )
                     }
                 },
@@ -126,7 +128,11 @@ fun AppProfilePage(
                         onDismissRequest = { showPopup.value = false },
                         content = {
                             top.yukonga.miuix.kmp.basic.ListPopupColumn {
-                                listOf("Launch app", "Force stop", "Restart app")
+                                listOf(
+                                    stringResource(Res.string.launch_app),
+                                    stringResource(Res.string.force_stop),
+                                    stringResource(Res.string.restart_app),
+                                )
                                     .forEachIndexed { index, text ->
                                         top.yukonga.miuix.kmp.basic.DropdownImpl(
                                             text = text,
@@ -207,7 +213,7 @@ fun AppProfilePage(
 
             // Enable section
             item {
-                SmallTitle(text = "Module")
+                SmallTitle(text = stringResource(Res.string.section_module))
             }
             item {
                 Card(
@@ -216,8 +222,8 @@ fun AppProfilePage(
                         .padding(bottom = 12.dp),
                 ) {
                     SuperSwitch(
-                        title = "Enable for this app",
-                        summary = "Hook this app on launch and output log",
+                        title = stringResource(Res.string.enable_for_this_app),
+                        summary = stringResource(Res.string.enable_for_this_app_summary),
                         checked = state.isTargeted,
                         onCheckedChange = { actions.onToggleTarget(it) },
                     )
@@ -226,7 +232,7 @@ fun AppProfilePage(
 
             // Log settings section
             item {
-                SmallTitle(text = "Log Settings")
+                SmallTitle(text = stringResource(Res.string.section_log_settings))
             }
             item {
                 Card(
@@ -236,8 +242,8 @@ fun AppProfilePage(
                 ) {
                     val logLevelOptions = listOf("DEBUG", "INFO", "WARN")
                     SuperDropdown(
-                        title = "Log level",
-                        summary = "Minimum severity level to output",
+                        title = stringResource(Res.string.log_level),
+                        summary = stringResource(Res.string.log_level_summary),
                         items = logLevelOptions,
                         selectedIndex = logLevelOptions.indexOf(settings.logLevel).coerceAtLeast(0),
                         onSelectedIndexChange = { idx ->
@@ -245,8 +251,8 @@ fun AppProfilePage(
                         },
                     )
                     SuperSwitch(
-                        title = "Dump stack trace",
-                        summary = "Include call stack in each log entry",
+                        title = stringResource(Res.string.dump_stack_trace),
+                        summary = stringResource(Res.string.dump_stack_trace_summary),
                         checked = settings.dumpStackTrace,
                         onCheckedChange = { actions.onSaveSettings(settings.copy(dumpStackTrace = it)) },
                     )
@@ -255,7 +261,7 @@ fun AppProfilePage(
 
             // Log tag
             item {
-                SmallTitle(text = "Log Tag")
+                SmallTitle(text = stringResource(Res.string.section_log_tag))
             }
             item {
                 Card(
@@ -265,13 +271,13 @@ fun AppProfilePage(
                     insideMargin = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
                 ) {
                     Text(
-                        text = "Custom tag",
+                        text = stringResource(Res.string.custom_tag),
                         fontSize = 15.sp,
                         fontWeight = FontWeight.Medium,
                         color = colorScheme.onSurface,
                     )
                     Text(
-                        text = "Leave blank to use the app's package name",
+                        text = stringResource(Res.string.custom_tag_hint),
                         fontSize = 13.sp,
                         color = colorScheme.onSurfaceVariantSummary,
                         modifier = Modifier.padding(top = 2.dp, bottom = 8.dp),
@@ -291,7 +297,7 @@ fun AppProfilePage(
 
             // Note
             item {
-                SmallTitle(text = "Note")
+                SmallTitle(text = stringResource(Res.string.section_note))
             }
             item {
                 Card(
@@ -307,7 +313,7 @@ fun AppProfilePage(
                             actions.onSaveSettings(settings.copy(note = it))
                         },
                         modifier = Modifier.fillMaxWidth(),
-                        label = "Optional note about this app",
+                        label = stringResource(Res.string.note_placeholder),
                     )
                 }
             }

@@ -1,4 +1,6 @@
 package io.github.nku100.webui.ui.screen.logs
+import org.jetbrains.compose.resources.stringResource
+import zygisk_module_webui_template.webui.generated.resources.*
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -111,7 +113,7 @@ fun LogsPage(
 
     val searchStatus = state.searchStatus
     val levelOptions = listOf(null) + LogLevel.entries.toList()
-    val levelLabels = listOf("All") + LogLevel.entries.map {
+    val levelLabels = listOf(stringResource(Res.string.level_all)) + LogLevel.entries.map {
         it.name.lowercase().replaceFirstChar { c -> c.uppercase() }
     }
 
@@ -123,7 +125,7 @@ fun LogsPage(
             ) {
                 TopAppBar(
                     color = if (enableBlur) Color.Transparent else colorScheme.surface,
-                    title = "Logs",
+                    title = stringResource(Res.string.tab_logs),
                     actions = {
                         // Level filter popup
                         SuperListPopup(
@@ -156,7 +158,7 @@ fun LogsPage(
                             Icon(
                                 imageVector = MiuixIcons.Filter,
                                 tint = if (state.selectedLevel != null) colorScheme.primary else colorScheme.onSurface,
-                                contentDescription = "Filter",
+                                contentDescription = stringResource(Res.string.filter),
                             )
                         }
                         // Clear button
@@ -167,7 +169,7 @@ fun LogsPage(
                             Icon(
                                 imageVector = MiuixIcons.Delete,
                                 tint = colorScheme.onSurface,
-                                contentDescription = "Clear logs",
+                                contentDescription = stringResource(Res.string.clear_logs),
                             )
                         }
                     },
@@ -192,7 +194,11 @@ fun LogsPage(
                         state.visibleLines.isEmpty() -> {
                             item {
                                 LogMessageCard(
-                                    message = if (searchStatus.searchText.isNotBlank()) "No matching logs." else "No logs yet."
+                                    message = if (searchStatus.searchText.isNotBlank()) {
+                                        stringResource(Res.string.no_matching_logs)
+                                    } else {
+                                        stringResource(Res.string.no_logs_yet)
+                                    }
                                 )
                             }
                         }
@@ -232,7 +238,12 @@ fun LogsPage(
                 isRefreshing = state.isRefreshing,
                 pullToRefreshState = pullToRefreshState,
                 onRefresh = actions.onRefresh,
-                refreshTexts = listOf("Pull to refresh", "Release to refresh", "Refreshing...", "Done"),
+                refreshTexts = listOf(
+                    stringResource(Res.string.pull_to_refresh),
+                    stringResource(Res.string.release_to_refresh),
+                    stringResource(Res.string.refreshing),
+                    stringResource(Res.string.done),
+                ),
                 contentPadding = PaddingValues(
                     top = chipTopPadding,
                     start = innerPadding.calculateStartPadding(layoutDirection),
@@ -275,23 +286,27 @@ fun LogsPage(
 
                     when {
                         state.isLoading -> {
-                            item { LogMessageCard(message = "Loading…") }
+                            item { LogMessageCard(message = stringResource(Res.string.loading)) }
                         }
                         state.errorMessage != null -> {
-                            item { LogMessageCard(message = "Error: ${state.errorMessage}") }
+                            item {
+                                LogMessageCard(
+                                    message = stringResource(Res.string.error_prefix, state.errorMessage ?: "")
+                                )
+                            }
                         }
                         state.visibleLines.isEmpty() -> {
                             item {
                                 LogMessageCard(
                                     message = if (searchStatus.searchText.isNotBlank() || state.selectedLevel != null)
-                                        "No matching logs."
+                                        stringResource(Res.string.no_matching_logs)
                                     else
-                                        "No logs yet. Tap refresh or trigger activity in a target app."
+                                        stringResource(Res.string.no_logs_yet)
                                 )
                             }
                         }
                         else -> {
-                            item { SmallTitle(text = "${state.visibleLines.size} lines") }
+                            item { SmallTitle(text = stringResource(Res.string.lines_count, state.visibleLines.size)) }
                             itemsIndexed(
                                 items = state.visibleLines,
                                 key = { index, _ -> index },
@@ -327,7 +342,7 @@ fun LogsPage(
     }
 }
 
-// ── Log line item ────────────────────────────────────────────────────────────
+// ── Log line item ──────────────────────────────────────────
 
 @Composable
 private fun LogLineItem(line: LogLine, onClick: () -> Unit) {
@@ -374,7 +389,7 @@ private fun LogLineItem(line: LogLine, onClick: () -> Unit) {
     }
 }
 
-// ── Empty / error card ───────────────────────────────────────────────────────
+// ── Empty / error card ─────────────────────────────────────
 
 @Composable
 private fun LogMessageCard(message: String) {
@@ -400,7 +415,7 @@ private fun LogMessageCard(message: String) {
     }
 }
 
-// ── Level color ──────────────────────────────────────────────────────────────
+// ── Level color ────────────────────────────────────────────────
 
 @Composable
 fun levelColor(level: LogLevel): Color = when (level) {
