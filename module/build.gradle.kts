@@ -102,8 +102,15 @@ androidComponents.onVariants { variant ->
             exclude("module.prop", "customize.sh", "post-fs-data.sh", "service.sh")
             filter<FixCrLfFilter>("eol" to FixCrLfFilter.CrLf.newInstance("lf"))
         }
+        // Tagged release: point to latest so older versions discover newer releases.
+        // CI/debug build: point to the ci pre-release tag directly.
         val updateJson = gitHubUser.zip(gitHubRepo) { user, repo ->
-            "https://github.com/$user/$repo/releases/download/${tag.get()}/update.json"
+            val t = tag.get()
+            if (t.startsWith("v")) {
+                "https://github.com/$user/$repo/releases/latest/download/update.json"
+            } else {
+                "https://github.com/$user/$repo/releases/download/$t/update.json"
+            }
         }
         from(layout.projectDirectory.file("template")) {
             include("module.prop")
