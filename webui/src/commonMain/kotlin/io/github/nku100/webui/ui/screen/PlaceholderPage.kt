@@ -1,31 +1,25 @@
 package io.github.nku100.webui.ui.screen
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import io.github.nku100.webui.ui.navigation.LocalNavigator
 import io.github.nku100.webui.ui.navigation.Route
+import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.nku100.webui.ui.screen.apps.AppsActions
 import io.github.nku100.webui.ui.screen.apps.AppsPage
 import io.github.nku100.webui.ui.screen.apps.AppsUiState
 import io.github.nku100.webui.ui.screen.home.HomeActions
 import io.github.nku100.webui.ui.screen.home.HomePage
 import io.github.nku100.webui.ui.screen.home.HomeUiState
+import io.github.nku100.webui.ui.screen.logs.LogsActions
+import io.github.nku100.webui.ui.screen.logs.LogsPage
+import io.github.nku100.webui.ui.screen.logs.LogsViewModel
 import io.github.nku100.webui.ui.screen.settings.SettingsActions
 import io.github.nku100.webui.ui.screen.settings.SettingsPage
 import io.github.nku100.webui.ui.screen.settings.SettingsUiState
-import top.yukonga.miuix.kmp.basic.Text
-import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
 fun PlaceholderPage(
@@ -96,31 +90,21 @@ fun PlaceholderPage(
                 enableBlur = config.enableBlur,
             )
         }
-        else -> {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(bottom = bottomPadding)
-                    .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center,
-            ) {
-                Text(
-                    text = tab.label,
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = MiuixTheme.colorScheme.onBackground,
-                )
-                Spacer(Modifier.height(8.dp))
-                Text(
-                    text = when (tab) {
-                        BottomTab.LOGS -> "View runtime logs"
-                        else -> ""
-                    },
-                    fontSize = 14.sp,
-                    color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
-                )
-            }
+        BottomTab.LOGS -> {
+            val logsViewModel = viewModel { LogsViewModel() }
+            val logsState by logsViewModel.uiState.collectAsState()
+            LaunchedEffect(Unit) { logsViewModel.load() }
+            LogsPage(
+                state = logsState,
+                actions = LogsActions(
+                    onRefresh = { logsViewModel.refresh() },
+                    onClear = { logsViewModel.clear() },
+                    onSearchStatusChange = { logsViewModel.updateSearchStatus(it) },
+                    onSelectLevel = { logsViewModel.selectLevel(it) },
+                ),
+                bottomPadding = bottomPadding,
+                enableBlur = config.enableBlur,
+            )
         }
     }
 }

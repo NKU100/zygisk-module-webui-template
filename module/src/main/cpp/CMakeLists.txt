@@ -5,7 +5,11 @@ set(CXX_FLAGS "${CXX_FLAGS} -fno-exceptions -fno-rtti -fvisibility=hidden -fvisi
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CXX_FLAGS}")
 
-add_library(${MODULE_NAME} SHARED example.cpp)
+add_library(${MODULE_NAME} SHARED
+        example.cpp
+        external/yyjson.c
+)
+target_include_directories(${MODULE_NAME} PRIVATE external)
 target_link_libraries(${MODULE_NAME} cxx log)
 
 add_subdirectory(external)
