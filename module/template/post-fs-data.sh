@@ -6,8 +6,6 @@ DATADIR="/data/adb/@MODULE_ID@"
 mkdir -p "$DATADIR"
 chmod 700 "$DATADIR"
 
-# Symlink system CJK font into webroot so wasmJs (Skia/Canvas) can fetch it.
-# Compose for Web cannot access system fonts from the WASM sandbox.
-CJK_FONT="/system/fonts/NotoSansCJK-Regular.ttc"
-WEBROOT_FONT="${MODDIR}/webroot/NotoSansCJK-Regular.ttc"
-[ -f "$CJK_FONT" ] && [ ! -e "$WEBROOT_FONT" ] && ln -s "$CJK_FONT" "$WEBROOT_FONT"
+# CJK font (NotoSansSC WOFF2 subset) is now bundled via Compose Resources
+# (composeResources/font/) and loaded at runtime with Res.readBytes(),
+# so no runtime font symlink is needed.
