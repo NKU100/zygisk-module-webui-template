@@ -20,8 +20,6 @@ class LogsViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(LogsUiState())
     val uiState: StateFlow<LogsUiState> = _uiState.asStateFlow()
 
-    // ── Parsing ──────────────────────────────────────────────────────
-
     /**
      * Parse a single logcat line.
      *
@@ -64,8 +62,6 @@ class LogsViewModel : ViewModel() {
         'F', 'S' -> LogLevel.FATAL
         else -> LogLevel.UNKNOWN
     }
-
-    // ── Data loading ─────────────────────────────────────────────────
 
     fun load() {
         if (!hasPlatformApi()) {
@@ -147,8 +143,6 @@ class LogsViewModel : ViewModel() {
         val LOG_PATH = ModuleInfo.CONFIG_PATH.replace("config.json", "module.log")
     }
 
-    // ── Filtering ────────────────────────────────────────────────────
-
     fun updateSearchStatus(status: SearchStatus) {
         _uiState.update { state ->
             val previous = state.searchStatus
@@ -187,8 +181,6 @@ class LogsViewModel : ViewModel() {
         }
         return result
     }
-
-    // ── Mock data ────────────────────────────────────────────────────
 
     private val MOCK_LINES = listOf(
         parseLine("04-08 04:49:52.878  3285  3285 I SampleHook: [ZygiskWebUI] process=com.android.chrome logLevel=verbose dumpStackTrace=false"),

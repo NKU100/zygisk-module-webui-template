@@ -342,8 +342,6 @@ fun LogsPage(
     }
 }
 
-// ── Log line item ──────────────────────────────────────────
-
 @Composable
 private fun LogLineItem(line: LogLine, onClick: () -> Unit) {
     Card(
@@ -389,8 +387,6 @@ private fun LogLineItem(line: LogLine, onClick: () -> Unit) {
     }
 }
 
-// ── Empty / error card ─────────────────────────────────────
-
 @Composable
 private fun LogMessageCard(message: String) {
     Box(
@@ -414,8 +410,6 @@ private fun LogMessageCard(message: String) {
         }
     }
 }
-
-// ── Level color ────────────────────────────────────────────────
 
 @Composable
 fun levelColor(level: LogLevel): Color = when (level) {

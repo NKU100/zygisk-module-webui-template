@@ -55,8 +55,6 @@ static constexpr uint8_t OP_WRITE_LOG   = 1;
 static constexpr off_t LOG_MAX_BYTES  = 512 * 1024;
 static constexpr off_t LOG_TRIM_BYTES = 256 * 1024;
 
-// ── Companion-side helpers (run as root) ────────────────────────────────────
-
 static void companion_appendLog(const std::string &line) {
     int fd = open(LOG_PATH, O_WRONLY | O_CREAT | O_APPEND, 0644);
     if (fd < 0) return;
@@ -106,8 +104,6 @@ static void companion_handler(int sock) {
     }
 }
 
-// ── Module-side helpers (run in app process) ────────────────────────────────
-
 static char levelChar(int prio) {
     switch (prio) {
         case ANDROID_LOG_VERBOSE: return 'V';
@@ -153,8 +149,6 @@ static void remoteLog(Api *api, int prio, const char *tag, const char *msg) {
     write(sock, line, len);
     close(sock);
 }
-
-// ── Module class ─────────────────────────────────────────────────────────────
 
 class MyModule : public zygisk::ModuleBase {
 public:

@@ -66,8 +66,6 @@ class MainViewModel : ViewModel() {
         }
     }
 
-    // ── Data loading ────────────────────────────────────────────────
-
     private suspend fun fetchData() {
         _uiState.update { it.copy(isLoading = true) }
         try {
@@ -132,8 +130,6 @@ class MainViewModel : ViewModel() {
             )
         }
     }
-
-    // ── Config mutations ────────────────────────────────────────────
 
     private fun saveConfig(newConfig: ModuleConfig) {
         _uiState.update { it.copy(config = newConfig, themeMode = resolveThemeMode(newConfig)) }
@@ -228,8 +224,6 @@ class MainViewModel : ViewModel() {
     fun getPackageSettings(packageName: String): PackageSettings =
         _uiState.value.config.packageSettings[packageName] ?: PackageSettings()
 
-    // ── Apps filtering ──────────────────────────────────────────────
-
     fun toggleShowSystemApps(): Job {
         val newValue = !_uiState.value.showSystemApps
         _uiState.update { it.copy(showSystemApps = newValue) }
@@ -238,8 +232,6 @@ class MainViewModel : ViewModel() {
             applySearchText(_uiState.value.appsSearchStatus.searchText)
         }
     }
-
-    // ── Search ──────────────────────────────────────────────────────
 
     fun updateSearchStatus(status: SearchStatus) {
         val previous = _uiState.value.appsSearchStatus
@@ -294,8 +286,6 @@ class MainViewModel : ViewModel() {
             )
         }
     }
-
-    // ── Helpers ─────────────────────────────────────────────────────
 
     private fun resolveThemeMode(config: ModuleConfig): ThemeMode =
         ThemeMode.entries.find { it.name == config.themeMode } ?: ThemeMode.FOLLOW_SYSTEM
