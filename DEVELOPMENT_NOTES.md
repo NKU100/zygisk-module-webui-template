@@ -129,6 +129,33 @@ The migrated library is included as a git submodule at `external/Backdrop`.
 
 ---
 
+## CJK Font Loading
+
+Compose for Web (Skia/CanvasKit) runs in a WASM sandbox with no access to system fonts, so CJK glyphs render as tofu (□) unless a font is explicitly loaded.
+
+### Evolution
+
+| Version | Font source | Loading mechanism | Size |
+|---------|-------------|-------------------|------|
+| v1 | System TTC via `post-fs-data.sh` symlink into `webroot/` | JS `fetch()` → `ArrayBuffer` → manual WASM memory copy → `Font(identity, bytes)` | ~16 MB (full NotoSansCJK-Regular.ttc) |
+| v2 (current) | WOFF2 GB2312 subset in `composeResources/font/` | `Res.readBytes()` → `Font(identity, bytes)` + `fontFamilyResolver.preload()` | ~969 KB |
+
+### Current Implementation (`main.kt`)
+
+1. `Res.readBytes("font/noto_sans_sc_regular.woff2")` reads the font bytes via Compose Resources
+2. `Font("NotoSansSC", bytes)` registers the font with Skia by identity name
+3. `fontFamilyResolver.preload(FontFamily(...))` makes Skia pick it up as a CJK fallback
+4. `fontsReady` gate prevents `App()` from rendering until the font is loaded, avoiding tofu flash
+
+### Key Findings
+
+- **`preloadFont(Res.font.xxx)` does NOT work as a CJK fallback**: the returned `Font` object wrapped in `FontFamily` and `preload()`-ed does not register with Skia's fallback chain. Only `Font(identity, bytes)` (from `androidx.compose.ui.text.platform`) properly registers as a fallback.
+- **`fontsReady` gate is required**: without it, `App()` renders immediately with the built-in Latin-only font, causing a visible tofu→CJK flash.
+- **WOFF2 format works**: Skia/CanvasKit on wasmJs can decode WOFF2 directly; no need for TTF/OTF conversion.
+- The font subset covers GB2312 (~6,763 characters), sufficient for the UI's Chinese text. If additional characters are needed, regenerate the subset with a broader character set.
+
+---
+
 ## Remaining / Known Issues
 
 - **wasmJs icon fallback**: When running under KsuWebUIStandalone (no `ksu.getPackagesInfo`), the `AppIconImage` wasmJs implementation falls back to `LetterIcon`. A proper fallback via `exec "pm list packages"` + icon fetch is not yet implemented.

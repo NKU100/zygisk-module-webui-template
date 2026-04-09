@@ -28,6 +28,7 @@ A Zygisk module template with **Compose Multiplatform** WebUI, based on [zygisk-
   - App icons via `AppIconImage` (expect/actual): Android uses `AppIconLoader` + `AppIconCache` (LRU, Semaphore, Hardware Bitmap); wasmJs fetches `ksu://icon/<pkg>` and decodes via Skia; falls back to `LetterIcon` when unavailable
 - **App Profile page** — per-app settings with targeted toggle, log level, note, and app management actions (launch / force stop / restart)
 - **JSON-based configuration** with kotlinx.serialization
+- **Bundled CJK font** — NotoSansSC WOFF2 subset (~969 KB, GB2312 coverage) loaded via Compose Resources; no runtime symlink or system font dependency
 - Supports **Magisk** and **KernelSU**
 - GitHub Actions CI/CD with auto-release
 
@@ -40,6 +41,8 @@ A Zygisk module template with **Compose Multiplatform** WebUI, based on [zygisk-
 ├── webui/                           # Compose Multiplatform UI
 │   └── src/
 │       ├── commonMain/              # Shared UI, data, platform expect declarations
+│       │   ├── composeResources/
+│       │   │   └── font/           # CJK font (NotoSansSC WOFF2 GB2312 subset)
 │       │   ├── data/               # ModuleConfig, ConfigRepository
 │       │   ├── platform/           # expect PlatformBridge, awaitNextFrame, PlatformBackHandler
 │       │   └── ui/
