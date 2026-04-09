@@ -31,6 +31,7 @@ import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeStyle
 import dev.chrisbanes.haze.HazeTint
 import dev.chrisbanes.haze.hazeSource
+import io.github.nku100.webui.ui.util.defaultHazeEffect
 import io.github.nku100.webui.platform.navigationBarBottomPadding
 import io.github.nku100.webui.ui.component.FloatingBottomBar
 import io.github.nku100.webui.ui.component.FloatingBottomBarItem
@@ -136,6 +137,7 @@ fun MainScreen(viewModel: MainViewModel, uiState: MainUiState) {
                 }
             } else {
                 NavigationBar(
+                    modifier = if (config.enableBlur) Modifier.defaultHazeEffect(hazeState, hazeStyle) else Modifier,
                     color = if (config.enableBlur) Color.Transparent else MiuixTheme.colorScheme.surface,
                     content = {
                         items.forEachIndexed { index, item ->
