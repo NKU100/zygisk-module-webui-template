@@ -56,6 +56,9 @@ jobs:
         run: |
           ccache --set-config=max_size=200M
           ccache --set-config=compression=true
+          ccache --set-config=compiler_check=content
+          ccache --set-config=hash_dir=false
+          ccache --set-config=sloppiness=file_macro,time_macros,include_file_mtime
 
       - name: Remove version tags locally (pre-release only)
         if: inputs.release-type == 'pre-release'
