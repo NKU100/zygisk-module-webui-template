@@ -106,6 +106,8 @@ androidComponents.onVariants { variant ->
         inputs.property("buildType", buildTypeLowered)
         from(rootProject.layout.projectDirectory.dir("webui/build/dist/wasmJs/productionExecutable")) {
             into("webroot")
+            // Exclude source maps (not needed on device) and empty composeResources dirs
+            exclude("**/*.map")
         }
         from(rootProject.layout.projectDirectory.file("README.md"))
         from(layout.projectDirectory.file("template")) {
@@ -149,6 +151,13 @@ androidComponents.onVariants { variant ->
         }
 
         doLast {
+            // Remove empty composeResources sub-directories that ship no files
+            // (e.g. library-generated placeholder dirs). Walk bottom-up so that
+            // nested empty dirs are pruned before their parents are checked.
+            destinationDir.walkBottomUp()
+                .filter { it.isDirectory && it.list()?.isEmpty() == true }
+                .forEach { it.delete() }
+
             // Use destinationDir (Sync task property) + plain Java IO instead of
             // project.fileTree / project.file to avoid capturing the script object,
             // which is required for Configuration Cache compatibility.
