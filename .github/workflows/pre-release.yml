@@ -33,6 +33,11 @@ jobs:
           java-version: 21
           cache: gradle
 
+      - name: Remove version tags locally
+        run: |
+          # Remove any v* tags on HEAD so Gradle resolves tag as "ci"
+          git tag --points-at HEAD | grep '^v' | xargs -r git tag -d || true
+
       - name: Build with Gradle
         run: |
           chmod +x ./gradlew
