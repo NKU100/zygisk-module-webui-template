@@ -15,65 +15,6 @@ concurrency:
 jobs:
   pre-release:
     name: Pre Release
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-          submodules: recursive
-
-      - name: Setup Java
-        uses: actions/setup-java@v5
-        with:
-          distribution: temurin
-          java-version: 21
-          cache: gradle
-
-      - name: Remove version tags locally
-        run: |
-          # Remove any v* tags on HEAD so Gradle resolves tag as "ci"
-          git tag --points-at HEAD | grep '^v' | xargs -r git tag -d || true
-
-      - name: Build with Gradle
-        run: |
-          chmod +x ./gradlew
-          ./gradlew :module:ciRelease
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v7
-        with:
-          name: zygisk-module
-          path: module/build/outputs/module/release
-
-      - name: Remove ci tag locally
-        run: git tag -d ci || true
-
-      - name: Build changelog
-        uses: orhun/git-cliff-action@v4
-        env:
-          OUTPUT: module/release/changelog.md
-        with:
-          args: --unreleased --tag "CI Build"
-
-      - name: Update ci tag
-        run: |
-          git tag -f ci
-          git push origin ci -f
-
-      - name: Delete old pre-release
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: gh release delete ci -y 2>/dev/null || true
-
-      - name: Release
-        uses: softprops/action-gh-release@v2
-        with:
-          body_path: module/release/changelog.md
-          prerelease: true
-          name: CI Build
-          tag_name: ci
-          files: module/release/**
+    uses: ./.github/workflows/build.yml
+    with:
+      release-type: pre-release

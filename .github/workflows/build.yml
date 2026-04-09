@@ -1,0 +1,132 @@
+name: Build Module
+
+on:
+  workflow_call:
+    inputs:
+      release-type:
+        description: 'Release type: "pre-release" or "tagged"'
+        required: true
+        type: string
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          submodules: recursive
+
+      - name: Validate Gradle Wrapper
+        uses: gradle/actions/wrapper-validation@v6
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6
+        with:
+          cache-read-only: false
+          cache-provider: basic
+
+      - name: Setup ccache
+        run: |
+          if ! command -v ccache &>/dev/null; then
+            sudo apt-get update -qq && sudo apt-get install -y -qq ccache
+          fi
+          ccache --zero-stats
+
+      - name: Restore ccache
+        uses: actions/cache@v5
+        with:
+          path: ~/.cache/ccache
+          key: ccache-${{ runner.os }}-${{ hashFiles('module/src/main/cpp/**') }}
+          restore-keys: |
+            ccache-${{ runner.os }}-
+
+      - name: Configure ccache
+        run: |
+          ccache --set-config=max_size=200M
+          ccache --set-config=compression=true
+
+      - name: Remove version tags locally (pre-release only)
+        if: inputs.release-type == 'pre-release'
+        run: |
+          # Remove any v* tags on HEAD so Gradle resolves tag as "ci"
+          git tag --points-at HEAD | grep '^v' | xargs -r git tag -d || true
+
+      - name: Build with Gradle
+        env:
+          GRADLE_OPTS: -Xmx4096m -XX:+UseParallelGC -Dfile.encoding=UTF-8
+        run: |
+          chmod +x ./gradlew
+          ./gradlew :module:ciRelease
+
+      - name: Print ccache stats
+        if: always()
+        run: ccache --show-stats
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: zygisk-module
+          path: module/build/outputs/module/release
+
+      - name: Remove ci tag locally
+        run: git tag -d ci || true
+
+      - name: Build changelog (pre-release)
+        if: inputs.release-type == 'pre-release'
+        uses: orhun/git-cliff-action@v4
+        env:
+          OUTPUT: module/release/changelog.md
+        with:
+          args: --unreleased --tag "CI Build"
+
+      - name: Build changelog (tagged)
+        if: inputs.release-type == 'tagged'
+        uses: orhun/git-cliff-action@v4
+        env:
+          OUTPUT: module/release/changelog.md
+        with:
+          args: --latest
+
+      - name: Update ci tag (pre-release only)
+        if: inputs.release-type == 'pre-release'
+        run: |
+          git tag -f ci
+          git push origin ci -f
+
+      - name: Delete old pre-release (pre-release only)
+        if: inputs.release-type == 'pre-release'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release delete ci -y 2>/dev/null || true
+
+      - name: Release (pre-release)
+        if: inputs.release-type == 'pre-release'
+        uses: softprops/action-gh-release@v2
+        with:
+          body_path: module/release/changelog.md
+          prerelease: true
+          name: CI Build
+          tag_name: ci
+          files: module/release/**
+
+      - name: Release (tagged)
+        if: inputs.release-type == 'tagged'
+        uses: softprops/action-gh-release@v2
+        with:
+          body_path: module/release/changelog.md
+          prerelease: false
+          name: ${{ github.ref_name }}
+          tag_name: ${{ github.ref_name }}
+          files: module/release/**

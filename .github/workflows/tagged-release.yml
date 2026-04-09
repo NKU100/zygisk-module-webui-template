@@ -12,50 +12,6 @@ concurrency:
 jobs:
   tagged-release:
     name: Tagged Release
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-          submodules: recursive
-
-      - name: Setup Java
-        uses: actions/setup-java@v5
-        with:
-          distribution: temurin
-          java-version: 21
-          cache: gradle
-
-      - name: Build with Gradle
-        run: |
-          chmod +x ./gradlew
-          ./gradlew :module:ciRelease
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v7
-        with:
-          name: zygisk-module
-          path: module/build/outputs/module/release
-
-      - name: Remove ci tag locally
-        run: git tag -d ci || true
-
-      - name: Build changelog
-        uses: orhun/git-cliff-action@v4
-        env:
-          OUTPUT: module/release/changelog.md
-        with:
-          args: --latest
-
-      - name: Release
-        uses: softprops/action-gh-release@v2
-        with:
-          body_path: module/release/changelog.md
-          prerelease: false
-          name: ${{ github.ref_name }}
-          tag_name: ${{ github.ref_name }}
-          files: module/release/**
+    uses: ./.github/workflows/build.yml
+    with:
+      release-type: tagged
