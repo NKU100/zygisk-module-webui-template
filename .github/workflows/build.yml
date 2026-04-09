@@ -14,6 +14,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    env:
+      CCACHE_BASEDIR: ${{ github.workspace }}
 
     steps:
       - name: Checkout
@@ -22,43 +24,18 @@ jobs:
           fetch-depth: 0
           submodules: recursive
 
-      - name: Validate Gradle Wrapper
-        uses: gradle/actions/wrapper-validation@v6
-
       - name: Setup Java
         uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: 21
-
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v6
-        with:
-          cache-read-only: false
-          cache-provider: basic
+          cache: gradle
 
       - name: Setup ccache
-        run: |
-          if ! command -v ccache &>/dev/null; then
-            sudo apt-get update -qq && sudo apt-get install -y -qq ccache
-          fi
-          ccache --zero-stats
-
-      - name: Restore ccache
-        uses: actions/cache@v5
+        uses: hendrikmuhs/ccache-action@v1.2
         with:
-          path: ~/.cache/ccache
-          key: ccache-${{ runner.os }}-${{ hashFiles('module/src/main/cpp/**') }}
-          restore-keys: |
-            ccache-${{ runner.os }}-
-
-      - name: Configure ccache
-        run: |
-          ccache --set-config=max_size=200M
-          ccache --set-config=compression=true
-          ccache --set-config=compiler_check=content
-          ccache --set-config=hash_dir=false
-          ccache --set-config=sloppiness=file_macro,time_macros,include_file_mtime
+          key: ${{ github.job }}
+          max-size: 200M
 
       - name: Remove version tags locally (pre-release only)
         if: inputs.release-type == 'pre-release'
@@ -72,10 +49,6 @@ jobs:
         run: |
           chmod +x ./gradlew
           ./gradlew :module:ciRelease
-
-      - name: Print ccache stats
-        if: always()
-        run: ccache --show-stats
 
       - name: Upload artifact
         uses: actions/upload-artifact@v7
