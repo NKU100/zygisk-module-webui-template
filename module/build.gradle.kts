@@ -35,12 +35,16 @@ val gitHubRepo = remoteUrl.map { url ->
     match?.groupValues?.get(2) ?: "zygisk-module-webui-template"
 }
 
-val moduleId: String by rootProject.extra
-val moduleName: String by rootProject.extra
-val moduleAuthor: String by rootProject.extra
-val moduleDesc: String by rootProject.extra
-val moduleLibName: String by rootProject.extra
-val abiList: List<String> by rootProject.extra
+// Resolve extra properties eagerly into plain vals (not delegated properties).
+// `by rootProject.extra` delegates capture rootProject, which cannot be
+// serialized/deserialized by the Configuration Cache.
+val moduleId = rootProject.extra["moduleId"] as String
+val moduleName = rootProject.extra["moduleName"] as String
+val moduleAuthor = rootProject.extra["moduleAuthor"] as String
+val moduleDesc = rootProject.extra["moduleDesc"] as String
+val moduleLibName = rootProject.extra["moduleLibName"] as String
+@Suppress("UNCHECKED_CAST")
+val abiList = rootProject.extra["abiList"] as List<String>
 
 android {
     defaultConfig {
@@ -51,7 +55,9 @@ android {
             cmake {
                 cppFlags("-std=c++20")
                 arguments(
-                    "-DANDROID_STL=none", "-DMODULE_NAME=$moduleLibName"
+                    "-DANDROID_STL=none", "-DMODULE_NAME=$moduleLibName",
+                    "-DCMAKE_C_COMPILER_LAUNCHER=ccache",
+                    "-DCMAKE_CXX_COMPILER_LAUNCHER=ccache",
                 )
             }
         }
@@ -143,16 +149,16 @@ androidComponents.onVariants { variant ->
         }
 
         doLast {
-            fileTree(moduleDir).visit {
-                if (isDirectory) return@visit
-                val md = MessageDigest.getInstance("SHA-256")
-                file.forEachBlock(4096) { bytes, size ->
-                    md.update(bytes, 0, size)
+            // Use destinationDir (Sync task property) + plain Java IO instead of
+            // project.fileTree / project.file to avoid capturing the script object,
+            // which is required for Configuration Cache compatibility.
+            destinationDir.walkTopDown()
+                .filter { it.isFile && !it.name.endsWith(".sha256") }
+                .forEach { f ->
+                    val md = MessageDigest.getInstance("SHA-256")
+                    f.forEachBlock(4096) { bytes, size -> md.update(bytes, 0, size) }
+                    File(f.path + ".sha256").writeText(Hex.encodeHexString(md.digest()))
                 }
-                file(file.path + ".sha256").writeText(
-                    Hex.encodeHexString(md.digest())
-                )
-            }
         }
     }
 
@@ -162,54 +168,70 @@ androidComponents.onVariants { variant ->
         archiveFileName.set(zipFileName)
         destinationDirectory.set(layout.projectDirectory.file("release").asFile)
         from(moduleDir)
+        // Declare inputs for CC compatibility
+        inputs.property("zipFileName", zipFileName)
+        inputs.property("buildType", buildTypeLowered)
         // Clean stale zips of the same variant to avoid confusion
         doFirst {
-            val name = zipFileName.get()
+            val props = inputs.properties
+            val name = props["zipFileName"] as String
+            val btype = props["buildType"] as String
             destinationDirectory.get().asFile.listFiles()?.filter {
-                it.name.endsWith("-$buildTypeLowered.zip") && it.name != name
+                it.name.endsWith("-$btype.zip") && it.name != name
             }?.forEach { it.delete() }
         }
     }
 
+    // Resolve layout.projectDirectory eagerly before the task closure
+    val releaseDir = layout.projectDirectory.file("release/update.json").asFile
+
     tasks.register("ci$variantCapped") {
         group = "module"
         dependsOn(zipTask)
+        inputs.property("zipFileName", zipFileName)
+        inputs.property("versionName", versionName)
+        inputs.property("versionCode", versionCode)
+        inputs.property("gitHubUser", gitHubUser)
+        inputs.property("gitHubRepo", gitHubRepo)
+        inputs.property("tag", tag)
 
         doLast {
-            val name = zipFileName.get()
-            val version = versionName.get()
-            val code = versionCode.get()
-            val user = gitHubUser.get()
-            val repo = gitHubRepo.get()
-            val t = tag.get()
-            val updateJsonFile = layout.projectDirectory.file("release/update.json").asFile
+            val props = inputs.properties
+            val name = props["zipFileName"] as String
+            val version = props["versionName"] as String
+            val code = props["versionCode"] as Int
+            val user = props["gitHubUser"] as String
+            val repo = props["gitHubRepo"] as String
+            val t = props["tag"] as String
             val jsonContent = mapOf(
                 "version" to version,
                 "versionCode" to code,
                 "zipUrl" to "https://github.com/$user/$repo/releases/download/$t/$name",
                 "changelog" to "https://github.com/$user/$repo/releases/download/$t/changelog.md"
             )
-            updateJsonFile.writeText(JsonBuilder(jsonContent).toPrettyString())
+            releaseDir.writeText(JsonBuilder(jsonContent).toPrettyString())
         }
     }
 
     val pushTask = tasks.register<Exec>("push$variantCapped") {
         group = "module"
         dependsOn(zipTask)
+        inputs.property("zipFileName", zipFileName)
         doFirst {
-            commandLine(
-                "adb", "push", zipTask.get().outputs.files.singleFile.path, "/data/local/tmp"
-            )
+            val zipFile = zipTask.get().outputs.files.singleFile
+            commandLine("adb", "push", zipFile.path, "/data/local/tmp")
         }
     }
 
     val installKsuTask = tasks.register<Exec>("installKsu$variantCapped") {
         group = "module"
         dependsOn(pushTask)
+        inputs.property("zipFileName", zipFileName)
         doFirst {
+            val name = inputs.properties["zipFileName"] as String
             commandLine(
                 "adb", "shell", "su", "-c",
-                "/data/adb/ksud module install /data/local/tmp/${zipFileName.get()}"
+                "/data/adb/ksud module install /data/local/tmp/$name"
             )
         }
     }
@@ -217,10 +239,12 @@ androidComponents.onVariants { variant ->
     val installMagiskTask = tasks.register<Exec>("installMagisk$variantCapped") {
         group = "module"
         dependsOn(pushTask)
+        inputs.property("zipFileName", zipFileName)
         doFirst {
+            val name = inputs.properties["zipFileName"] as String
             commandLine(
                 "adb", "shell", "su", "-M", "-c",
-                "magisk --install-module /data/local/tmp/${zipFileName.get()}"
+                "magisk --install-module /data/local/tmp/$name"
             )
         }
     }

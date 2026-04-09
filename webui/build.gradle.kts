@@ -6,16 +6,19 @@ plugins {
     alias(libs.plugins.agp.app)
 }
 
-val moduleId: String by rootProject.extra
-val moduleName: String by rootProject.extra
-val moduleVersion: String by rootProject.extra
-val moduleVersionCode: Int by rootProject.extra
-val moduleAuthor: String by rootProject.extra
-val moduleRepo: String by rootProject.extra
-val moduleApplicationId: String by rootProject.extra
-val androidCompileSdkVersion: Int by rootProject.extra
-val androidMinSdkVersion: Int by rootProject.extra
-val androidTargetSdkVersion: Int by rootProject.extra
+// Resolve extra properties eagerly into plain vals (not delegated properties).
+// `by rootProject.extra` delegates capture rootProject, which cannot be
+// serialized/deserialized by the Configuration Cache.
+val moduleId = rootProject.extra["moduleId"] as String
+val moduleName = rootProject.extra["moduleName"] as String
+val moduleVersion = rootProject.extra["moduleVersion"] as String
+val moduleVersionCode = rootProject.extra["moduleVersionCode"] as Int
+val moduleAuthor = rootProject.extra["moduleAuthor"] as String
+val moduleRepo = rootProject.extra["moduleRepo"] as String
+val moduleApplicationId = rootProject.extra["moduleApplicationId"] as String
+val androidCompileSdkVersion = rootProject.extra["androidCompileSdkVersion"] as Int
+val androidMinSdkVersion = rootProject.extra["androidMinSdkVersion"] as Int
+val androidTargetSdkVersion = rootProject.extra["androidTargetSdkVersion"] as Int
 
 @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
 kotlin {
@@ -96,7 +99,9 @@ android {
 val generateModuleInfo = tasks.register("generateModuleInfo") {
     val outputDir = layout.buildDirectory.dir("generated/moduleInfo/commonMain/kotlin")
     val pkg = "io.github.nku100.webui"
-    // Declare inputs so Gradle re-runs this task when module metadata changes
+    // Declare inputs so Gradle re-runs this task when module metadata changes.
+    // In doLast, read back from inputs.properties to avoid capturing script-level
+    // variables — required for Configuration Cache compatibility.
     inputs.property("moduleId", moduleId)
     inputs.property("moduleName", moduleName)
     inputs.property("moduleVersion", moduleVersion)
@@ -105,6 +110,14 @@ val generateModuleInfo = tasks.register("generateModuleInfo") {
     inputs.property("moduleRepo", moduleRepo)
     outputs.dir(outputDir)
     doLast {
+        val props = inputs.properties
+        val id = props["moduleId"] as String
+        val name = props["moduleName"] as String
+        val version = props["moduleVersion"] as String
+        val versionCode = props["moduleVersionCode"] as Int
+        val author = props["moduleAuthor"] as String
+        val repo = props["moduleRepo"] as String
+
         val dir = outputDir.get().asFile.resolve(pkg.replace('.', '/'))
         dir.mkdirs()
         dir.resolve("ModuleInfo.kt").writeText(
@@ -113,15 +126,15 @@ val generateModuleInfo = tasks.register("generateModuleInfo") {
             |
             |/** Auto-generated from module.gradle.kts — do not edit. */
             |object ModuleInfo {
-            |    const val MODULE_ID = "$moduleId"
-            |    const val MODULE_NAME = "$moduleName"
-            |    const val MODULE_VERSION = "$moduleVersion"
-            |    const val MODULE_VERSION_CODE = $moduleVersionCode
-            |    const val MODULE_AUTHOR = "$moduleAuthor"
-            |    const val MODULE_REPO = "$moduleRepo"
-            |    const val DATA_DIR = "/data/adb/$moduleId"
-            |    const val CONFIG_PATH = "/data/adb/$moduleId/config.json"
-            |    const val MODULE_PROP_PATH = "/data/adb/modules/$moduleId/module.prop"
+            |    const val MODULE_ID = "$id"
+            |    const val MODULE_NAME = "$name"
+            |    const val MODULE_VERSION = "$version"
+            |    const val MODULE_VERSION_CODE = $versionCode
+            |    const val MODULE_AUTHOR = "$author"
+            |    const val MODULE_REPO = "$repo"
+            |    const val DATA_DIR = "/data/adb/$id"
+            |    const val CONFIG_PATH = "/data/adb/$id/config.json"
+            |    const val MODULE_PROP_PATH = "/data/adb/modules/$id/module.prop"
             |}
             """.trimMargin()
         )
@@ -151,11 +164,19 @@ val pushTask = tasks.register<Exec>("push") {
 val removeTask = tasks.register<Exec>("remove") {
     group = "webui"
     dependsOn(pushTask)
-    commandLine("adb", "shell", "su", "-c", "rm -rf /data/adb/modules/$moduleId/webroot")
+    inputs.property("moduleId", moduleId)
+    doFirst {
+        val id = inputs.properties["moduleId"] as String
+        commandLine("adb", "shell", "su", "-c", "rm -rf /data/adb/modules/$id/webroot")
+    }
 }
 
 tasks.register<Exec>("install") {
     group = "webui"
     dependsOn(removeTask)
-    commandLine("adb", "shell", "su", "-c", "mv /data/local/tmp/webroot /data/adb/modules/$moduleId/webroot")
+    inputs.property("moduleId", moduleId)
+    doFirst {
+        val id = inputs.properties["moduleId"] as String
+        commandLine("adb", "shell", "su", "-c", "mv /data/local/tmp/webroot /data/adb/modules/$id/webroot")
+    }
 }
