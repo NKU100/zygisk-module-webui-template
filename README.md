@@ -152,18 +152,18 @@ The module zip will be generated under `module/release/`.
 
 ## Tech Stack
 
-| Component | Technology |
-|-----------|-----------|
-| Native module | C++20, CMake, Zygisk API v4 |
-| UI framework | Compose Multiplatform 1.10.3 |
-| Language | Kotlin 2.3.20 |
-| Web target | Kotlin/Wasm |
-| UI library | Miuix 0.8.8 |
-| Glass effects | Backdrop 1.0.6 + Haze 1.7.2 |
+| Component      | Technology                                                             |
+|----------------|------------------------------------------------------------------------|
+| Native module  | C++20, CMake, Zygisk API v4                                            |
+| UI framework   | Compose Multiplatform 1.10.3                                           |
+| Language       | Kotlin 2.3.20                                                          |
+| Web target     | Kotlin/Wasm                                                            |
+| UI library     | Miuix 0.8.8                                                            |
+| Glass effects  | Backdrop 1.0.6 + Haze 1.7.2                                            |
 | Smooth corners | [Capsule][capsule] — G2 continuous rounded rectangles (cross-platform) |
-| Architecture | ViewModel (lifecycle-viewmodel 2.9.0) + StateFlow + Navigation 3 |
-| Serialization | kotlinx.serialization (JSON) |
-| Build system | Gradle 9.3, AGP 9.0 |
+| Architecture   | ViewModel (lifecycle-viewmodel 2.9.0) + StateFlow + Navigation 3       |
+| Serialization  | kotlinx.serialization (JSON)                                           |
+| Build system   | Gradle 9.3, AGP 9.0                                                    |
 
 ## See also
 

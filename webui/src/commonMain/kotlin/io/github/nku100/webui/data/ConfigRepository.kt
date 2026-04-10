@@ -12,7 +12,7 @@ import kotlinx.serialization.json.Json
 object ConfigRepository {
     private val json = Json { prettyPrint = true; ignoreUnknownKeys = true }
 
-    var configPath = ModuleInfo.CONFIG_PATH
+    var configPath: String = ModuleInfo.CONFIG_PATH
 
     suspend fun load(): ModuleConfig {
         return try {

@@ -51,9 +51,7 @@ import dev.chrisbanes.haze.HazeTint
 import dev.chrisbanes.haze.hazeSource
 import io.github.nku100.webui.ui.component.SearchBox
 import io.github.nku100.webui.ui.component.SearchPager
-import io.github.nku100.webui.ui.component.SearchStatus
 import io.github.nku100.webui.ui.component.StatusTag
-import io.github.nku100.webui.ui.util.defaultHazeEffect
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.DropdownImpl
 import top.yukonga.miuix.kmp.basic.Icon

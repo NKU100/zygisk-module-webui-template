@@ -14,7 +14,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.toComposeImageBitmap
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import io.github.nku100.webui.ui.LetterIcon
 import kotlinx.coroutines.await
 import kotlinx.coroutines.sync.Semaphore

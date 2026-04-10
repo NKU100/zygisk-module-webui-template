@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.time.Duration.Companion.milliseconds
 
 data class MainUiState(
     val config: ModuleConfig = ModuleConfig(),
@@ -50,7 +51,7 @@ class MainViewModel : ViewModel() {
             searchQuery.collect { text ->
                 debounceJob?.cancel()
                 debounceJob = launch {
-                    kotlinx.coroutines.delay(300)
+                    kotlinx.coroutines.delay(300.milliseconds)
                     applySearchText(text)
                 }
             }
