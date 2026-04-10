@@ -2,17 +2,4 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <!-- Required to list all installed packages on Android 11+ -->
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
-
-    <application
-        android:label="Module Config"
-        android:theme="@android:style/Theme.Material.Light.NoActionBar">
-        <activity
-            android:name="io.github.nku100.webui.MainActivity"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-    </application>
 </manifest>

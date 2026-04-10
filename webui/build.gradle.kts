@@ -3,7 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.compose.multiplatform)
     alias(libs.plugins.compose.compiler)
-    alias(libs.plugins.agp.app)
+    id("com.android.kotlin.multiplatform.library")
 }
 
 // Resolve extra properties eagerly into plain vals (not delegated properties).
@@ -15,10 +15,8 @@ val moduleVersion = rootProject.extra["moduleVersion"] as String
 val moduleVersionCode = rootProject.extra["moduleVersionCode"] as Int
 val moduleAuthor = rootProject.extra["moduleAuthor"] as String
 val moduleRepo = rootProject.extra["moduleRepo"] as String
-val moduleApplicationId = rootProject.extra["moduleApplicationId"] as String
 val androidCompileSdkVersion = rootProject.extra["androidCompileSdkVersion"] as Int
 val androidMinSdkVersion = rootProject.extra["androidMinSdkVersion"] as Int
-val androidTargetSdkVersion = rootProject.extra["androidTargetSdkVersion"] as Int
 
 @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
 kotlin {
@@ -37,7 +35,14 @@ kotlin {
         binaries.executable()
     }
 
-    androidTarget()
+    androidLibrary {
+        namespace = "io.github.nku100.webui"
+        compileSdk = androidCompileSdkVersion
+        minSdk = androidMinSdkVersion
+        androidResources {
+            enable = true
+        }
+    }
 
     compilerOptions {
         freeCompilerArgs.addAll(
@@ -80,18 +85,6 @@ kotlin {
             implementation(libs.haze)
             implementation(libs.material.kolor)
         }
-    }
-}
-
-android {
-    namespace = "io.github.nku100.webui"
-    compileSdk = androidCompileSdkVersion
-    defaultConfig {
-        applicationId = moduleApplicationId
-        minSdk = androidMinSdkVersion
-        targetSdk = androidTargetSdkVersion
-        versionCode = 1
-        versionName = "1.0"
     }
 }
 

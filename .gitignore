@@ -20,3 +20,4 @@ node_modules
 module/build/
 module/release/
 webui/build/
+webui-app/build/

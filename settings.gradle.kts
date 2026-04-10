@@ -29,7 +29,7 @@ dependencyResolutionManagement {
 
 rootProject.name = "zygisk-module-webui-template"
 include(
-    ":module", ":webui"
+    ":module", ":webui", ":webui-app"
 )
 
 includeBuild("external/Capsule")
