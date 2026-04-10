@@ -64,8 +64,8 @@ data class HomeUiState(
     val moduleEnabled: Boolean = true,
     val targetPackageCount: Int = 0,
     val moduleId: String = ModuleInfo.MODULE_ID,
-    val moduleName: String = ModuleInfo.MODULE_NAME,
-    val moduleVersion: String = ModuleInfo.MODULE_VERSION,
+    val moduleName: String = "",
+    val moduleVersion: String = "",
     val configPath: String = ModuleInfo.CONFIG_PATH,
 )
 
@@ -97,7 +97,7 @@ fun HomePage(
             TopAppBar(
                 modifier = if (enableBlur) Modifier.defaultHazeEffect(hazeState, hazeStyle) else Modifier,
                 color = if (enableBlur) Color.Transparent else colorScheme.surface,
-                title = ModuleInfo.MODULE_NAME,
+                title = state.moduleName,
                 scrollBehavior = scrollBehavior,
             )
         },

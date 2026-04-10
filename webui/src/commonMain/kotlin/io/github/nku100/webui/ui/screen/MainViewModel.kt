@@ -35,6 +35,10 @@ data class MainUiState(
     val themeMode: ThemeMode = ThemeMode.FOLLOW_SYSTEM,
     val updateChannel: UpdateChannel = UpdateChannel.STABLE,
     val updateChannelVisible: Boolean = false,
+    // Dynamic metadata read from module.prop at runtime
+    val moduleName: String = "",
+    val moduleVersion: String = "",
+    val moduleAuthor: String = "",
 )
 
 class MainViewModel : ViewModel() {
@@ -74,7 +78,14 @@ class MainViewModel : ViewModel() {
             val rawPackages = PlatformBridge.listPackages()
             val targets = config.targetPackages.toSet()
             val packages = withContext(Dispatchers.Default) { sortPackages(rawPackages, targets) }
-            val channel = readUpdateChannelFromProp()
+            val prop = readModuleProp()
+            val channel = prop["updateJson"]?.let { url ->
+                when {
+                    url.contains(STABLE_PATH) -> UpdateChannel.STABLE
+                    url.contains(BETA_PATH) -> UpdateChannel.BETA
+                    else -> null
+                }
+            }
             _uiState.update {
                 it.copy(
                     config = config,
@@ -84,6 +95,9 @@ class MainViewModel : ViewModel() {
                     themeMode = resolveThemeMode(config),
                     updateChannel = channel ?: UpdateChannel.STABLE,
                     updateChannelVisible = channel != null,
+                    moduleName = prop["name"].orEmpty(),
+                    moduleVersion = prop["version"].orEmpty(),
+                    moduleAuthor = prop["author"].orEmpty(),
                 )
             }
         } catch (e: Exception) {
@@ -128,6 +142,9 @@ class MainViewModel : ViewModel() {
                 packages = sortPackages(rawPackages, targets),
                 isLoading = false,
                 hasLoaded = true,
+                moduleName = "Zygisk Module Sample",
+                moduleVersion = "v0.0.0-dev",
+                moduleAuthor = "NKU100",
             )
         }
     }
@@ -158,26 +175,21 @@ class MainViewModel : ViewModel() {
     }
 
     /**
-     * Read the current updateJson URL from module.prop and determine the channel.
-     * Stable URLs contain "/releases/latest/download/";
-     * Beta (CI) URLs contain "/releases/download/ci/".
-     * Returns null if no updateJson is found or the URL doesn't match either pattern.
+     * Read and parse module.prop into a key-value map.
+     * Each line is expected to be in `key=value` format.
      */
-    private suspend fun readUpdateChannelFromProp(): UpdateChannel? {
+    private suspend fun readModuleProp(): Map<String, String> {
         return try {
-            val content = PlatformBridge.readFile(ModuleInfo.MODULE_PROP_PATH)
-            val url = content.lines()
-                .firstOrNull { it.startsWith("updateJson=") }
-                ?.removePrefix("updateJson=")
-                ?.trim()
-                ?: return null
-            when {
-                url.contains(STABLE_PATH) -> UpdateChannel.STABLE
-                url.contains(BETA_PATH) -> UpdateChannel.BETA
-                else -> null
-            }
+            PlatformBridge.readFile(ModuleInfo.MODULE_PROP_PATH)
+                .lines()
+                .filter { '=' in it }
+                .associate { line ->
+                    val key = line.substringBefore('=').trim()
+                    val value = line.substringAfter('=').trim()
+                    key to value
+                }
         } catch (_: Exception) {
-            null
+            emptyMap()
         }
     }
 

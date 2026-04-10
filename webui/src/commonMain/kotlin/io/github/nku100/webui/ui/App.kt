@@ -61,6 +61,7 @@ fun App() {
                         AboutPage(
                             bottomPadding = io.github.nku100.webui.platform.navigationBarBottomPadding(),
                             onBack = { navigator.pop() },
+                            moduleAuthor = uiState.moduleAuthor,
                             enableBlur = uiState.config.enableBlur,
                         )
                     }

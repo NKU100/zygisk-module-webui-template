@@ -42,6 +42,7 @@ import top.yukonga.miuix.kmp.utils.overScrollVertical
 fun AboutPage(
     bottomPadding: Dp,
     onBack: () -> Unit,
+    moduleAuthor: String = "",
     enableBlur: Boolean = false,
 ) {
     val scrollBehavior = MiuixScrollBehavior()
@@ -115,7 +116,7 @@ fun AboutPage(
                 ) {
                     BasicComponent(
                         title = stringResource(Res.string.author),
-                        summary = ModuleInfo.MODULE_AUTHOR,
+                        summary = moduleAuthor,
                         startAction = {
                             Icon(
                                 Icons.Rounded.Person,

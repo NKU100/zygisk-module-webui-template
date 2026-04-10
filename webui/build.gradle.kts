@@ -10,10 +10,6 @@ plugins {
 // `by rootProject.extra` delegates capture rootProject, which cannot be
 // serialized/deserialized by the Configuration Cache.
 val moduleId = rootProject.extra["moduleId"] as String
-val moduleName = rootProject.extra["moduleName"] as String
-val moduleVersion = rootProject.extra["moduleVersion"] as String
-val moduleVersionCode = rootProject.extra["moduleVersionCode"] as Int
-val moduleAuthor = rootProject.extra["moduleAuthor"] as String
 val moduleRepo = rootProject.extra["moduleRepo"] as String
 val androidCompileSdkVersion = rootProject.extra["androidCompileSdkVersion"] as Int
 val androidMinSdkVersion = rootProject.extra["androidMinSdkVersion"] as Int
@@ -88,27 +84,17 @@ kotlin {
     }
 }
 
-// Generate ModuleInfo.kt with moduleId from module.gradle.kts
+// Generate ModuleInfo.kt — only compile-time constants that cannot be read at runtime.
+// Dynamic metadata (name, version, author) is read from module.prop at runtime.
 val generateModuleInfo = tasks.register("generateModuleInfo") {
     val outputDir = layout.buildDirectory.dir("generated/moduleInfo/commonMain/kotlin")
     val pkg = "io.github.nku100.webui"
-    // Declare inputs so Gradle re-runs this task when module metadata changes.
-    // In doLast, read back from inputs.properties to avoid capturing script-level
-    // variables — required for Configuration Cache compatibility.
     inputs.property("moduleId", moduleId)
-    inputs.property("moduleName", moduleName)
-    inputs.property("moduleVersion", moduleVersion)
-    inputs.property("moduleVersionCode", moduleVersionCode)
-    inputs.property("moduleAuthor", moduleAuthor)
     inputs.property("moduleRepo", moduleRepo)
     outputs.dir(outputDir)
     doLast {
         val props = inputs.properties
         val id = props["moduleId"] as String
-        val name = props["moduleName"] as String
-        val version = props["moduleVersion"] as String
-        val versionCode = props["moduleVersionCode"] as Int
-        val author = props["moduleAuthor"] as String
         val repo = props["moduleRepo"] as String
 
         val dir = outputDir.get().asFile.resolve(pkg.replace('.', '/'))
@@ -120,12 +106,7 @@ val generateModuleInfo = tasks.register("generateModuleInfo") {
             |/** Auto-generated from module.gradle.kts — do not edit. */
             |object ModuleInfo {
             |    const val MODULE_ID = "$id"
-            |    const val MODULE_NAME = "$name"
-            |    const val MODULE_VERSION = "$version"
-            |    const val MODULE_VERSION_CODE = $versionCode
-            |    const val MODULE_AUTHOR = "$author"
             |    const val MODULE_REPO = "$repo"
-            |    const val DATA_DIR = "/data/adb/$id"
             |    const val CONFIG_PATH = "/data/adb/$id/config.json"
             |    const val MODULE_PROP_PATH = "/data/adb/modules/$id/module.prop"
             |}

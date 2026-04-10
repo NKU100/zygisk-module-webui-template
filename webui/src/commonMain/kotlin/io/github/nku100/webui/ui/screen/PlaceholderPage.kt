@@ -54,6 +54,8 @@ fun PlaceholderPage(
                 state = HomeUiState(
                     moduleEnabled = config.enabled,
                     targetPackageCount = config.targetPackages.size,
+                    moduleName = uiState.moduleName,
+                    moduleVersion = uiState.moduleVersion,
                 ),
                 actions = HomeActions(
                     onStatusClick = { onNavigateToTab(BottomTab.SETTINGS.ordinal) },

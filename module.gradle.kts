@@ -1,7 +1,5 @@
 val moduleId by extra("zygisk_sample")
 val moduleName by extra("Zygisk Module Sample")
-val moduleVersion by extra("v1.0.0")
-val moduleVersionCode by extra(1)
 val moduleAuthor by extra("NKU100")
 val moduleDesc by extra("A sample module for zygisk")
 val moduleApplicationId by extra("io.github.nku100.zygisk.sample")
