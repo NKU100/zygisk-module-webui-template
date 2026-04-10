@@ -291,7 +291,7 @@ fun LogsPage(
                         state.errorMessage != null -> {
                             item {
                                 LogMessageCard(
-                                    message = stringResource(Res.string.error_prefix, state.errorMessage ?: "")
+                                    message = stringResource(Res.string.error_prefix, state.errorMessage)
                                 )
                             }
                         }
