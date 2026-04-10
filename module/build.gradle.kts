@@ -24,16 +24,11 @@ val tag = providers.exec {
         .ifEmpty { "ci" }
 }
 
-val remoteUrl = providers.exec { commandLine("git", "remote", "get-url", "origin") }
-    .standardOutput.asText.map { it.trim() }
-val gitHubUser = remoteUrl.map { url ->
-    val match = Regex("""(?:https://github\.com/|git@github\.com:)([^/]+)/([^/]+?)(?:\.git)?$""").find(url)
-    match?.groupValues?.get(1) ?: "NKU100"
-}
-val gitHubRepo = remoteUrl.map { url ->
-    val match = Regex("""(?:https://github\.com/|git@github\.com:)([^/]+)/([^/]+?)(?:\.git)?$""").find(url)
-    match?.groupValues?.get(2) ?: "zygisk-module-webui-template"
-}
+val moduleRepoUrl = rootProject.extra["moduleRepo"] as String
+val gitHubPattern = Regex("""https://github\.com/([^/]+)/([^/]+)$""")
+val gitHubMatch = gitHubPattern.find(moduleRepoUrl)
+val gitHubUser = providers.provider { gitHubMatch?.groupValues?.get(1) ?: "NKU100" }
+val gitHubRepo = providers.provider { gitHubMatch?.groupValues?.get(2) ?: "zygisk-module-webui-template" }
 
 // Resolve extra properties eagerly into plain vals (not delegated properties).
 // `by rootProject.extra` delegates capture rootProject, which cannot be
@@ -85,12 +80,12 @@ androidComponents.onVariants { variant ->
 
     // Use .dir() for directories (not .file())
     val moduleDir = layout.buildDirectory.dir("outputs/module/$variantLowered")
-    // Derived values resolved lazily via Provider.map
-    val zipFileName = commitCount.zip(commitHash) { count, hash ->
-        "$moduleName-${tag.get()}-$count-$hash-$buildTypeLowered.zip".replace(' ', '-')
+    // Derived values resolved lazily via Provider.zip
+    val zipFileName = tag.zip(commitCount.zip(commitHash) { c, h -> c to h }) { t, (count, hash) ->
+        "$moduleName-$t-$count-$hash-$buildTypeLowered.zip".replace(' ', '-')
     }
-    val versionName = commitCount.zip(commitHash) { count, hash ->
-        "${tag.get()} ($count-$hash-$variantLowered)"
+    val versionName = tag.zip(commitCount.zip(commitHash) { c, h -> c to h }) { t, (count, hash) ->
+        "$t ($count-$hash-$variantLowered)"
     }
     val versionCode = commitCount
 
@@ -116,8 +111,8 @@ androidComponents.onVariants { variant ->
         }
         // Stable (tagged release): point to latest so older versions discover newer releases.
         // Beta (CI build): point to the ci pre-release tag.
-        val updateJson = gitHubUser.zip(gitHubRepo) { user, repo ->
-            if (tag.get().startsWith("v")) {
+        val updateJson = tag.zip(gitHubUser.zip(gitHubRepo) { u, r -> u to r }) { t, (user, repo) ->
+            if (t.startsWith("v")) {
                 "https://github.com/$user/$repo/releases/latest/download/update.json"
             } else {
                 "https://github.com/$user/$repo/releases/download/ci/update.json"

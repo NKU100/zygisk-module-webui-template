@@ -10,6 +10,15 @@ plugins {
 
 apply(from = "module.gradle.kts")
 
+val moduleRepo by extra(
+    providers.exec { commandLine("git", "remote", "get-url", "origin") }
+        .standardOutput.asText.map { url ->
+            val trimmed = url.trim()
+            val match = Regex("""(?:https://github\.com/|git@github\.com:)([^/]+)/([^/]+?)(?:\.git)?$""").find(trimmed)
+            if (match != null) "https://github.com/${match.groupValues[1]}/${match.groupValues[2]}" else trimmed
+        }.getOrElse("")
+)
+
 val androidMinSdkVersion by extra(26)
 val androidTargetSdkVersion by extra(36)
 val androidCompileSdkVersion by extra(36)
