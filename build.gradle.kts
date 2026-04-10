@@ -1,4 +1,4 @@
-import com.android.build.gradle.AppExtension
+import com.android.build.api.dsl.ApplicationExtension
 
 plugins {
     alias(libs.plugins.agp.app) apply false
@@ -32,9 +32,9 @@ tasks.register("Delete", Delete::class) {
 }
 
 fun Project.configureBaseExtension() {
-    extensions.findByType(AppExtension::class)?.run {
+    extensions.findByType(ApplicationExtension::class)?.run {
         namespace = "io.github.a13e300.zygisk.module.sample"
-        compileSdkVersion(androidCompileSdkVersion)
+        compileSdk = androidCompileSdkVersion
         ndkVersion = androidCompileNdkVersion
         buildToolsVersion = androidBuildToolsVersion
 
