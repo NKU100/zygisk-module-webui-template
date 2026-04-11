@@ -49,9 +49,11 @@ import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeStyle
 import dev.chrisbanes.haze.HazeTint
 import dev.chrisbanes.haze.hazeSource
+import io.github.nku100.webui.platform.isAndroidPlatform
 import io.github.nku100.webui.ui.component.SearchBox
 import io.github.nku100.webui.ui.component.SearchPager
 import io.github.nku100.webui.ui.component.StatusTag
+import io.github.nku100.webui.ui.util.wasmStatusBarPadding
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.DropdownImpl
 import top.yukonga.miuix.kmp.basic.Icon
@@ -115,9 +117,12 @@ fun LogsPage(
         it.name.lowercase().replaceFirstChar { c -> c.uppercase() }
     }
 
+    val statusBarPadding = wasmStatusBarPadding()
+
     Scaffold(
         topBar = {
             searchStatus.TopAppBarAnim(
+                modifier = Modifier.padding(top = statusBarPadding),
                 hazeState = if (enableBlur) hazeState else null,
                 hazeStyle = if (enableBlur) hazeStyle else null,
             ) {
@@ -172,6 +177,7 @@ fun LogsPage(
                         }
                     },
                     scrollBehavior = scrollBehavior,
+                    defaultWindowInsetsPadding = isAndroidPlatform,
                 )
             }
         },

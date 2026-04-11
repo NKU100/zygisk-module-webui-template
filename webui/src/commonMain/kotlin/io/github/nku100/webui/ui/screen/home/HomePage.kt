@@ -39,10 +39,12 @@ import dev.chrisbanes.haze.HazeStyle
 import dev.chrisbanes.haze.HazeTint
 import dev.chrisbanes.haze.hazeSource
 import io.github.nku100.webui.ModuleInfo
+import io.github.nku100.webui.platform.isAndroidPlatform
 import io.github.nku100.webui.platform.openUrl
 import org.jetbrains.compose.resources.stringResource
 import io.github.nku100.webui.ui.theme.isSystemDarkTheme
 import io.github.nku100.webui.ui.util.defaultHazeEffect
+import io.github.nku100.webui.ui.util.wasmStatusBarPadding
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardDefaults
@@ -92,13 +94,17 @@ fun HomePage(
         HazeStyle.Unspecified
     }
 
+    val statusBarPadding = wasmStatusBarPadding()
+
     Scaffold(
         topBar = {
             TopAppBar(
-                modifier = if (enableBlur) Modifier.defaultHazeEffect(hazeState, hazeStyle) else Modifier,
+                modifier = (if (enableBlur) Modifier.defaultHazeEffect(hazeState, hazeStyle) else Modifier)
+                    .padding(top = statusBarPadding),
                 color = if (enableBlur) Color.Transparent else colorScheme.surface,
                 title = state.moduleName,
                 scrollBehavior = scrollBehavior,
+                defaultWindowInsetsPadding = isAndroidPlatform,
             )
         },
         contentWindowInsets = WindowInsets.systemBars.add(WindowInsets.displayCutout).only(WindowInsetsSides.Horizontal),

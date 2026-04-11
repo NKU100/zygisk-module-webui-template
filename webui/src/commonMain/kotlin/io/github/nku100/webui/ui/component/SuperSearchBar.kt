@@ -158,7 +158,11 @@ fun SearchStatus.SearchPager(
     result: @Composable () -> Unit
 ) {
     val searchStatus = this
-    val systemBarsPadding = WindowInsets.systemBars.asPaddingValues().calculateTopPadding()
+    val systemBarsPadding = if (io.github.nku100.webui.platform.isAndroidPlatform) {
+        WindowInsets.systemBars.asPaddingValues().calculateTopPadding()
+    } else {
+        io.github.nku100.webui.platform.statusBarTopPadding()
+    }
     val topPadding by animateDpAsState(
         targetValue = if (searchStatus.shouldExpand()) {
             systemBarsPadding + 5.dp

@@ -19,9 +19,23 @@ import zygisk_module_webui_template.webui.generated.resources.Res
  */
 private const val CJK_FONT_RES_PATH = "font/noto_sans_sc_regular.woff2"
 
+// JS interop: check ksu API availability and enable edge-to-edge
+@JsFun("() => typeof window !== 'undefined' && typeof window.ksu !== 'undefined' && window.ksu != null && typeof window.ksu.enableEdgeToEdge === 'function'")
+private external fun hasEnableEdgeToEdge(): Boolean
+
+@JsFun("() => { try { ksu.enableEdgeToEdge(true); } catch(e) { console.warn('enableEdgeToEdge failed:', e); } }")
+private external fun enableEdgeToEdge()
+
 @OptIn(ExperimentalResourceApi::class)
 fun main() {
     val body = document.body ?: return
+
+    // Enable edge-to-edge mode before creating the viewport, so KernelSU
+    // removes WebView margins and injects --safe-area-inset-* CSS variables.
+    if (hasEnableEdgeToEdge()) {
+        enableEdgeToEdge()
+    }
+
     ComposeViewport(body) {
         val fontFamilyResolver = LocalFontFamilyResolver.current
         var fontsReady by remember { mutableStateOf(false) }

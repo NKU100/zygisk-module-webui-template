@@ -57,9 +57,11 @@ import dev.chrisbanes.haze.hazeSource
 import io.github.nku100.webui.platform.PackageInfo
 import io.github.nku100.webui.ui.component.AppIconImage
 import io.github.nku100.webui.ui.component.SearchBox
+import io.github.nku100.webui.platform.isAndroidPlatform
 import io.github.nku100.webui.ui.component.SearchPager
 import io.github.nku100.webui.ui.component.SearchStatus
 import io.github.nku100.webui.ui.component.StatusTag
+import io.github.nku100.webui.ui.util.wasmStatusBarPadding
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.DropdownImpl
 import top.yukonga.miuix.kmp.basic.Icon
@@ -144,9 +146,12 @@ fun AppsPage(
     // searchResults come from ViewModel (already filtered + resultStatus managed)
     val searchResults = state.searchResults
 
+    val statusBarPadding = wasmStatusBarPadding()
+
     Scaffold(
         topBar = {
             searchStatus.TopAppBarAnim(
+                modifier = Modifier.padding(top = statusBarPadding),
                 hazeState = if (enableBlur) hazeState else null,
                 hazeStyle = if (enableBlur) hazeStyle else null,
             ) {
@@ -188,6 +193,7 @@ fun AppsPage(
                         }
                     },
                     scrollBehavior = scrollBehavior,
+                    defaultWindowInsetsPadding = isAndroidPlatform,
                 )
             }
         },

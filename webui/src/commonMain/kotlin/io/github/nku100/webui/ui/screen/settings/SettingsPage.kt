@@ -34,8 +34,10 @@ import dev.chrisbanes.haze.HazeStyle
 import dev.chrisbanes.haze.HazeTint
 import dev.chrisbanes.haze.hazeSource
 import androidx.compose.material.icons.rounded.Update
+import io.github.nku100.webui.platform.isAndroidPlatform
 import io.github.nku100.webui.ui.theme.ThemeMode
 import io.github.nku100.webui.ui.util.defaultHazeEffect
+import io.github.nku100.webui.ui.util.wasmStatusBarPadding
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
@@ -66,13 +68,17 @@ fun SettingsPage(
         HazeStyle.Unspecified
     }
 
+    val statusBarPadding = wasmStatusBarPadding()
+
     Scaffold(
         topBar = {
             TopAppBar(
-                modifier = if (enableBlur) Modifier.defaultHazeEffect(hazeState, hazeStyle) else Modifier,
+                modifier = (if (enableBlur) Modifier.defaultHazeEffect(hazeState, hazeStyle) else Modifier)
+                    .padding(top = statusBarPadding),
                 color = if (enableBlur) Color.Transparent else colorScheme.surface,
                 title = stringResource(Res.string.tab_settings),
-                scrollBehavior = scrollBehavior
+                scrollBehavior = scrollBehavior,
+                defaultWindowInsetsPadding = isAndroidPlatform,
             )
         },
         contentWindowInsets = WindowInsets.systemBars.add(WindowInsets.displayCutout).only(WindowInsetsSides.Horizontal),
