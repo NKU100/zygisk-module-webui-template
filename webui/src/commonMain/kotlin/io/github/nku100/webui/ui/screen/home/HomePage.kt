@@ -42,7 +42,6 @@ import io.github.nku100.webui.ModuleInfo
 import io.github.nku100.webui.platform.isAndroidPlatform
 import io.github.nku100.webui.platform.openUrl
 import org.jetbrains.compose.resources.stringResource
-import io.github.nku100.webui.ui.theme.isSystemDarkTheme
 import io.github.nku100.webui.ui.util.defaultHazeEffect
 import io.github.nku100.webui.ui.util.wasmStatusBarPadding
 import top.yukonga.miuix.kmp.basic.BasicComponent
@@ -55,6 +54,7 @@ import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Link
+import top.yukonga.miuix.kmp.theme.ColorSchemeMode
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
 import top.yukonga.miuix.kmp.utils.PressFeedbackType
@@ -138,7 +138,7 @@ fun HomePage(
 
 @Composable
 private fun StatusCard(state: HomeUiState, actions: HomeActions) {
-    val isDark = isSystemDarkTheme()
+    val isDark = MiuixTheme.colorSchemeMode in setOf(ColorSchemeMode.Dark, ColorSchemeMode.MonetDark)
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -177,8 +177,7 @@ private fun StatusCard(state: HomeUiState, actions: HomeActions) {
                             Icons.Rounded.ErrorOutline
                         },
                         tint = if (state.moduleEnabled) {
-                                if (isDark) colorScheme.primary.copy(alpha = 0.8f)
-                                else Color(0xFF36D167)
+                                Color(0xFF36D167)
                             } else {
                                 Color(0xFFF72727)
                             },
