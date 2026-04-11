@@ -55,8 +55,8 @@
     <string name="blur_effects_summary">启用背景模糊效果</string>
     <string name="floating_bottom_bar">悬浮底栏</string>
     <string name="floating_bottom_bar_summary">使用悬浮导航栏样式</string>
-    <string name="bottom_bar_glass_effect">底栏毛玻璃效果</string>
-    <string name="bottom_bar_glass_effect_summary">在悬浮底栏上启用毛玻璃模糊</string>
+    <string name="bottom_bar_glass_effect">底栏液态玻璃效果</string>
+    <string name="bottom_bar_glass_effect_summary">在悬浮底栏上启用液态玻璃效果</string>
     <string name="about">关于</string>
     <string name="about_summary">模块信息与版本</string>
     <string name="update_channel">更新渠道</string>
