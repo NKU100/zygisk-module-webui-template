@@ -156,6 +156,38 @@ Compose for Web (Skia/CanvasKit) runs in a WASM sandbox with no access to system
 
 ---
 
+---
+
+## wasmJs Back Navigation (Hash Guard)
+
+在 KernelSU/KsuWebUIStandalone 的 WebView 中，侧滑返回时 WebView 检查 `canGoBack()`：为 true 调用 `goBack()`，为 false 直接关闭 Activity。Compose WASM 是单页应用，默认 `canGoBack()` 始终为 false，侧滑永远直接退出。
+
+### 方案
+
+利用 `location.hash` 创建真实导航记录（WebView 的 `canGoBack()` 识别 hash 变化但不识别 `pushState`）。离开退出点（Home tab + 无路由页）时预先 push 5 层 hash guard（`#g1..#g5`），侧滑时 `goBack()` 逐层消费并触发 `hashchange` 事件，在 handler 中执行 Compose 侧返回。
+
+### 文件
+
+| 文件 | 说明 |
+|------|------|
+| `commonMain/.../platform/BrowserHistorySync.kt` | expect 声明 |
+| `androidMain/.../platform/BrowserHistorySync.kt` | no-op（Android 用原生 BackHandler） |
+| `wasmJsMain/.../platform/BrowserHistorySync.kt` | hash guard 实现 |
+| `commonMain/.../ui/App.kt` | 持有 mainPagerStateHolder，调用 BrowserHistorySync |
+| `commonMain/.../ui/screen/MainScreenImpl.kt` | 通过 onPagerStateReady 回调向上传递 pagerState |
+
+### 关键技术点
+
+- **为什么不用 pushState**：Android WebView 的 `canGoBack()` 只追踪真实导航（loadUrl、hash 变化），不追踪 History API 的 `pushState`。
+- **为什么预先 push 多层**：在 `hashchange` handler 中同步或异步 re-push hash，WebView 的 `canGoBack()` 来不及更新，第二次侧滑仍然退出。预先 push 足够多层避免了 re-push。
+- **防级联 hashchange**：`pushHashGuards` 的 for 循环触发 N 次异步 hashchange。用 JS 全局 `window.__composeSyncing` flag + `setTimeout(0)` 延迟重置，在 handler 中检查 flag 跳过自触发事件。
+- **BrowserHistorySync 放在 App 层级**：不能放在 MainScreen 内部，因为 push 路由（AppProfile/About）时 MainScreen unmount，listener 会丢失。通过 `rememberUpdatedState` 引用最新的 navigator 和 pagerState。
+
+### 已知限制
+
+- Guard depth 固定为 5 层，深层嵌套导航（>5 层）会耗尽 guard
+- 回到首页时 `clearGuards` 的 `history.go(-n)` 产生的级联 hashchange 未被完全拦截（`setTimeout(0)` 不覆盖 `history.go` 的异步事件），但因 depth=0 时逻辑不执行任何操作，实际无害
+
 ## Remaining / Known Issues
 
 - **wasmJs icon fallback**: When running under KsuWebUIStandalone (no `ksu.getPackagesInfo`), the `AppIconImage` wasmJs implementation falls back to `LetterIcon`. A proper fallback via `exec "pm list packages"` + icon fetch is not yet implemented.
@@ -166,21 +198,11 @@ Compose for Web (Skia/CanvasKit) runs in a WASM sandbox with no access to system
 
 ## UI 优化待办（P3）
 
-以下两项在跨平台 UI 审查中识别，优先级较低，记录备忘。
+以下在跨平台 UI 审查中识别，优先级较低，记录备忘。
 
-### 1. 统一 wasmStatusBarPadding 处理
+### ~~1. 统一 wasmStatusBarPadding 处理~~ ✅ 已完成
 
-**现状**：每个页面都手动调用 `wasmStatusBarPadding()` 并 `padding(top = statusBarPadding)` 到 TopAppBar，共 6 处（HomePage、AppsPage、LogsPage、SettingsPage、AppProfilePage、AboutPage）。新增页面若遗漏则状态栏区域会被遮挡。
-
-**涉及文件**：
-- `webui/src/commonMain/.../ui/util/InsetsExt.kt` — `wasmStatusBarPadding()` 定义
-- 6 个页面文件中的 TopAppBar 调用处
-
-**建议方案**：封装 `AppTopAppBar` 组件，内部统一处理 `wasmStatusBarPadding()` + `defaultHazeEffect`，各页面只需传入 `title`、`scrollBehavior`、`actions` 等参数。
-
-**风险**：TopAppBar 的使用方式差异较大（有些带搜索栏的 `TopAppBarAnim`，有些带 `navigationIcon`），统一封装需仔细处理各场景。
-
-**预估工作量**：1 小时
+已在 `InsetsExt.kt` 中封装 `topBarModifier()`、`topBarInsetsPadding()`、`topBarDefaultWindowInsetsPadding`，6 个页面统一使用。
 
 ### 2. 语义颜色集中管理
 

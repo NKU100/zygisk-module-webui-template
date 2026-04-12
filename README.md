@@ -44,7 +44,7 @@ A Zygisk module template with **Compose Multiplatform** WebUI, based on [zygisk-
 │       │   ├── composeResources/
 │       │   │   └── font/           # CJK font (NotoSansSC WOFF2 GB2312 subset)
 │       │   ├── data/               # ModuleConfig, ConfigRepository
-│       │   ├── platform/           # expect PlatformBridge, awaitNextFrame, PlatformBackHandler
+│       │   ├── platform/           # expect PlatformBridge, PlatformBackHandler, BrowserHistorySync
 │       │   └── ui/
 │       │       ├── animation/      # DampedDragAnimation, InteractiveHighlight
 │       │       ├── component/      # FloatingBottomBar, SuperSearchBar, SearchStatus, StatusTag
@@ -56,14 +56,14 @@ A Zygisk module template with **Compose Multiplatform** WebUI, based on [zygisk-
 │       │       ├── theme/          # AppTheme, ThemeMode, isSystemDarkTheme
 │       │       └── util/           # DeferredContent, HazeExt (defaultHazeEffect, rememberDefaultHazeState), InsetsExt
 │       ├── androidMain/            # Android target
-│       │   ├── platform/           # PlatformBridge.android, PlatformBackHandler.android
+│       │   ├── platform/           # PlatformBridge.android, PlatformBackHandler, BrowserHistorySync (no-op)
 │       │   └── ui/
 │       │       ├── component/      # AppIconImage.android (AppIconLoader + AppIconCache)
 │       │       ├── modifier/       # DragGestureInspector (AGSL)
 │       │       ├── util/           # AppIconCache (LRU, Semaphore, Hardware Bitmap)
 │       │       └── theme/          # MaterialKolor dynamic color
 │       └── wasmJsMain/             # Web (Wasm) target
-│           ├── platform/           # KernelSU JS API bridge (v3.0.2), PlatformBackHandler.wasmJs
+│           ├── platform/           # KernelSU JS API bridge (v3.0.2), PlatformBackHandler, BrowserHistorySync (hash guard)
 │           └── ui/
 │               ├── component/      # AppIconImage.wasmJs (ksu://icon/ + Skia decode)
 │               └── modifier/       # DragGestureInspector (SkSL)
