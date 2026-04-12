@@ -130,27 +130,17 @@ tasks.register("buildWebUI") {
 val pushTask = tasks.register<Exec>("push") {
     group = "webui"
     dependsOn("buildWebUI")
-    doFirst {
-        commandLine("adb", "push", webDistDir.get().asFile.path, "/data/local/tmp/webroot")
-    }
+    commandLine("adb", "push", webDistDir.get().asFile.path, "/data/local/tmp/webroot")
 }
 
 val removeTask = tasks.register<Exec>("remove") {
     group = "webui"
     dependsOn(pushTask)
-    inputs.property("moduleId", moduleId)
-    doFirst {
-        val id = inputs.properties["moduleId"] as String
-        commandLine("adb", "shell", "su", "-c", "rm -rf /data/adb/modules/$id/webroot")
-    }
+    commandLine("adb", "shell", "su", "-c", "rm -rf /data/adb/modules/$moduleId/webroot")
 }
 
 tasks.register<Exec>("install") {
     group = "webui"
     dependsOn(removeTask)
-    inputs.property("moduleId", moduleId)
-    doFirst {
-        val id = inputs.properties["moduleId"] as String
-        commandLine("adb", "shell", "su", "-c", "mv /data/local/tmp/webroot /data/adb/modules/$id/webroot")
-    }
+    commandLine("adb", "shell", "su", "-c", "mv /data/local/tmp/webroot /data/adb/modules/$moduleId/webroot")
 }
