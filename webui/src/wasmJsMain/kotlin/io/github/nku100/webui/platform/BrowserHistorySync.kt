@@ -5,7 +5,6 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -13,13 +12,23 @@ import androidx.compose.runtime.setValue
 import io.github.nku100.webui.ui.navigation.Navigator
 import io.github.nku100.webui.ui.screen.MainPagerState
 
-// Push N hash entries as guard layers: #g1, #g2, ... #gN
-// Each unique hash creates a real navigation entry recognized by canGoBack().
-@JsFun("(n) => { for (var i = 1; i <= n; i++) location.hash = '#g' + i; }")
+// Push N hash entries as guard layers, with syncing flag to suppress hashchange.
+// setTimeout(0) defers the flag reset so queued hashchange events are still blocked.
+@JsFun("""(n) => {
+    window.__composeSyncing = true;
+    for (var i = 1; i <= n; i++) location.hash = '#g' + i;
+    setTimeout(function() { window.__composeSyncing = false; }, 0);
+}""")
 private external fun pushHashGuards(count: Int)
 
 // Go back to the base entry (no hash), clearing all guard layers at once.
-@JsFun("(n) => { if (n > 0) history.go(-n); }")
+@JsFun("""(n) => {
+    if (n > 0) {
+        window.__composeSyncing = true;
+        history.go(-n);
+        setTimeout(function() { window.__composeSyncing = false; }, 0);
+    }
+}""")
 private external fun clearGuards(count: Int)
 
 // Get current guard depth from hash (e.g. "#g3" → 3, "" → 0)
@@ -65,7 +74,7 @@ actual fun BrowserHistorySync(navigator: Navigator, mainPagerState: MainPagerSta
 
     // Listen for hashchange (goBack consumed one guard layer)
     DisposableEffect(Unit) {
-        val listener: (JsAny?) -> Unit = { _ ->
+        val listener: (JsAny?) -> Unit = listener@{ _ ->
             val depth = currentGuardDepth()
             val nav = currentNavigator
             val pager = currentPagerState
@@ -96,10 +105,14 @@ actual fun BrowserHistorySync(navigator: Navigator, mainPagerState: MainPagerSta
     }
 }
 
+// The hashchange handler checks window.__composeSyncing BEFORE calling
+// the Kotlin callback. This ensures push/clear-triggered events are
+// suppressed at the JS level, which is synchronous and reliable.
 @JsFun("""
 (callback) => {
     if (!window.__composeHashChangeHandler) {
         window.__composeHashChangeHandler = (event) => {
+            if (window.__composeSyncing) return;
             if (window.__composeHashChangeCallback) {
                 window.__composeHashChangeCallback(event);
             }
