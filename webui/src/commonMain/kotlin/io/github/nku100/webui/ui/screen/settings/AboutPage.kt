@@ -29,7 +29,9 @@ import io.github.nku100.webui.ModuleInfo
 import io.github.nku100.webui.platform.isAndroidPlatform
 import io.github.nku100.webui.platform.openUrl
 import io.github.nku100.webui.ui.util.defaultHazeEffect
-import io.github.nku100.webui.ui.util.wasmStatusBarPadding
+import io.github.nku100.webui.ui.util.rememberDefaultHazeState
+import io.github.nku100.webui.ui.util.topBarDefaultWindowInsetsPadding
+import io.github.nku100.webui.ui.util.topBarModifier
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Icon
@@ -48,27 +50,16 @@ fun AboutPage(
     enableBlur: Boolean = false,
 ) {
     val scrollBehavior = MiuixScrollBehavior()
-    val hazeState = remember { HazeState() }
-    val hazeStyle = if (enableBlur) {
-        HazeStyle(
-            backgroundColor = colorScheme.surface,
-            tint = HazeTint(colorScheme.surface.copy(0.8f))
-        )
-    } else {
-        HazeStyle.Unspecified
-    }
-
-    val statusBarPadding = wasmStatusBarPadding()
+    val (hazeState, hazeStyle) = rememberDefaultHazeState(enableBlur)
 
     Scaffold(
         topBar = {
             TopAppBar(
-                modifier = (if (enableBlur) Modifier.defaultHazeEffect(hazeState, hazeStyle) else Modifier)
-                    .padding(top = statusBarPadding),
+                modifier = Modifier.topBarModifier(enableBlur, hazeState, hazeStyle),
                 color = if (enableBlur) Color.Transparent else colorScheme.surface,
                 title = stringResource(Res.string.about),
                 scrollBehavior = scrollBehavior,
-                defaultWindowInsetsPadding = isAndroidPlatform,
+                defaultWindowInsetsPadding = topBarDefaultWindowInsetsPadding,
                 navigationIcon = {
                     top.yukonga.miuix.kmp.basic.IconButton(onClick = onBack) {
                         Icon(

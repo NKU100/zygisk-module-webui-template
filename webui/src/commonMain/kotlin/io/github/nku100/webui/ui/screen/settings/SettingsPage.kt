@@ -38,7 +38,8 @@ import io.github.nku100.webui.platform.isAndroidPlatform
 import io.github.nku100.webui.ui.theme.ThemeMode
 import io.github.nku100.webui.ui.util.defaultHazeEffect
 import io.github.nku100.webui.ui.util.rememberDefaultHazeState
-import io.github.nku100.webui.ui.util.wasmStatusBarPadding
+import io.github.nku100.webui.ui.util.topBarDefaultWindowInsetsPadding
+import io.github.nku100.webui.ui.util.topBarModifier
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
@@ -61,17 +62,14 @@ fun SettingsPage(
     val scrollBehavior = MiuixScrollBehavior()
     val (hazeState, hazeStyle) = rememberDefaultHazeState(enableBlur)
 
-    val statusBarPadding = wasmStatusBarPadding()
-
     Scaffold(
         topBar = {
             TopAppBar(
-                modifier = (if (enableBlur) Modifier.defaultHazeEffect(hazeState, hazeStyle) else Modifier)
-                    .padding(top = statusBarPadding),
+                modifier = Modifier.topBarModifier(enableBlur, hazeState, hazeStyle),
                 color = if (enableBlur) Color.Transparent else colorScheme.surface,
                 title = stringResource(Res.string.tab_settings),
                 scrollBehavior = scrollBehavior,
-                defaultWindowInsetsPadding = isAndroidPlatform,
+                defaultWindowInsetsPadding = topBarDefaultWindowInsetsPadding,
             )
         },
         contentWindowInsets = WindowInsets.systemBars.add(WindowInsets.displayCutout).only(WindowInsetsSides.Horizontal),

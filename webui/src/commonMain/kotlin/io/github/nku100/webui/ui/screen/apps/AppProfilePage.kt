@@ -40,7 +40,8 @@ import io.github.nku100.webui.platform.isAndroidPlatform
 import io.github.nku100.webui.ui.component.AppIconImage
 import io.github.nku100.webui.ui.util.defaultHazeEffect
 import io.github.nku100.webui.ui.util.rememberDefaultHazeState
-import io.github.nku100.webui.ui.util.wasmStatusBarPadding
+import io.github.nku100.webui.ui.util.topBarDefaultWindowInsetsPadding
+import io.github.nku100.webui.ui.util.topBarModifier
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.DropdownImpl
 import top.yukonga.miuix.kmp.basic.Icon
@@ -95,13 +96,10 @@ fun AppProfilePage(
     var logTagLocal by rememberSaveable(settings.logTag) { mutableStateOf(settings.logTag) }
     var noteLocal by rememberSaveable(settings.note) { mutableStateOf(settings.note) }
 
-    val statusBarPadding = wasmStatusBarPadding()
-
     Scaffold(
         topBar = {
             TopAppBar(
-                modifier = (if (enableBlur) Modifier.defaultHazeEffect(hazeState, hazeStyle) else Modifier)
-                    .padding(top = statusBarPadding),
+                modifier = Modifier.topBarModifier(enableBlur, hazeState, hazeStyle),
                 color = if (enableBlur) Color.Transparent else colorScheme.surface,
                 title = state.packageInfo.label,
                 navigationIcon = {
@@ -161,7 +159,7 @@ fun AppProfilePage(
                     }
                 },
                 scrollBehavior = scrollBehavior,
-                defaultWindowInsetsPadding = isAndroidPlatform,
+                defaultWindowInsetsPadding = topBarDefaultWindowInsetsPadding,
             )
         },
         contentWindowInsets = WindowInsets.systemBars.add(WindowInsets.displayCutout).only(WindowInsetsSides.Horizontal),

@@ -54,7 +54,8 @@ import io.github.nku100.webui.ui.component.SearchBox
 import io.github.nku100.webui.ui.component.SearchPager
 import io.github.nku100.webui.ui.component.StatusTag
 import io.github.nku100.webui.ui.util.rememberDefaultHazeState
-import io.github.nku100.webui.ui.util.wasmStatusBarPadding
+import io.github.nku100.webui.ui.util.topBarDefaultWindowInsetsPadding
+import io.github.nku100.webui.ui.util.topBarInsetsPadding
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.DropdownImpl
 import top.yukonga.miuix.kmp.basic.Icon
@@ -110,12 +111,10 @@ fun LogsPage(
         it.name.lowercase().replaceFirstChar { c -> c.uppercase() }
     }
 
-    val statusBarPadding = wasmStatusBarPadding()
-
     Scaffold(
         topBar = {
             searchStatus.TopAppBarAnim(
-                modifier = Modifier.padding(top = statusBarPadding),
+                modifier = Modifier.topBarInsetsPadding(),
                 hazeState = if (enableBlur) hazeState else null,
                 hazeStyle = if (enableBlur) hazeStyle else null,
             ) {
@@ -170,7 +169,7 @@ fun LogsPage(
                         }
                     },
                     scrollBehavior = scrollBehavior,
-                    defaultWindowInsetsPadding = isAndroidPlatform,
+                    defaultWindowInsetsPadding = topBarDefaultWindowInsetsPadding,
                 )
             }
         },
