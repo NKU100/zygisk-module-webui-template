@@ -50,10 +50,11 @@ A Zygisk module template with **Compose Multiplatform** WebUI, based on [zygisk-
 │       │       ├── component/      # FloatingBottomBar, SuperSearchBar, SearchStatus, StatusTag
 │       │       ├── screen/         # MainViewModel, MainPagerState, all page composables
 │       │       │   ├── home/       # HomePage
-│       │       │   ├── apps/       # AppsPage (+ AppsViewModel search logic)
+│       │       │   ├── apps/       # AppsPage, AppProfilePage
+│       │       │   ├── logs/       # LogsPage (real-time log viewer with filtering)
 │       │       │   └── settings/   # SettingsPage, AboutPage
 │       │       ├── theme/          # AppTheme, ThemeMode, isSystemDarkTheme
-│       │       └── util/           # DeferredContent (rememberContentReady), defaultHazeEffect
+│       │       └── util/           # DeferredContent, HazeExt (defaultHazeEffect, rememberDefaultHazeState), InsetsExt
 │       ├── androidMain/            # Android target
 │       │   ├── platform/           # PlatformBridge.android, PlatformBackHandler.android
 │       │   └── ui/
@@ -125,7 +126,7 @@ Edit files under `webui/src/commonMain/` to build your configuration UI:
 ./gradlew :webui:wasmJsBrowserDevelopmentRun
 
 # Install both Android APK and WebUI to device
-./gradlew :webui:installDebug :webui:install
+./gradlew :webui-app:installDebug :webui:install
 ```
 
 The module zip will be generated under `module/release/`.

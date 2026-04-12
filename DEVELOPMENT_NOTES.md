@@ -161,3 +161,45 @@ Compose for Web (Skia/CanvasKit) runs in a WASM sandbox with no access to system
 - **wasmJs icon fallback**: When running under KsuWebUIStandalone (no `ksu.getPackagesInfo`), the `AppIconImage` wasmJs implementation falls back to `LetterIcon`. A proper fallback via `exec "pm list packages"` + icon fetch is not yet implemented.
 - **`rememberViewModelStoreNavEntryDecorator`**: KernelSU manager binds ViewModel scope to NavDisplay entries via this decorator. KMP `commonMain` does not support this API yet; skipped intentionally.
 - **`internal/colors.css`** in KsuWebUIStandalone: Always returns empty. WebUI modules that rely on this for dynamic theming will not receive Material You colors when running under KsuWebUIStandalone.
+
+---
+
+## UI 优化待办（P3）
+
+以下两项在跨平台 UI 审查中识别，优先级较低，记录备忘。
+
+### 1. 统一 wasmStatusBarPadding 处理
+
+**现状**：每个页面都手动调用 `wasmStatusBarPadding()` 并 `padding(top = statusBarPadding)` 到 TopAppBar，共 6 处（HomePage、AppsPage、LogsPage、SettingsPage、AppProfilePage、AboutPage）。新增页面若遗漏则状态栏区域会被遮挡。
+
+**涉及文件**：
+- `webui/src/commonMain/.../ui/util/InsetsExt.kt` — `wasmStatusBarPadding()` 定义
+- 6 个页面文件中的 TopAppBar 调用处
+
+**建议方案**：封装 `AppTopAppBar` 组件，内部统一处理 `wasmStatusBarPadding()` + `defaultHazeEffect`，各页面只需传入 `title`、`scrollBehavior`、`actions` 等参数。
+
+**风险**：TopAppBar 的使用方式差异较大（有些带搜索栏的 `TopAppBarAnim`，有些带 `navigationIcon`），统一封装需仔细处理各场景。
+
+**预估工作量**：1 小时
+
+### 2. 语义颜色集中管理
+
+**现状**：StatusCard 和日志级别使用硬编码颜色值，分散在各页面中：
+
+```
+HomePage.kt — StatusCard 卡片背景（4 色）+ 状态图标（2 色）
+  Color(0xFF1A3825) / Color(0xFFDFFAE4) / Color(0xFF310808) / Color(0xFFF8E2E2)
+  Color(0xFF36D167) / Color(0xFFF72727)
+
+LogsPage.kt — levelColor() 日志级别（5 色）
+  DEBUG: Color(0xFF4DA6FF)  INFO: Color(0xFF4CAF50)  WARN: Color(0xFFFFA000)
+  ERROR: Color(0xFFF44336)  FATAL: Color(0xFFD50000)
+```
+
+目前已通过 `isDark` 区分了深色/浅色变体，功能正确。但如果后续要支持 Monet 动态取色或自定义主题，这些硬编码值需要统一管理。
+
+**建议方案**：在 `ui/theme/` 下新建 `SemanticColors.kt`，定义 `CompositionLocal` 提供语义颜色（如 `statusEnabled`、`statusDisabled`、`logDebug` 等），在 `AppTheme` 中根据深浅色模式注入对应颜色值。
+
+**风险**：改动范围较广，需要同时修改 Theme 层和所有使用处；且当前作为模板项目，硬编码颜色的可读性反而更直观。
+
+**预估工作量**：2 小时

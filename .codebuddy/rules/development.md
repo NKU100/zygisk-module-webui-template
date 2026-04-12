@@ -4,7 +4,7 @@
 
 安装命令（同时构建并推送 Android APK 和 wasmJs webroot）：
 ```
-./gradlew :webui:installDebug :webui:install
+./gradlew :webui-app:installDebug :webui:install
 ```
 
 安装完成后需要分别打开两端验证：
