@@ -19,6 +19,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -38,17 +39,23 @@ import io.github.nku100.webui.platform.PackageInfo
 import io.github.nku100.webui.platform.isAndroidPlatform
 import io.github.nku100.webui.ui.component.AppIconImage
 import io.github.nku100.webui.ui.util.defaultHazeEffect
+import io.github.nku100.webui.ui.util.rememberDefaultHazeState
 import io.github.nku100.webui.ui.util.wasmStatusBarPadding
 import top.yukonga.miuix.kmp.basic.Card
+import top.yukonga.miuix.kmp.basic.DropdownImpl
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
+import top.yukonga.miuix.kmp.basic.ListPopupColumn
+import top.yukonga.miuix.kmp.basic.ListPopupDefaults
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
+import top.yukonga.miuix.kmp.basic.PopupPositionProvider
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextField
 import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.extra.SuperDropdown
+import top.yukonga.miuix.kmp.extra.SuperListPopup
 import top.yukonga.miuix.kmp.extra.SuperSwitch
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Back
@@ -80,15 +87,7 @@ fun AppProfilePage(
     enableBlur: Boolean = false,
 ) {
     val scrollBehavior = MiuixScrollBehavior()
-    val hazeState = androidx.compose.runtime.remember { HazeState() }
-    val hazeStyle = if (enableBlur) {
-        HazeStyle(
-            backgroundColor = colorScheme.surface,
-            tint = HazeTint(colorScheme.surface.copy(0.8f))
-        )
-    } else {
-        HazeStyle.Unspecified
-    }
+    val (hazeState, hazeStyle) = rememberDefaultHazeState(enableBlur)
 
     val settings = state.settings
 
@@ -118,35 +117,34 @@ fun AppProfilePage(
                     }
                 },
                 actions = {
-                    val showPopup = androidx.compose.runtime.remember { mutableStateOf(false) }
-                    top.yukonga.miuix.kmp.extra.SuperListPopup(
+                    val showPopup = remember { mutableStateOf(false) }
+                    SuperListPopup(
                         show = showPopup.value,
-                        popupPositionProvider = top.yukonga.miuix.kmp.basic.ListPopupDefaults.ContextMenuPositionProvider,
-                        alignment = top.yukonga.miuix.kmp.basic.PopupPositionProvider.Align.TopEnd,
+                        popupPositionProvider = ListPopupDefaults.ContextMenuPositionProvider,
+                        alignment = PopupPositionProvider.Align.TopEnd,
                         onDismissRequest = { showPopup.value = false },
                         content = {
-                            top.yukonga.miuix.kmp.basic.ListPopupColumn {
+                            ListPopupColumn {
                                 listOf(
                                     stringResource(Res.string.launch_app),
                                     stringResource(Res.string.force_stop),
                                     stringResource(Res.string.restart_app),
-                                )
-                                    .forEachIndexed { index, text ->
-                                        top.yukonga.miuix.kmp.basic.DropdownImpl(
-                                            text = text,
-                                            optionSize = 3,
-                                            isSelected = false,
-                                            index = index,
-                                            onSelectedIndexChange = { i ->
-                                                when (i) {
-                                                    0 -> actions.onLaunchApp()
-                                                    1 -> actions.onForceStopApp()
-                                                    2 -> actions.onRestartApp()
-                                                }
-                                                showPopup.value = false
-                                            },
-                                        )
-                                    }
+                                ).forEachIndexed { index, text ->
+                                    DropdownImpl(
+                                        text = text,
+                                        optionSize = 3,
+                                        isSelected = false,
+                                        index = index,
+                                        onSelectedIndexChange = { i ->
+                                            when (i) {
+                                                0 -> actions.onLaunchApp()
+                                                1 -> actions.onForceStopApp()
+                                                2 -> actions.onRestartApp()
+                                            }
+                                            showPopup.value = false
+                                        },
+                                    )
+                                }
                             }
                         },
                     )
@@ -158,7 +156,7 @@ fun AppProfilePage(
                         Icon(
                             imageVector = MiuixIcons.MoreCircle,
                             tint = colorScheme.onSurface,
-                            contentDescription = null,
+                            contentDescription = stringResource(Res.string.more_options),
                         )
                     }
                 },

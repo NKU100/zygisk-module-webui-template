@@ -61,6 +61,7 @@ import io.github.nku100.webui.platform.isAndroidPlatform
 import io.github.nku100.webui.ui.component.SearchPager
 import io.github.nku100.webui.ui.component.SearchStatus
 import io.github.nku100.webui.ui.component.StatusTag
+import io.github.nku100.webui.ui.util.rememberDefaultHazeState
 import io.github.nku100.webui.ui.util.wasmStatusBarPadding
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.DropdownImpl
@@ -116,15 +117,7 @@ fun AppsPage(
         derivedStateOf { 12.dp * (1f - scrollBehavior.state.collapsedFraction) }
     }
 
-    val hazeState = remember { HazeState() }
-    val hazeStyle = if (enableBlur) {
-        HazeStyle(
-            backgroundColor = colorScheme.surface,
-            tint = HazeTint(colorScheme.surface.copy(0.8f))
-        )
-    } else {
-        HazeStyle.Unspecified
-    }
+    val (hazeState, hazeStyle) = rememberDefaultHazeState(enableBlur)
 
     // Hoist these outside SearchBox lambda so they survive config changes (e.g. toggling target)
     val lazyListState = rememberLazyListState()
@@ -188,7 +181,7 @@ fun AppsPage(
                             Icon(
                                 imageVector = MiuixIcons.MoreCircle,
                                 tint = colorScheme.onSurface,
-                                contentDescription = null,
+                                contentDescription = stringResource(Res.string.more_options),
                             )
                         }
                     },

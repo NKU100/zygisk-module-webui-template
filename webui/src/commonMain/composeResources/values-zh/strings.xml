@@ -26,6 +26,7 @@
 
     <!-- AppProfilePage -->
     <string name="back">返回</string>
+    <string name="more_options">更多选项</string>
     <string name="launch_app">启动应用</string>
     <string name="force_stop">强制停止</string>
     <string name="restart_app">重启应用</string>

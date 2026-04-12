@@ -37,6 +37,7 @@ import androidx.compose.material.icons.rounded.Update
 import io.github.nku100.webui.platform.isAndroidPlatform
 import io.github.nku100.webui.ui.theme.ThemeMode
 import io.github.nku100.webui.ui.util.defaultHazeEffect
+import io.github.nku100.webui.ui.util.rememberDefaultHazeState
 import io.github.nku100.webui.ui.util.wasmStatusBarPadding
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Icon
@@ -58,15 +59,7 @@ fun SettingsPage(
     enableBlur: Boolean,
 ) {
     val scrollBehavior = MiuixScrollBehavior()
-    val hazeState = remember { HazeState() }
-    val hazeStyle = if (enableBlur) {
-        HazeStyle(
-            backgroundColor = colorScheme.surface,
-            tint = HazeTint(colorScheme.surface.copy(0.8f))
-        )
-    } else {
-        HazeStyle.Unspecified
-    }
+    val (hazeState, hazeStyle) = rememberDefaultHazeState(enableBlur)
 
     val statusBarPadding = wasmStatusBarPadding()
 

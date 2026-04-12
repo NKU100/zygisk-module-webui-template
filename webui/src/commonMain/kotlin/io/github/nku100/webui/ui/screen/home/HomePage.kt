@@ -43,6 +43,7 @@ import io.github.nku100.webui.platform.isAndroidPlatform
 import io.github.nku100.webui.platform.openUrl
 import org.jetbrains.compose.resources.stringResource
 import io.github.nku100.webui.ui.util.defaultHazeEffect
+import io.github.nku100.webui.ui.util.rememberDefaultHazeState
 import io.github.nku100.webui.ui.util.wasmStatusBarPadding
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.Card
@@ -84,15 +85,7 @@ fun HomePage(
     enableBlur: Boolean = false,
 ) {
     val scrollBehavior = MiuixScrollBehavior()
-    val hazeState = remember { HazeState() }
-    val hazeStyle = if (enableBlur) {
-        HazeStyle(
-            backgroundColor = colorScheme.surface,
-            tint = HazeTint(colorScheme.surface.copy(0.8f))
-        )
-    } else {
-        HazeStyle.Unspecified
-    }
+    val (hazeState, hazeStyle) = rememberDefaultHazeState(enableBlur)
 
     val statusBarPadding = wasmStatusBarPadding()
 
@@ -181,7 +174,11 @@ private fun StatusCard(state: HomeUiState, actions: HomeActions) {
                             } else {
                                 Color(0xFFF72727)
                             },
-                        contentDescription = null
+                        contentDescription = if (state.moduleEnabled) {
+                            stringResource(Res.string.status_working)
+                        } else {
+                            stringResource(Res.string.status_disabled)
+                        }
                     )
                 }
                 Column(
