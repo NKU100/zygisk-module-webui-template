@@ -52,7 +52,7 @@ val LocalMainPagerState = staticCompositionLocalOf<MainPagerState> {
 }
 
 @Composable
-fun MainScreen(viewModel: MainViewModel, uiState: MainUiState) {
+fun MainScreen(viewModel: MainViewModel, uiState: MainUiState, onPagerStateReady: (MainPagerState) -> Unit = {}) {
     val scope = rememberCoroutineScope()
 
     val config = uiState.config
@@ -77,6 +77,11 @@ fun MainScreen(viewModel: MainViewModel, uiState: MainUiState) {
 
     val pagerState = rememberPagerState(pageCount = { BottomTab.entries.size })
     val mainPagerState = rememberMainPagerState(pagerState, scope)
+
+    // Notify App-level BrowserHistorySync about our pager state
+    LaunchedEffect(mainPagerState) {
+        onPagerStateReady(mainPagerState)
+    }
 
     LaunchedEffect(pagerState.currentPage) {
         mainPagerState.syncPage()

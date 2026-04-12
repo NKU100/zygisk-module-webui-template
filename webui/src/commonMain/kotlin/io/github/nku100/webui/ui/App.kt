@@ -7,7 +7,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.lifecycle.viewmodel.compose.viewModel
+import io.github.nku100.webui.platform.BrowserHistorySync
 import io.github.nku100.webui.platform.PlatformBridge
 import kotlinx.coroutines.launch
 import androidx.navigation3.runtime.entryProvider
@@ -17,6 +20,7 @@ import io.github.nku100.webui.ui.navigation.LocalNavigator
 import io.github.nku100.webui.ui.navigation.Route
 import io.github.nku100.webui.ui.navigation.rememberNavigator
 import io.github.nku100.webui.ui.screen.MainScreen
+import io.github.nku100.webui.ui.screen.MainPagerState
 import io.github.nku100.webui.ui.screen.MainViewModel
 import io.github.nku100.webui.ui.screen.apps.AppProfileActions
 import io.github.nku100.webui.ui.screen.apps.AppProfilePage
@@ -34,9 +38,13 @@ fun App() {
     val viewModel = viewModel { MainViewModel() }
     val uiState by viewModel.uiState.collectAsState()
     val navigator = rememberNavigator(Route.Main)
+    val mainPagerStateHolder = remember { mutableStateOf<MainPagerState?>(null) }
 
     AppTheme(themeMode = uiState.themeMode) {
         CompositionLocalProvider(LocalNavigator provides navigator) {
+            // Must be at App level so it survives route navigation (MainScreen unmounts on push)
+            BrowserHistorySync(navigator = navigator, mainPagerState = mainPagerStateHolder.value)
+
             NavDisplay(
                 backStack = navigator.backStack,
                 entryDecorators = listOf(
@@ -56,7 +64,9 @@ fun App() {
                         slideOutHorizontally(targetOffsetX = { it })
                 },
                 entryProvider = entryProvider {
-                    entry<Route.Main> { MainScreen(viewModel, uiState) }
+                    entry<Route.Main> {
+                        MainScreen(viewModel, uiState, onPagerStateReady = { mainPagerStateHolder.value = it })
+                    }
                     entry<Route.About> {
                         AboutPage(
                             bottomPadding = io.github.nku100.webui.platform.navigationBarBottomPadding(),
