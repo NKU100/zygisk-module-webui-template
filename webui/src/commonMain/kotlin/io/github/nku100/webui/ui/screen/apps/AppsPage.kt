@@ -113,8 +113,8 @@ fun AppsPage(
 ) {
     val searchStatus = state.searchStatus
     val scrollBehavior = MiuixScrollBehavior()
-    val dynamicTopPadding by remember {
-        derivedStateOf { 12.dp * (1f - scrollBehavior.state.collapsedFraction) }
+    val dynamicTopPadding = remember(scrollBehavior) {
+        { 12.dp * (1f - scrollBehavior.state.collapsedFraction) }
     }
 
     val (hazeState, hazeStyle) = rememberDefaultHazeState(enableBlur)

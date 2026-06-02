@@ -52,6 +52,7 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalDensity
@@ -59,7 +60,10 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.constrainHeight
+import androidx.compose.ui.unit.constrainWidth
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.max
 import androidx.compose.ui.zIndex
@@ -84,10 +88,10 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
 @Composable
 fun SearchStatus.SearchBox(
     onSearchStatusChange: (SearchStatus) -> Unit,
-    collapseBar: @Composable (SearchStatus, Dp, PaddingValues) -> Unit = { searchStatus, topPadding, innerPadding ->
+    collapseBar: @Composable (SearchStatus, () -> Dp, PaddingValues) -> Unit = { searchStatus, topPadding, innerPadding ->
         SearchBarFake(searchStatus.label, topPadding, innerPadding)
     },
-    searchBarTopPadding: Dp = 12.dp,
+    searchBarTopPadding: () -> Dp = { 12.dp },
     contentPadding: PaddingValues = PaddingValues(0.dp),
     hazeState: HazeState? = null,
     hazeStyle: HazeStyle? = null,
@@ -151,10 +155,10 @@ fun SearchStatus.SearchBox(
 fun SearchStatus.SearchPager(
     onSearchStatusChange: (SearchStatus) -> Unit,
     defaultResult: @Composable () -> Unit,
-    expandBar: @Composable (SearchStatus, (SearchStatus) -> Unit, Dp) -> Unit = { searchStatus, onStatusChange, padding ->
+    expandBar: @Composable (SearchStatus, (SearchStatus) -> Unit, () -> Dp) -> Unit = { searchStatus, onStatusChange, padding ->
         SearchBar(searchStatus, onStatusChange, padding)
     },
-    searchBarTopPadding: Dp = 12.dp,
+    searchBarTopPadding: () -> Dp = { 12.dp },
     result: @Composable () -> Unit
 ) {
     val searchStatus = this
@@ -221,7 +225,8 @@ fun SearchStatus.SearchPager(
                     fontWeight = FontWeight.Bold,
                     color = colorScheme.primary,
                     modifier = Modifier
-                        .padding(start = 4.dp, end = 16.dp, top = searchBarTopPadding, bottom = 6.dp)
+                        .padding(start = 4.dp, end = 16.dp, bottom = 6.dp)
+                        .deferredTopPadding(searchBarTopPadding)
                         .clickable(
                             interactionSource = null,
                             enabled = searchStatus.isExpand(),
@@ -274,7 +279,7 @@ fun SearchStatus.SearchPager(
 fun SearchBar(
     searchStatus: SearchStatus,
     onSearchStatusChange: (SearchStatus) -> Unit,
-    searchBarTopPadding: Dp = 12.dp,
+    searchBarTopPadding: () -> Dp = { 12.dp },
 ) {
     val focusRequester = remember { FocusRequester() }
     var expanded by rememberSaveable { mutableStateOf(false) }
@@ -318,7 +323,8 @@ fun SearchBar(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 12.dp)
-            .padding(top = searchBarTopPadding, bottom = 6.dp)
+            .deferredTopPadding(searchBarTopPadding)
+            .padding(bottom = 6.dp)
             .focusRequester(focusRequester),
         onSearch = { },
         expanded = searchStatus.shouldExpand(),
@@ -341,7 +347,7 @@ fun SearchBar(
 @Composable
 fun SearchBarFake(
     label: String,
-    searchBarTopPadding: Dp = 12.dp,
+    searchBarTopPadding: () -> Dp = { 12.dp },
     innerPadding: PaddingValues = PaddingValues(0.dp),
     enableBlur: Boolean = false,
 ) {
@@ -368,10 +374,37 @@ fun SearchBarFake(
                 start = innerPadding.calculateStartPadding(layoutDirection),
                 end = innerPadding.calculateEndPadding(layoutDirection)
             )
-            .padding(top = searchBarTopPadding, bottom = 6.dp),
+            .deferredTopPadding(searchBarTopPadding)
+            .padding(bottom = 6.dp),
         onSearch = { },
         enabled = false,
         expanded = false,
         onExpandedChange = { }
     )
+}
+
+/**
+ * Deferred top padding: reads the padding value in the layout phase,
+ * avoiding recomposition on every scroll tick.
+ * Ported from KernelSU: SuperSearchBar.kt deferredTopPadding.
+ */
+internal fun Modifier.deferredTopPadding(top: () -> Dp): Modifier = layout { measurable, constraints ->
+    val topPx = (top().value * density).toInt().coerceAtLeast(0)
+    val placeable = measurable.measure(
+        Constraints(
+            minWidth = constraints.minWidth,
+            maxWidth = constraints.maxWidth,
+            minHeight = (constraints.minHeight - topPx).coerceAtLeast(0),
+            maxHeight = if (constraints.maxHeight == Constraints.Infinity) {
+                Constraints.Infinity
+            } else {
+                (constraints.maxHeight - topPx).coerceAtLeast(0)
+            }
+        )
+    )
+    val width = constraints.constrainWidth(placeable.width)
+    val height = constraints.constrainHeight(placeable.height + topPx)
+    layout(width, height) {
+        placeable.place(0, topPx)
+    }
 }
