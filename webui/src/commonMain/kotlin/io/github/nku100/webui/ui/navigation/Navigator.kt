@@ -1,6 +1,7 @@
 package io.github.nku100.webui.ui.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshots.SnapshotStateList
@@ -14,6 +15,7 @@ import kotlinx.coroutines.flow.SharedFlow
  * Simple navigation helper that owns a back stack and result channels.
  * KMP-compatible — no Parcelable/Saver dependency (wasmJs doesn't need process restoration).
  */
+@Stable
 class Navigator(
     initialKey: NavKey
 ) {

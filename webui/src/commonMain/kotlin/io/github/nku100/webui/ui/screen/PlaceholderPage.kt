@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.unit.Dp
 import io.github.nku100.webui.ui.navigation.LocalNavigator
 import io.github.nku100.webui.ui.navigation.Route
@@ -20,6 +21,7 @@ import io.github.nku100.webui.ui.screen.logs.LogsViewModel
 import io.github.nku100.webui.ui.screen.settings.SettingsActions
 import io.github.nku100.webui.ui.screen.settings.SettingsPage
 import io.github.nku100.webui.ui.screen.settings.SettingsUiState
+import io.github.nku100.webui.ui.util.RecompositionTracker
 
 @Composable
 fun PlaceholderPage(
@@ -29,7 +31,9 @@ fun PlaceholderPage(
     onNavigateToTab: (Int) -> Unit,
     viewModel: MainViewModel,
 ) {
+    RecompositionTracker(label = "PlaceholderPage:${tab.name}")
     val config = uiState.config
+    val targetPackagesSet = remember(config.targetPackages) { config.targetPackages.toSet() }
 
     when (tab) {
         BottomTab.SETTINGS -> {
@@ -70,7 +74,7 @@ fun PlaceholderPage(
             AppsPage(
                 state = AppsUiState(
                     packages = uiState.packages,
-                    targetPackages = config.targetPackages.toSet(),
+                    targetPackages = targetPackagesSet,
                     loading = uiState.isLoading,
                     hasLoaded = uiState.hasLoaded,
                     isRefreshing = uiState.isRefreshing,

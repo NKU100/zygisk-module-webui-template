@@ -58,6 +58,7 @@ import io.github.nku100.webui.ui.component.SearchPager
 import io.github.nku100.webui.ui.component.SearchStatus
 import io.github.nku100.webui.ui.component.StatusTag
 import io.github.nku100.webui.ui.util.rememberDefaultHazeState
+import io.github.nku100.webui.ui.util.RecompositionTracker
 import io.github.nku100.webui.ui.util.topBarDefaultWindowInsetsPadding
 import io.github.nku100.webui.ui.util.topBarInsetsPadding
 import top.yukonga.miuix.kmp.basic.Card
@@ -314,6 +315,7 @@ private fun AppItem(
     isTarget: Boolean,
     onClick: () -> Unit,
 ) {
+    RecompositionTracker(label = "AppItem:${packageInfo.packageName}")
     val bg = colorScheme.secondaryContainer.copy(alpha = 0.8f)
     val fg = colorScheme.onSecondaryContainer
 

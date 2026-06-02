@@ -6,6 +6,11 @@ plugins {
     id("com.android.kotlin.multiplatform.library")
 }
 
+composeCompiler {
+    metricsDestination = layout.buildDirectory.dir("compose-metrics")
+    reportsDestination = layout.buildDirectory.dir("compose-reports")
+}
+
 // Resolve extra properties eagerly into plain vals (not delegated properties).
 // `by rootProject.extra` delegates capture rootProject, which cannot be
 // serialized/deserialized by the Configuration Cache.

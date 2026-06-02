@@ -5,6 +5,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -22,6 +23,7 @@ import kotlin.math.abs
  * Manages pager navigation with isNavigating guard to prevent selectedPage
  * from being overwritten by intermediate pages during cross-tab animation.
  */
+@Stable
 class MainPagerState(
     val pagerState: PagerState,
     private val coroutineScope: CoroutineScope,

@@ -1,5 +1,7 @@
 package io.github.nku100.webui.platform
 
+import androidx.compose.runtime.Stable
+
 /**
  * Result of executing a shell command.
  */
@@ -9,6 +11,7 @@ data class ShellResult(val errno: Int, val stdout: String, val stderr: String)
  * Represents a package (app) on the device.
  * [iconModel] is platform-specific: a URI string on wasmJs, a Bitmap/Drawable on Android.
  */
+@Stable
 data class PackageInfo(
     val packageName: String,
     val label: String = packageName,

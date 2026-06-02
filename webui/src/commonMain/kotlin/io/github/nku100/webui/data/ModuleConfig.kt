@@ -1,11 +1,13 @@
 package io.github.nku100.webui.data
 
+import androidx.compose.runtime.Stable
 import kotlinx.serialization.Serializable
 
 /**
  * Module configuration stored as JSON.
  * Extensible: add new fields as needed for your module.
  */
+@Stable
 @Serializable
 data class ModuleConfig(
     /** Package names that this module should target. */
