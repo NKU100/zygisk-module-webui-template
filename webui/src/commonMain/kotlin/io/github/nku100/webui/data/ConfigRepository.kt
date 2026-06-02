@@ -25,6 +25,11 @@ object ConfigRepository {
 
     suspend fun save(config: ModuleConfig) {
         val content = json.encodeToString(ModuleConfig.serializer(), config)
-        PlatformBridge.writeFile(configPath, content)
+        val escaped = content.replace("'", "'\\''")
+        val escapedPath = configPath.replace("'", "'\\''")
+        val result = PlatformBridge.exec("echo '$escaped' > '$escapedPath'")
+        if (result.errno != 0) {
+            throw IllegalStateException("Failed to save config: ${result.stderr.ifBlank { "errno=${result.errno}" }}")
+        }
     }
 }

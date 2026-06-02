@@ -27,16 +27,20 @@ actual object PlatformBridge {
         "'${arg.replace("'", "'\\''")}'"
 
     actual suspend fun exec(command: String): ShellResult = withContext(Dispatchers.IO) {
-        val process = Runtime.getRuntime().exec(arrayOf("su", "-c", command))
         try {
-            val stdout = process.inputStream.bufferedReader().readText()
-            val stderr = process.errorStream.bufferedReader().readText()
-            val errno = process.waitFor()
-            ShellResult(errno, stdout, stderr)
+            val process = Runtime.getRuntime().exec(arrayOf("su", "-c", command))
+            try {
+                val stdout = process.inputStream.bufferedReader().readText()
+                val stderr = process.errorStream.bufferedReader().readText()
+                val errno = process.waitFor()
+                ShellResult(errno, stdout, stderr)
+            } catch (e: Exception) {
+                ShellResult(-1, "", e.message ?: "Unknown error")
+            } finally {
+                process.destroy()
+            }
         } catch (e: Exception) {
-            ShellResult(-1, "", e.message ?: "Unknown error")
-        } finally {
-            process.destroy()
+            ShellResult(-1, "", e.message ?: "Failed to execute su")
         }
     }
 

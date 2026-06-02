@@ -98,7 +98,10 @@ actual fun hasPlatformApi(): Boolean = hasKsuApiJs()
                 delete window[cb];
                 if (errno !== 0) window.open(url, '_blank');
             };
-            try { window.ksu.exec('am start -a android.intent.action.VIEW -d ' + url, '{}', cb); }
+            try {
+                var escaped = url.replace(/'/g, "'\\\\''");
+                window.ksu.exec("am start -a android.intent.action.VIEW -d '" + escaped + "'", '{}', cb);
+            }
             catch(e) { delete window[cb]; window.open(url, '_blank'); }
         }, 100);
     } else {
@@ -182,7 +185,8 @@ actual object PlatformBridge {
     }
 
     actual suspend fun readFile(path: String): String {
-        val result = exec("cat '$path' 2>/dev/null || echo ''")
+        val escapedPath = path.replace("'", "'\\''")
+        val result = exec("cat '$escapedPath' 2>/dev/null || echo ''")
         return result.stdout
     }
 

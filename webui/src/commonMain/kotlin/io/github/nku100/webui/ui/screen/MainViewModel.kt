@@ -23,6 +23,7 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.CancellationException
 import kotlin.time.Duration.Companion.milliseconds
 
 data class MainUiState(
@@ -96,6 +97,13 @@ class MainViewModel : ViewModel() {
                     moduleAuthor = prop["author"].orEmpty(),
                 )
             }
+            // Re-apply active search after data loads so results are not stale
+            val currentSearch = searchQuery.value
+            if (currentSearch.isNotEmpty()) {
+                applySearchText(currentSearch)
+            }
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             _uiState.update { it.copy(isLoading = false, hasLoaded = true) }
         }
@@ -110,6 +118,13 @@ class MainViewModel : ViewModel() {
             val packages = withContext(Dispatchers.Default) { sortPackages(rawPackages, targets) }
             awaitNextFrame()
             _uiState.update { it.copy(packages = packages, isRefreshing = false) }
+            // Re-apply active search with refreshed package list
+            val currentSearch = searchQuery.value
+            if (currentSearch.isNotEmpty()) {
+                applySearchText(currentSearch)
+            }
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             _uiState.update { it.copy(isRefreshing = false) }
         }
@@ -147,7 +162,15 @@ class MainViewModel : ViewModel() {
 
     private fun saveConfig(newConfig: ModuleConfig) {
         _uiState.update { it.copy(config = newConfig, themeMode = resolveThemeMode(newConfig)) }
-        viewModelScope.launch { ConfigRepository.save(newConfig) }
+        viewModelScope.launch {
+            try {
+                ConfigRepository.save(newConfig)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                PlatformBridge.toast("Failed to save config: ${e.message}")
+            }
+        }
     }
 
     fun setEnabled(enabled: Boolean) =
@@ -184,6 +207,8 @@ class MainViewModel : ViewModel() {
                     val value = line.substringAfter('=').trim()
                     key to value
                 }
+        } catch (e: CancellationException) {
+            throw e
         } catch (_: Exception) {
             emptyMap()
         }
@@ -205,6 +230,8 @@ class MainViewModel : ViewModel() {
                 if (line.startsWith("updateJson=")) line.replace(from, to) else line
             }
             PlatformBridge.writeFile(ModuleInfo.MODULE_PROP_PATH, newContent)
+        } catch (e: CancellationException) {
+            throw e
         } catch (_: Exception) { /* best-effort */ }
     }
 
@@ -221,7 +248,15 @@ class MainViewModel : ViewModel() {
         // Don't re-sort here — mirrors KSU behavior where sort order updates on next refresh,
         // preventing the list from jumping while user is on the AppProfile page.
         _uiState.update { it.copy(config = newConfig, themeMode = resolveThemeMode(newConfig)) }
-        viewModelScope.launch { ConfigRepository.save(newConfig) }
+        viewModelScope.launch {
+            try {
+                ConfigRepository.save(newConfig)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                PlatformBridge.toast("Failed to save config: ${e.message}")
+            }
+        }
     }
 
     fun savePackageSettings(packageName: String, settings: PackageSettings) {

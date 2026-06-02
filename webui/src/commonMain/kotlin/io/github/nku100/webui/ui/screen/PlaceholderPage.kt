@@ -1,7 +1,6 @@
 package io.github.nku100.webui.ui.screen
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -100,7 +99,6 @@ fun PlaceholderPage(
         BottomTab.LOGS -> {
             val logsViewModel = viewModel { LogsViewModel() }
             val logsState by logsViewModel.uiState.collectAsState()
-            LaunchedEffect(Unit) { logsViewModel.load() }
             LogsPage(
                 state = logsState,
                 actions = LogsActions(

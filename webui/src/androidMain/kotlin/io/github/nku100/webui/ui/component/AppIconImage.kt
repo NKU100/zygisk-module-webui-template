@@ -27,7 +27,7 @@ import io.github.nku100.webui.ui.LetterIcon
 import io.github.nku100.webui.ui.util.AppIconCache
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
-private data class IconKey(val uid: Int, val packageName: String)
+private data class IconKey(val uid: Int, val packageName: String, val sourceDir: String)
 
 @Composable
 actual fun AppIconImage(
@@ -47,7 +47,7 @@ actual fun AppIconImage(
     val context = LocalContext.current
     val targetSizePx = with(density) { size.roundToPx() }
 
-    val iconKey = IconKey(applicationInfo.uid, applicationInfo.packageName)
+    val iconKey = IconKey(applicationInfo.uid, applicationInfo.packageName, applicationInfo.sourceDir)
     val cachedBitmap = remember(iconKey) {
         AppIconCache.getFromCache(applicationInfo)
     }

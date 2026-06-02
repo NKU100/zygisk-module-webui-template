@@ -14,11 +14,16 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.CancellationException
 
 class LogsViewModel : ViewModel() {
 
     private val _uiState = MutableStateFlow(LogsUiState())
     val uiState: StateFlow<LogsUiState> = _uiState.asStateFlow()
+
+    init {
+        load()
+    }
 
     /**
      * Parse a single logcat line.
@@ -116,6 +121,8 @@ class LogsViewModel : ViewModel() {
                     errorMessage = null,
                 )
             }
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             _uiState.update {
                 it.copy(

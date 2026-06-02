@@ -49,6 +49,7 @@ import kotlin.js.Promise
 private external fun xhrAsBase64(url: String): Promise<JsString>
 
 private val iconCache = mutableMapOf<String, ImageBitmap>()
+private const val ICON_CACHE_MAX_SIZE = 100
 private val loadSemaphore = Semaphore(4)
 
 @OptIn(ExperimentalEncodingApi::class)
@@ -78,6 +79,10 @@ actual fun AppIconImage(
                     skiaImageToImageBitmap(SkiaImage.makeFromEncoded(bytes))
                 }
                 iconCache[url] = bmp
+                if (iconCache.size > ICON_CACHE_MAX_SIZE) {
+                    val keys = iconCache.keys.toList().take(ICON_CACHE_MAX_SIZE / 2)
+                    keys.forEach { iconCache.remove(it) }
+                }
                 bitmap = bmp
             } catch (_: Throwable) { }
         }
