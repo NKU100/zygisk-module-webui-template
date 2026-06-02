@@ -38,6 +38,7 @@ import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeStyle
 import dev.chrisbanes.haze.HazeTint
 import dev.chrisbanes.haze.hazeSource
+import androidx.compose.runtime.Immutable
 import io.github.nku100.webui.ModuleInfo
 import io.github.nku100.webui.platform.isAndroidPlatform
 import io.github.nku100.webui.platform.openUrl
@@ -64,6 +65,7 @@ import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 import zygisk_module_webui_template.webui.generated.resources.*
 
+@Immutable
 data class HomeUiState(
     val moduleEnabled: Boolean = true,
     val targetPackageCount: Int = 0,

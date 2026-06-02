@@ -1,8 +1,10 @@
 package io.github.nku100.webui.ui.screen.settings
 
+import androidx.compose.runtime.Immutable
 import io.github.nku100.webui.data.ModuleConfig
 import io.github.nku100.webui.ui.theme.ThemeMode
 
+@Immutable
 data class SettingsUiState(
     val enabled: Boolean = true,
     val themeMode: ThemeMode = ThemeMode.FOLLOW_SYSTEM,

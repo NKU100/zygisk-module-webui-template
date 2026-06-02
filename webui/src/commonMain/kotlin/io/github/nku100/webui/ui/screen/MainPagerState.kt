@@ -44,7 +44,7 @@ class MainPagerState(
         selectedPage = targetIndex
         isNavigating = true
 
-        val distance = abs(targetIndex - pagerState.currentPage).coerceAtLeast(1)
+        val distance = abs(targetIndex - pagerState.currentPage).coerceAtLeast(2)
         val duration = 100 * distance + 100
         val layoutInfo = pagerState.layoutInfo
         val pageSize = layoutInfo.pageSize + layoutInfo.pageSpacing

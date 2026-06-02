@@ -1,5 +1,6 @@
 package io.github.nku100.webui.ui.screen
 
+import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.github.nku100.webui.ModuleInfo
@@ -26,6 +27,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.CancellationException
 import kotlin.time.Duration.Companion.milliseconds
 
+@Immutable
 data class MainUiState(
     val config: ModuleConfig = ModuleConfig(),
     val packages: List<PackageInfo> = emptyList(),

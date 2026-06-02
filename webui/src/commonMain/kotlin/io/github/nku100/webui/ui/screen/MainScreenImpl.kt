@@ -89,7 +89,7 @@ fun MainScreen(viewModel: MainViewModel, uiState: MainUiState, onPagerStateReady
         mainPagerState.syncPage()
     }
 
-    val isBackHandlerEnabled by remember {
+    val isBackHandlerEnabled by remember(mainPagerState) {
         derivedStateOf { mainPagerState.selectedPage != 0 }
     }
     PlatformBackHandler(enabled = isBackHandlerEnabled) {
