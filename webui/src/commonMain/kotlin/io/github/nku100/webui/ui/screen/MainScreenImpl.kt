@@ -14,9 +14,11 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.staticCompositionLocalOf
+import io.github.nku100.webui.platform.awaitNextFrame
 import io.github.nku100.webui.platform.PlatformBackHandler
 import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.Alignment
@@ -164,7 +166,21 @@ fun MainScreen(viewModel: MainViewModel, uiState: MainUiState, onPagerStateReady
     }
 
     CompositionLocalProvider(LocalMainPagerState provides mainPagerState) {
+        // Progressive warm-up: increment beyondViewportPageCount by 1 per frame
+        // to avoid composing all 4 pages in a single frame during cold start.
+        // contentReady is the legacy flag (true after nav transition completes).
         val contentReady = rememberContentReady()
+        val warmUpCount = remember { mutableIntStateOf(0) }
+        LaunchedEffect(contentReady) {
+            if (contentReady && warmUpCount.intValue < 3) {
+                while (warmUpCount.intValue < 3) {
+                    awaitNextFrame()
+                    warmUpCount.intValue++
+                }
+            }
+        }
+        val beyondViewportPages = if (!contentReady) 0
+        else minOf(warmUpCount.intValue, 3)
 
         Scaffold(bottomBar = bottomBar) { innerPadding ->
             HorizontalPager(
@@ -173,11 +189,11 @@ fun MainScreen(viewModel: MainViewModel, uiState: MainUiState, onPagerStateReady
                     .then(if (config.enableBlur) Modifier.hazeSource(state = hazeState) else Modifier)
                     .then(if (enableFloatingBottomBarBlur) Modifier.layerBackdrop(backdrop) else Modifier),
                 state = pagerState,
-                beyondViewportPageCount = if (contentReady) 3 else 0,
+                beyondViewportPageCount = beyondViewportPages,
                 userScrollEnabled = true,
             ) { page ->
                 val isCurrentPage = page == pagerState.settledPage
-                if (isCurrentPage || contentReady) {
+                if (isCurrentPage || beyondViewportPages > 0) {
                     PlaceholderPage(
                         tab = BottomTab.entries[page],
                         uiState = uiState,
