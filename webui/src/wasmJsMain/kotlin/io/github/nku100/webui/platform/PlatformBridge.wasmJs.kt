@@ -187,7 +187,8 @@ actual object PlatformBridge {
     }
 
     actual suspend fun writeFile(path: String, content: String) {
+        val escapedPath = path.replace("'", "'\\''")
         val escaped = content.replace("'", "'\\''")
-        exec("echo '$escaped' > '$path'")
+        exec("echo '${escaped}' > '${escapedPath}'")
     }
 }

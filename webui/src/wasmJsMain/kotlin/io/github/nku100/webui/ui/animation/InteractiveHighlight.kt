@@ -49,13 +49,16 @@ actual class InteractiveHighlight actual constructor(
         uniform half4 color;
         uniform float radius;
         uniform float2 position;
-        
+
         half4 main(float2 coord) {
             float dist = distance(coord, position);
             float intensity = smoothstep(radius, radius * 0.5, dist);
             return color * intensity;
         }
     """)
+
+    // Reuse Paint across frames to avoid per-frame allocation
+    private val skiaPaint = org.jetbrains.skia.Paint()
 
     actual val modifier: Modifier = Modifier.drawWithContent {
         val progress = pressProgressAnimation.value
@@ -75,15 +78,12 @@ actual class InteractiveHighlight actual constructor(
             builder.uniform("position", clampedX, clampedY)
 
             drawIntoCanvas { canvas ->
-                val paint = org.jetbrains.skia.Paint().apply {
-                    shader = builder.makeShader()
-                    blendMode = org.jetbrains.skia.BlendMode.PLUS
-                }
+                skiaPaint.shader = builder.makeShader()
+                skiaPaint.blendMode = org.jetbrains.skia.BlendMode.PLUS
                 canvas.nativeCanvas.drawRect(
                     org.jetbrains.skia.Rect.makeWH(size.width, size.height),
-                    paint
+                    skiaPaint
                 )
-                paint.close()
             }
         }
         drawContent()

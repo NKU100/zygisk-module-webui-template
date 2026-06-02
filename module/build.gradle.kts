@@ -1,4 +1,3 @@
-import android.databinding.tool.ext.capitalizeUS
 import groovy.json.JsonBuilder
 import org.apache.commons.codec.binary.Hex
 import org.apache.tools.ant.filters.FixCrLfFilter
@@ -66,7 +65,7 @@ android {
 
 androidComponents.onVariants { variant ->
     val variantLowered = variant.name.lowercase()
-    val variantCapped = variant.name.capitalizeUS()
+    val variantCapped = variant.name.replaceFirstChar { it.titlecase() }
     val buildTypeLowered = variant.buildType?.lowercase() ?: "debug"
     val supportedAbis = abiList.joinToString(" ") {
         when (it) {

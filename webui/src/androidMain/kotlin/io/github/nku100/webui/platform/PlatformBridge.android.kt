@@ -22,15 +22,21 @@ actual object PlatformBridge {
     var appContext: Context? = null
     var toastCallback: ((String) -> Unit)? = null
 
+    /** Escape a value for safe use as a shell argument (wraps in single quotes). */
+    private fun shellEscape(arg: String): String =
+        "'${arg.replace("'", "'\\''")}'"
+
     actual suspend fun exec(command: String): ShellResult = withContext(Dispatchers.IO) {
+        val process = Runtime.getRuntime().exec(arrayOf("su", "-c", command))
         try {
-            val process = Runtime.getRuntime().exec(arrayOf("su", "-c", command))
             val stdout = process.inputStream.bufferedReader().readText()
             val stderr = process.errorStream.bufferedReader().readText()
             val errno = process.waitFor()
             ShellResult(errno, stdout, stderr)
         } catch (e: Exception) {
             ShellResult(-1, "", e.message ?: "Unknown error")
+        } finally {
+            process.destroy()
         }
     }
 
@@ -65,7 +71,7 @@ actual object PlatformBridge {
 
     actual suspend fun readFile(path: String): String = withContext(Dispatchers.IO) {
         try {
-            val result = exec("cat '$path'")
+            val result = exec("cat ${shellEscape(path)}")
             if (result.errno == 0) result.stdout else ""
         } catch (_: Exception) { "" }
     }
@@ -73,7 +79,7 @@ actual object PlatformBridge {
     actual suspend fun writeFile(path: String, content: String) {
         withContext(Dispatchers.IO) {
             val escaped = content.replace("'", "'\\''")
-            exec("echo '$escaped' > '$path'")
+            exec("echo '${escaped}' > ${shellEscape(path)}")
         }
     }
 }

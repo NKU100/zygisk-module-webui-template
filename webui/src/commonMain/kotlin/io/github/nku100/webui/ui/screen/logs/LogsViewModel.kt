@@ -31,21 +31,19 @@ class LogsViewModel : ViewModel() {
      */
     private fun parseLine(raw: String): LogLine {
         // threadtime / time format: "04-08 12:34:56.789  1234  5678 I ZygiskWebUI: msg"
-        val threadtime = Regex(
-            """^\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2}\.\d+\s+\d+\s+\d+\s+([VDIWEFS])\s+(\S+)\s*:\s*(.*)$"""
-        ).find(raw)
+        val threadtime = REGEX_THREADTIME.find(raw)
         if (threadtime != null) {
             val (lvlChar, tag, msg) = threadtime.destructured
             return LogLine(level = charToLevel(lvlChar[0]), tag = tag.trimEnd(':'), message = msg, raw = raw)
         }
         // brief format: "I/ZygiskWebUI(1234): msg"
-        val brief = Regex("""^([VDIWEFS])/(\S+?)\(\s*\d+\):\s*(.*)$""").find(raw)
+        val brief = REGEX_BRIEF.find(raw)
         if (brief != null) {
             val (lvlChar, tag, msg) = brief.destructured
             return LogLine(level = charToLevel(lvlChar[0]), tag = tag, message = msg, raw = raw)
         }
         // tag format: "I/ZygiskWebUI: msg"
-        val tag = Regex("""^([VDIWEFS])/(\S+?):\s*(.*)$""").find(raw)
+        val tag = REGEX_TAG.find(raw)
         if (tag != null) {
             val (lvlChar, tagName, msg) = tag.destructured
             return LogLine(level = charToLevel(lvlChar[0]), tag = tagName, message = msg, raw = raw)
@@ -141,6 +139,12 @@ class LogsViewModel : ViewModel() {
     companion object {
         /** Must match LOG_PATH in example.cpp */
         val LOG_PATH = ModuleInfo.CONFIG_PATH.replace("config.json", "module.log")
+
+        private val REGEX_THREADTIME = Regex(
+            """^\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2}\.\d+\s+\d+\s+\d+\s+([VDIWEFS])\s+(\S+)\s*:\s*(.*)$"""
+        )
+        private val REGEX_BRIEF = Regex("""^([VDIWEFS])/(\S+?)\(\s*\d+\):\s*(.*)$""")
+        private val REGEX_TAG = Regex("""^([VDIWEFS])/(\S+?):\s*(.*)$""")
     }
 
     fun updateSearchStatus(status: SearchStatus) {

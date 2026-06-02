@@ -35,10 +35,8 @@ class Navigator(
 
     fun replaceAll(keys: List<NavKey>) {
         if (keys.isEmpty()) return
-        if (backStack.isNotEmpty()) {
-            backStack.clear()
-            backStack.addAll(keys)
-        }
+        backStack.clear()
+        backStack.addAll(keys)
     }
 
     fun pop() {

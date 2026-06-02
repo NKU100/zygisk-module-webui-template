@@ -2,11 +2,7 @@ package io.github.nku100.webui.ui.screen.apps
 import org.jetbrains.compose.resources.stringResource
 import zygisk_module_webui_template.webui.generated.resources.*
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
+
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.Arrangement
@@ -220,17 +216,11 @@ fun AppsPage(
                     item { Spacer(Modifier.height(6.dp)) }
                     items(searchResults, key = { it.packageName }) { pkg ->
                         val isTarget = state.targetPackages.contains(pkg.packageName)
-                        AnimatedVisibility(
-                            visible = true,
-                            enter = fadeIn() + expandVertically(),
-                            exit = fadeOut() + shrinkVertically(),
-                        ) {
-                            AppItem(
-                                packageInfo = pkg,
-                                isTarget = isTarget,
-                                onClick = { actions.onNavigateToProfile(pkg.packageName) },
-                            )
-                        }
+                        AppItem(
+                            packageInfo = pkg,
+                            isTarget = isTarget,
+                            onClick = { actions.onNavigateToProfile(pkg.packageName) },
+                        )
                     }
                     item { Spacer(Modifier.height(maxOf(bottomPadding, imeBottomPadding))) }
                 }

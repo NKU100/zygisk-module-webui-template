@@ -95,9 +95,16 @@ fun LogsPage(
     val lazyListState = rememberLazyListState()
     val pullToRefreshState = rememberPullToRefreshState()
 
-    // Auto-scroll to bottom when new lines arrive
+    // Auto-scroll to bottom when new lines arrive, but only if user is near the bottom
+    val shouldAutoScroll by remember {
+        derivedStateOf {
+            val lastVisible = lazyListState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
+            val totalItems = lazyListState.layoutInfo.totalItemsCount
+            lastVisible >= totalItems - 3
+        }
+    }
     LaunchedEffect(state.visibleLines.size) {
-        if (state.visibleLines.isNotEmpty()) {
+        if (state.visibleLines.isNotEmpty() && shouldAutoScroll) {
             lazyListState.animateScrollToItem(state.visibleLines.size - 1)
         }
     }

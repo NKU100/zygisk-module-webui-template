@@ -95,21 +95,24 @@ fun App() {
                                 },
                                 onLaunchApp = {
                                     scope.launch {
+                                        val pkg = key.packageName.replace("'", "'\\''")
                                         PlatformBridge.exec(
-                                            "cmd package resolve-activity --brief ${key.packageName} | tail -n 1 | xargs cmd activity start-activity -n"
+                                            "cmd package resolve-activity --brief $pkg | tail -n 1 | xargs cmd activity start-activity -n"
                                         )
                                     }
                                 },
                                 onForceStopApp = {
                                     scope.launch {
-                                        PlatformBridge.exec("am force-stop ${key.packageName}")
+                                        val pkg = key.packageName.replace("'", "'\\''")
+                                        PlatformBridge.exec("am force-stop $pkg")
                                     }
                                 },
                                 onRestartApp = {
                                     scope.launch {
-                                        PlatformBridge.exec("am force-stop ${key.packageName}")
+                                        val pkg = key.packageName.replace("'", "'\\''")
+                                        PlatformBridge.exec("am force-stop $pkg")
                                         PlatformBridge.exec(
-                                            "cmd package resolve-activity --brief ${key.packageName} | tail -n 1 | xargs cmd activity start-activity -n"
+                                            "cmd package resolve-activity --brief $pkg | tail -n 1 | xargs cmd activity start-activity -n"
                                         )
                                     }
                                 },

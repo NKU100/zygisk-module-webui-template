@@ -18,6 +18,8 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -41,6 +43,7 @@ data class MainUiState(
     val moduleAuthor: String = "",
 )
 
+@OptIn(FlowPreview::class)
 class MainViewModel : ViewModel() {
 
     private val _uiState = MutableStateFlow(MainUiState())
@@ -51,14 +54,7 @@ class MainViewModel : ViewModel() {
     init {
         // Launch search query collector with debounce, mirroring KSU's launchSearchQueryCollector
         viewModelScope.launch {
-            var debounceJob: Job? = null
-            searchQuery.collect { text ->
-                debounceJob?.cancel()
-                debounceJob = launch {
-                    kotlinx.coroutines.delay(300.milliseconds)
-                    applySearchText(text)
-                }
-            }
+            searchQuery.debounce(300.milliseconds).collect { applySearchText(it) }
         }
 
         // Auto-load data on init

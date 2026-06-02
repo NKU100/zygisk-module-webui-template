@@ -41,6 +41,19 @@ using zygisk::Api;
 using zygisk::AppSpecializeArgs;
 using zygisk::ServerSpecializeArgs;
 
+// Write exactly n bytes, handling partial writes.
+static ssize_t write_all(int fd, const void *buf, size_t n) {
+    const char *p = static_cast<const char *>(buf);
+    size_t left = n;
+    while (left > 0) {
+        ssize_t written = write(fd, p, left);
+        if (written <= 0) return written;
+        p += written;
+        left -= (size_t)written;
+    }
+    return (ssize_t)n;
+}
+
 #define LOG_TAG    "ZygiskWebUI"
 #define MODULE_ID  "zygisk_sample"
 #define DATA_DIR    "/data/adb/" MODULE_ID
@@ -67,12 +80,12 @@ static void companion_appendLog(const std::string &line) {
         if (n > 0) {
             ftruncate(fd, 0);
             lseek(fd, 0, SEEK_SET);
-            write(fd, buf, n);
+            write_all(fd, buf, (size_t)n);
         }
         delete[] buf;
     }
 
-    write(fd, line.data(), line.size());
+    write_all(fd, line.data(), line.size());
     close(fd);
 }
 
@@ -91,16 +104,20 @@ static void companion_handler(int sock) {
             close(cfd);
         }
         uint32_t len = (uint32_t)config.size();
-        write(sock, &len, sizeof(len));
-        if (len > 0) write(sock, config.data(), len);
+        write_all(sock, &len, sizeof(len));
+        if (len > 0) write_all(sock, config.data(), len);
 
     } else if (op == OP_WRITE_LOG) {
         uint32_t len = 0;
         if (read(sock, &len, sizeof(len)) != sizeof(len) || len == 0 || len > 65536) return;
         std::string line(len, '\0');
-        if (read(sock, &line[0], len) == (ssize_t)len) {
-            companion_appendLog(line);
+        ssize_t nread = 0;
+        while (nread < (ssize_t)len) {
+            ssize_t r = read(sock, &line[(size_t)nread], (size_t)(len - (uint32_t)nread));
+            if (r <= 0) return;
+            nread += r;
         }
+        companion_appendLog(line);
     }
 }
 
@@ -144,9 +161,9 @@ static void remoteLog(Api *api, int prio, const char *tag, const char *msg) {
 
     uint8_t op = OP_WRITE_LOG;
     uint32_t msgLen = (uint32_t)len;
-    write(sock, &op, 1);
-    write(sock, &msgLen, sizeof(msgLen));
-    write(sock, line, len);
+    write_all(sock, &op, 1);
+    write_all(sock, &msgLen, sizeof(msgLen));
+    write_all(sock, line, (size_t)len);
     close(sock);
 }
 
@@ -168,8 +185,8 @@ public:
     }
 
 private:
-    Api *api;
-    JNIEnv *env;
+    Api *api = nullptr;
+    JNIEnv *env = nullptr;
 
     void preSpecialize(const char *process) {
         // Read config from companion (OP_READ_CONFIG)
@@ -177,7 +194,7 @@ private:
         int sock = api->connectCompanion();
         if (sock >= 0) {
             uint8_t op = OP_READ_CONFIG;
-            write(sock, &op, 1);
+            write_all(sock, &op, 1);
             uint32_t len = 0;
             if (read(sock, &len, sizeof(len)) == sizeof(len) && len > 0) {
                 configJson.resize(len);

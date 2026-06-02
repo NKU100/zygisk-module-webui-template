@@ -16,4 +16,9 @@ class MainActivity : ComponentActivity() {
         }
         setContent { App() }
     }
+
+    override fun onDestroy() {
+        PlatformBridge.toastCallback = null
+        super.onDestroy()
+    }
 }
