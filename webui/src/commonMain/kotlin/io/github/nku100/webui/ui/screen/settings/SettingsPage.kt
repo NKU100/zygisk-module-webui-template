@@ -45,9 +45,9 @@ import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.TopAppBar
-import top.yukonga.miuix.kmp.extra.SuperArrow
-import top.yukonga.miuix.kmp.extra.SuperDropdown
-import top.yukonga.miuix.kmp.extra.SuperSwitch
+import top.yukonga.miuix.kmp.preference.ArrowPreference
+import top.yukonga.miuix.kmp.preference.OverlayDropdownPreference
+import top.yukonga.miuix.kmp.preference.SwitchPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
@@ -92,7 +92,7 @@ fun SettingsPage(
                         .padding(top = 12.dp)
                         .fillMaxWidth(),
                 ) {
-                    SuperSwitch(
+                    SwitchPreference(
                         title = stringResource(Res.string.module_enabled),
                         summary = stringResource(Res.string.module_enabled_summary),
                         startAction = {
@@ -123,7 +123,7 @@ fun SettingsPage(
                             ThemeMode.DARK -> stringResource(Res.string.theme_dark)
                         }
                     }
-                    SuperDropdown(
+                    OverlayDropdownPreference(
                         title = stringResource(Res.string.theme_mode),
                         summary = stringResource(Res.string.theme_mode_summary),
                         items = themeModeItems,
@@ -157,7 +157,7 @@ fun SettingsPage(
                                 UpdateChannel.BETA -> stringResource(Res.string.update_channel_beta)
                             }
                         }
-                        SuperDropdown(
+                        OverlayDropdownPreference(
                             title = stringResource(Res.string.update_channel),
                             summary = stringResource(Res.string.update_channel_summary),
                             items = channelItems,
@@ -185,7 +185,7 @@ fun SettingsPage(
                         .padding(top = 12.dp)
                         .fillMaxWidth(),
                 ) {
-                    SuperSwitch(
+                    SwitchPreference(
                         title = stringResource(Res.string.blur_effects),
                         summary = stringResource(Res.string.blur_effects_summary),
                         startAction = {
@@ -199,7 +199,7 @@ fun SettingsPage(
                         checked = uiState.enableBlur,
                         onCheckedChange = actions.onEnableBlurChange
                     )
-                    SuperSwitch(
+                    SwitchPreference(
                         title = stringResource(Res.string.floating_bottom_bar),
                         summary = stringResource(Res.string.floating_bottom_bar_summary),
                         startAction = {
@@ -214,7 +214,7 @@ fun SettingsPage(
                         onCheckedChange = actions.onEnableFloatingBottomBarChange
                     )
                     AnimatedVisibility(visible = uiState.enableFloatingBottomBar) {
-                        SuperSwitch(
+                        SwitchPreference(
                             title = stringResource(Res.string.bottom_bar_glass_effect),
                             summary = stringResource(Res.string.bottom_bar_glass_effect_summary),
                             startAction = {
@@ -239,7 +239,7 @@ fun SettingsPage(
                         .padding(vertical = 12.dp)
                         .fillMaxWidth(),
                 ) {
-                    SuperArrow(
+                    ArrowPreference(
                         title = stringResource(Res.string.about),
                         summary = stringResource(Res.string.about_summary),
                         startAction = {

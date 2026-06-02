@@ -38,7 +38,7 @@ import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.TopAppBar
-import top.yukonga.miuix.kmp.extra.SuperArrow
+import top.yukonga.miuix.kmp.preference.ArrowPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 
@@ -133,7 +133,7 @@ fun AboutPage(
                         .padding(top = 12.dp)
                         .fillMaxWidth(),
                 ) {
-                    SuperArrow(
+                    ArrowPreference(
                         title = stringResource(Res.string.source_code),
                         summary = ModuleInfo.MODULE_REPO.removePrefix("https://"),
                         startAction = {

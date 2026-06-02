@@ -55,9 +55,9 @@ import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextField
 import top.yukonga.miuix.kmp.basic.TopAppBar
-import top.yukonga.miuix.kmp.extra.SuperDropdown
-import top.yukonga.miuix.kmp.extra.SuperListPopup
-import top.yukonga.miuix.kmp.extra.SuperSwitch
+import top.yukonga.miuix.kmp.preference.OverlayDropdownPreference
+import top.yukonga.miuix.kmp.overlay.OverlayListPopup
+import top.yukonga.miuix.kmp.preference.SwitchPreference
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Back
 import top.yukonga.miuix.kmp.icon.extended.MoreCircle
@@ -116,7 +116,7 @@ fun AppProfilePage(
                 },
                 actions = {
                     val showPopup = remember { mutableStateOf(false) }
-                    SuperListPopup(
+                    OverlayListPopup(
                         show = showPopup.value,
                         popupPositionProvider = ListPopupDefaults.ContextMenuPositionProvider,
                         alignment = PopupPositionProvider.Align.TopEnd,
@@ -216,7 +216,7 @@ fun AppProfilePage(
                         .padding(horizontal = 12.dp)
                         .padding(bottom = 12.dp),
                 ) {
-                    SuperSwitch(
+                    SwitchPreference(
                         title = stringResource(Res.string.enable_for_this_app),
                         summary = stringResource(Res.string.enable_for_this_app_summary),
                         checked = state.isTargeted,
@@ -236,7 +236,7 @@ fun AppProfilePage(
                         .padding(bottom = 12.dp),
                 ) {
                     val logLevelOptions = listOf("DEBUG", "INFO", "WARN")
-                    SuperDropdown(
+                    OverlayDropdownPreference(
                         title = stringResource(Res.string.log_level),
                         summary = stringResource(Res.string.log_level_summary),
                         items = logLevelOptions,
@@ -245,7 +245,7 @@ fun AppProfilePage(
                             actions.onSaveSettings(settings.copy(logLevel = logLevelOptions[idx]))
                         },
                     )
-                    SuperSwitch(
+                    SwitchPreference(
                         title = stringResource(Res.string.dump_stack_trace),
                         summary = stringResource(Res.string.dump_stack_trace_summary),
                         checked = settings.dumpStackTrace,

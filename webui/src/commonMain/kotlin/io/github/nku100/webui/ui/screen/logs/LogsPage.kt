@@ -70,8 +70,8 @@ import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.basic.rememberPullToRefreshState
-import top.yukonga.miuix.kmp.extra.SuperDialog
-import top.yukonga.miuix.kmp.extra.SuperListPopup
+import top.yukonga.miuix.kmp.overlay.OverlayDialog
+import top.yukonga.miuix.kmp.overlay.OverlayListPopup
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Delete
 import top.yukonga.miuix.kmp.icon.extended.Filter
@@ -130,7 +130,7 @@ fun LogsPage(
                     title = stringResource(Res.string.tab_logs),
                     actions = {
                         // Level filter popup
-                        SuperListPopup(
+                        OverlayListPopup(
                             show = showFilterPopup.value,
                             popupPositionProvider = ListPopupDefaults.ContextMenuPositionProvider,
                             alignment = PopupPositionProvider.Align.TopEnd,
@@ -327,7 +327,7 @@ fun LogsPage(
 
     // Detail dialog
     detailLine.value?.let { line ->
-        SuperDialog(
+        OverlayDialog(
             title = "${line.level.name}  ${line.tag}",
             show = true,
             onDismissRequest = { detailLine.value = null },

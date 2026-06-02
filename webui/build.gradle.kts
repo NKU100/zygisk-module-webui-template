@@ -70,8 +70,9 @@ kotlin {
             implementation(compose.preview)
             implementation(compose.materialIconsExtended)
             implementation(libs.activity.compose)
-            implementation(libs.miuix.android)
-            implementation(libs.miuix.icons.android)
+            implementation(libs.miuix.ui)
+            implementation(libs.miuix.preference)
+            implementation(libs.miuix.icons)
             implementation("com.kyant.backdrop:backdrop")
             implementation(libs.haze.android)
             implementation(libs.material.kolor)
@@ -80,7 +81,8 @@ kotlin {
         wasmJsMain.dependencies {
             implementation(compose.materialIconsExtended)
             // KMP main artifacts — Gradle auto-resolves to wasmJs variant
-            implementation(libs.miuix)
+            implementation(libs.miuix.ui)
+            implementation(libs.miuix.preference)
             implementation(libs.miuix.icons)
             implementation("com.kyant.backdrop:backdrop")
             implementation(libs.haze)

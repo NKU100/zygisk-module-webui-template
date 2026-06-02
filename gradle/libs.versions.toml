@@ -1,11 +1,11 @@
 [versions]
-agp = "9.0.0"
+agp = "9.2.1"
 appiconloader = "1.5.0"
 kotlin = "2.3.20"
 compose-multiplatform = "1.10.3"
 kotlinx-serialization = "1.8.1"
 activity-compose = "1.10.1"
-miuix = "0.8.8"
+miuix = "0.9.1"
 haze = "1.7.2"
 materialKolor = "4.1.1"
 navigation3 = "1.0.0-alpha05"
@@ -14,15 +14,14 @@ lifecycle = "2.9.0"
 [libraries]
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
 activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activity-compose" }
-# Android-specific artifacts (used in androidMain only)
-miuix-android = { module = "top.yukonga.miuix.kmp:miuix-android", version.ref = "miuix" }
-miuix-icons-android = { module = "top.yukonga.miuix.kmp:miuix-icons-android", version.ref = "miuix" }
+# Android-specific artifacts (used in androidMain only) — removed in 0.9.x, use KMP artifacts directly
+# KMP main artifacts (Gradle auto-resolves to correct platform variant)
+miuix-ui = { module = "top.yukonga.miuix.kmp:miuix-ui", version.ref = "miuix" }
+miuix-preference = { module = "top.yukonga.miuix.kmp:miuix-preference", version.ref = "miuix" }
+miuix-icons = { module = "top.yukonga.miuix.kmp:miuix-icons", version.ref = "miuix" }
 haze-android = { module = "dev.chrisbanes.haze:haze-android", version.ref = "haze" }
 material-kolor = { group = "com.materialkolor", name = "material-kolor", version.ref = "materialKolor" }
 appiconloader = { module = "me.zhanghai.android.appiconloader:appiconloader", version.ref = "appiconloader" }
-# KMP main artifacts (Gradle auto-resolves to correct platform variant)
-miuix = { module = "top.yukonga.miuix.kmp:miuix", version.ref = "miuix" }
-miuix-icons = { module = "top.yukonga.miuix.kmp:miuix-icons", version.ref = "miuix" }
 haze = { module = "dev.chrisbanes.haze:haze", version.ref = "haze" }
 navigation3-ui = { module = "org.jetbrains.androidx.navigation3:navigation3-ui", version.ref = "navigation3" }
 lifecycle-viewmodel = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel", version.ref = "lifecycle" }
