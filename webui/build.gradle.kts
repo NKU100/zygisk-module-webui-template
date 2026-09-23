@@ -40,6 +40,7 @@ kotlin {
         namespace = "io.github.nku100.webui"
         compileSdk = androidCompileSdkVersion
         minSdk = androidMinSdkVersion
+        withHostTest {}
         androidResources {
             enable = true
         }
@@ -65,6 +66,9 @@ kotlin {
             implementation(libs.lifecycle.viewmodel)
             implementation(libs.lifecycle.viewmodel.compose)
             implementation("com.kyant.capsule:capsule")
+        }
+        commonTest.dependencies {
+            implementation(kotlin("test"))
         }
         androidMain.dependencies {
             implementation(compose.preview)
