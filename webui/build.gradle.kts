@@ -141,9 +141,7 @@ tasks.register("buildWebUI") {
 val pushTask = tasks.register<Exec>("push") {
     group = "webui"
     dependsOn("buildWebUI")
-    doFirst {
-        commandLine("adb", "push", webDistDir.get().asFile.path, "/data/local/tmp/webroot")
-    }
+    commandLine("adb", "push", webDistDir.get().asFile, "/data/local/tmp/webroot")
 }
 
 val removeTask = tasks.register<Exec>("remove") {
