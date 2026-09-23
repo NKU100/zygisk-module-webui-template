@@ -49,6 +49,17 @@ Added `InsetsSupplier` and `OnInsetsRequestedListener` constructor parameters. N
 - `doUpdateVisitedHistory`: re-injects `currentInsets.js` on navigation when insets are enabled
 - Passes `this` as `WebUIActivity` to `WebViewInterface` constructor
 
+### Safe-area units
+
+KernelSU exposes `--safe-area-inset-*` in density-independent CSS pixels:
+the host divides Android system-bar insets by the display density and truncates
+to integers before generating either CSS or JavaScript. KsuWebUIStandalone must
+use the same conversion while keeping native WebView margins in physical pixels.
+With `width=device-width`, the template consumes these values directly as dp;
+dividing by `devicePixelRatio` again makes the top and bottom padding too small.
+Older standalone builds that inject physical pixels are not compatible with this
+contract and must be updated together with the template.
+
 ### Verification
 
 All APIs were verified on an emulator (Magisk 30700 + root granted via `magisk --sqlite`):
