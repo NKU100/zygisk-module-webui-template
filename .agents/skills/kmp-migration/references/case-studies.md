@@ -1,75 +1,37 @@
-# KMP Migration Case Studies
+# KMP Migration Patterns
 
-## Case 1: Capsule (Pure Algorithm Library)
+These anonymized examples preserve reusable engineering decisions without depending on a particular repository.
 
-**Repository:** kyant0/Capsule
-**Type:** Jetpack Compose smooth corner shapes
-**Difficulty:** Low — pure math + Compose Shape API
+## Example 1: Geometry-Heavy Shape Library
 
-### What Changed
+**Profile:** A small Compose shape library whose core behavior is portable geometry and math.
 
-| File Category | Count | Change Type |
-|---------------|-------|-------------|
-| Kotlin sources (pure move) | 10 | `git mv` only |
-| Kotlin sources (API fix) | 6 | Remove annotations + replace `fastCoerce*` |
-| PathSegment.kt | 1 | Replace `android.graphics.Path.arcTo` with Bézier |
-| Build scripts | 4 | KMP plugin migration |
-| AndroidManifest.xml | 1 | Deleted |
-| .gitignore | 1 | Add `.kotlin/` |
+**Approach:** Move common shape logic into commonMain, remove tooling-only Android annotations, replace AndroidX-only helpers where standard Kotlin behavior matches, and implement missing path operations with focused geometry code.
 
-### Key Decisions
+**Decision:** A short Bézier approximation can be preferable to introducing a graphics engine dependency for one path operation. Compare complexity, artifact size, and rendering fidelity before choosing.
 
-- **Arc drawing**: Bézier approximation instead of Skiko (library is <100KB, Skiko would add 4-8MB)
-- **Compose Multiplatform version**: 1.11.0-beta01 (upstream uses Kotlin 2.3.0, stable CMP only supports 2.2)
-- **Maven publish**: Preserved with version bump to 2.2.0
+**Pitfall:** Bulk-removing an annotation import can leave constructor or property use-site annotations behind. Search for @param:, @get:, @set:, and @field: forms, then compile every target.
 
-### Pitfall Encountered
+## Example 2: Platform-Dependent Effects Library
 
-`sed` batch replacement of `@FloatRange` missed `@param:FloatRange(...)` on data class constructor parameters. Caught at compile time. Lesson: always grep for `@param:`, `@get:`, `@set:`, `@field:` annotation use-site prefixes.
+**Profile:** A Compose effects library that relies on native blur, color-filter, and runtime-shader APIs.
 
----
+**Approach:** Migrate in phases:
 
-## Case 2: Backdrop (Heavy Graphics Library)
+1. Convert the build and move platform-independent models and modifiers to common code.
+2. Define narrow expect/actual APIs for effects, shader construction, and mask filters.
+3. Keep native Android implementations on Android and use the target's supported graphics APIs elsewhere.
+4. Move higher-level effects into common code once they depend only on shared abstractions.
+5. Build and visually compare each requested target.
 
-**Repository:** kyant0/Backdrop
-**Type:** Compose backdrop blur/shadow/highlight effects
-**Difficulty:** High — extensive use of Android graphics APIs (RenderEffect, RuntimeShader, BlurMaskFilter, ColorMatrix)
+**Decision:** Shader source can be shared only when the languages and runtime semantics are compatible. Keep shader creation platform-specific and test compiled output on each target.
 
-### Migration Strategy: Phased expect/actual
+## Decision Guide
 
-Unlike Capsule, Backdrop could NOT simply replace APIs — it needed platform-specific implementations.
-
-**Phase 0:** Build system conversion (same as Capsule)
-**Phase 1:** Move pure Compose files to commonMain (interfaces, data classes, Canvas extensions)
-**Phase 2:** Define `expect`/`actual` for core platform types:
-  - `PlatformRenderEffect` — Android: `android.graphics.RenderEffect`, wasmJs: `org.jetbrains.skia.ImageFilter`
-  - `RuntimeShaderCache` — Android: caches `RuntimeShader` (AGSL), wasmJs: caches `RuntimeEffect` + `RuntimeShaderBuilder` (SkSL)
-  - `PlatformMaskFilter` — Android: `BlurMaskFilter`, wasmJs: `MaskFilter.makeBlur`
-**Phase 3:** Split effects/ directory with `expect`/`actual` for Blur, ColorFilter, Lens, RenderEffect chaining
-**Phase 4:** Move highlight/ and shadow/ modifiers to commonMain (they now depend on cross-platform abstractions)
-**Phase 5:** Verify both Android and wasmJs compile and render identically
-
-### Key Insight: AGSL ↔ SkSL
-
-Android's AGSL (Android Graphics Shading Language) and Skia's SkSL are nearly identical syntax. Shader string constants can live in commonMain; only the runtime shader creation differs:
-
-```kotlin
-// commonMain — shader source string (same for both platforms)
-const val LENS_SHADER = "uniform float2 resolution; ..."
-
-// androidMain
-RuntimeShader(LENS_SHADER)
-
-// wasmJsMain  
-RuntimeEffect.makeForShader(LENS_SHADER)
-```
-
-### Decision Tree Used
-
-```
-Can the API be replaced with stdlib/Compose common API?
-  YES → Replace directly (annotations, fastCoerce*, etc.)
-  NO  → Is there a Skia equivalent?
-         YES → Use expect/actual (Android native, Skia on others)
-         NO  → Reimplement with cross-platform math (Bézier arcs, etc.)
-```
+~~~text
+Is there a common Kotlin or Compose API with matching behavior?
+  Yes -> use it and test boundary cases.
+  No  -> does each target have a suitable native equivalent?
+           Yes -> isolate it behind expect/actual.
+           No  -> use a focused portable algorithm or reassess the dependency.
+~~~

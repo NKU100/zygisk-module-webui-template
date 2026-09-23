@@ -60,7 +60,7 @@ For libraries with platform-specific code that cannot be made common, use a spli
 
 ### 3. Convert Build Scripts
 
-#### `capsule/build.gradle.kts` (library module)
+#### `library/build.gradle.kts` (library module)
 
 ```kotlin
 plugins {

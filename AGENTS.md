@@ -1,6 +1,6 @@
-# CLAUDE.md
+# AGENTS.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Repository guidance for coding agents working in this project.
 
 ## Project Overview
 
@@ -17,6 +17,9 @@ Zygisk module template with Compose Multiplatform WebUI. Two deployment targets:
 # WebUI Wasm production build
 ./gradlew :webui:buildWebUI
 
+# Focused common tests on the JVM (no emulator or browser required)
+./gradlew :webui:testAndroidHostTest
+
 # Browser dev server (http://localhost:8080, mock data when window.ksu unavailable)
 ./gradlew :webui:wasmJsBrowserDevelopmentRun
 
@@ -30,9 +33,20 @@ Zygisk module template with Compose Multiplatform WebUI. Two deployment targets:
 ./gradlew :module:ciRelease
 ```
 
-No test suite exists. Verification is manual (browser preview or device install).
+Before editing, read this guide and the relevant README, build files, and scripts. If a module or Gradle task is unfamiliar, inspect `./gradlew projects` and `./gradlew tasks --all` instead of guessing task or package names. Keep edits within the requested scope. Because this is a template, prioritize reusable infrastructure and representative sample flows over exhaustive tests for placeholder domain logic.
+
+Focused `commonTest` logic tests run on the Android host JVM with
+`:webui:testAndroidHostTest`. Browser-based `wasmJsTest` still requires a local
+Chrome installation. Choose UI verification based on the changed path: use
+browser preview when browser behavior is the target; use an Android device or
+AVD for Android APIs, WebView integration, permissions, or platform bridges.
 
 ## Verification Workflow
+
+Run the narrowest relevant build and tests first. Inspect the resulting artifact
+and install it on the target when feasible. For embedded WebUI, a successful
+build or browser preview alone does not verify KernelSU manager integration;
+test the packaged assets in the intended Android host when practical.
 
 ```bash
 # Build and install both targets to device
@@ -46,7 +60,16 @@ adb shell am start -n io.github.a13e300.ksuwebui/.WebUIActivity \
   --es id zygisk_sample --es name "Zygisk Module WebUI"
 ```
 
-The emulator must be rooted (Magisk) for full wasmJs testing. Root AVD instructions are in `.codebuddy/skills/root-avd/SKILL.md`.
+The emulator must be rooted (Magisk) for full wasmJs testing. Root AVD
+instructions, app-level root grants, and staged-module reboot guidance are in
+`.agents/skills/root-avd/SKILL.md`.
+
+For WebView tests, verify asset responses, JavaScript errors, and a screenshot of
+the rendered screen; HTTP 200 responses alone do not prove the UI rendered.
+Filter device logs to the relevant process and time window. When they affect the
+result, record the Android API, ABI, system-image type, page size, root
+implementation, and WebView version. Report environment limitations separately
+from application failures.
 
 ## Architecture
 

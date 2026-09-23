@@ -110,3 +110,7 @@ Then replace Magisk.zip and re-run rootAVD.
 | AVD won't root after patch | Ensure cold boot with `-no-snapshot-load` |
 | Android 14+ patching fails | Try adding `FAKEBOOTIMG` parameter to rootAVD command |
 | Zygisk modules not loading on Android 16 | Ensure Magisk v30.7+ for Android 16 QPR2 Zygisk support |
+
+## Additional Verified Compatibility
+
+Android 17 / API 37.2, Google Play ARM64 image, 16 KB pages, Magisk 31.0, and NKU100/rootAVD revision `a0defa2` were verified on 2026-09-23. After a cold boot and approving `com.android.shell` in Magisk Superuser, `/debug_ramdisk/su -c id` returned `uid=0(root)`. This confirms root for this tested combination only.
