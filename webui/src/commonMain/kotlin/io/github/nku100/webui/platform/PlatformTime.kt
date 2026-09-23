@@ -10,10 +10,3 @@ package io.github.nku100.webui.platform
  * - wasmJs: withFrameNanos {}
  */
 expect suspend fun awaitNextFrame()
-
-/**
- * Current time in milliseconds for velocity tracking.
- * - Android: System.currentTimeMillis()
- * - wasmJs: TimeSource.Monotonic relative time
- */
-expect fun currentTimeMillis(): Long

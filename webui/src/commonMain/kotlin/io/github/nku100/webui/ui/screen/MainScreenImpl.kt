@@ -1,7 +1,6 @@
 package io.github.nku100.webui.ui.screen
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
@@ -24,6 +23,7 @@ import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -38,7 +38,6 @@ import io.github.nku100.webui.platform.isAndroidPlatform
 import io.github.nku100.webui.platform.navigationBarBottomPadding
 import io.github.nku100.webui.ui.component.FloatingBottomBar
 import io.github.nku100.webui.ui.component.FloatingBottomBarItem
-import io.github.nku100.webui.ui.theme.ThemeMode
 import io.github.nku100.webui.ui.util.rememberContentReady
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.NavigationBar
@@ -106,24 +105,20 @@ fun MainScreen(viewModel: MainViewModel, uiState: MainUiState, onPagerStateReady
                 FloatingBottomBar(
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
-                        .clickable(
-                            interactionSource = remember { MutableInteractionSource() },
-                            indication = null,
-                            onClick = {},
-                        )
+                        .pointerInput(Unit) { detectTapGestures { } }
                         .padding(
                             bottom = 12.dp + navigationBarBottomPadding()
                         ),
-                    selectedIndex = { mainPagerState.selectedPage },
-                    onSelected = { mainPagerState.animateToPage(it) },
+                    selectedIndex = mainPagerState.selectedPage,
+                    onSelected = mainPagerState::animateToPage,
                     backdrop = backdrop,
                     tabsCount = items.size,
                     isBlurEnabled = enableFloatingBottomBarBlur,
-                    isDark = uiState.themeMode == ThemeMode.DARK,
-                ) {
+                ) { activateTab ->
                     items.forEachIndexed { index, item ->
                         FloatingBottomBarItem(
-                            onClick = { mainPagerState.animateToPage(index) },
+                            selected = mainPagerState.selectedPage == index,
+                            onClick = { activateTab(index) },
                             modifier = Modifier.defaultMinSize(minWidth = 76.dp)
                         ) {
                             Icon(
