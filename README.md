@@ -128,6 +128,9 @@ Edit files under `webui/src/commonMain/` to build your configuration UI:
 
 The module zip will be generated under `module/release/`.
 
+The native module is built for `arm64-v8a`, `armeabi-v7a`, `x86`, `x86_64`, and
+`riscv64`, using the NDK-provided static libc++ runtime for every ABI.
+
 ### 6. Install
 
 ```bash
@@ -152,7 +155,7 @@ The module zip will be generated under `module/release/`.
 
 | Component      | Technology                                                             |
 |----------------|------------------------------------------------------------------------|
-| Native module  | C++20, CMake, Zygisk API v4                                            |
+| Native module  | C++20, CMake, NDK r29, Zygisk API v4                                  |
 | UI framework   | Compose Multiplatform 1.12.1                                           |
 | Language       | Kotlin 2.4.20                                                          |
 | Web target     | Kotlin/Wasm                                                            |

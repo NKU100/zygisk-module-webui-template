@@ -49,7 +49,8 @@ android {
             cmake {
                 cppFlags("-std=c++20")
                 arguments(
-                    "-DANDROID_STL=none", "-DMODULE_NAME=$moduleLibName",
+                    "-DANDROID_STL=c++_static", "-DMODULE_NAME=$moduleLibName",
+                    "-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON",
                     "-DCMAKE_C_COMPILER_LAUNCHER=ccache",
                     "-DCMAKE_CXX_COMPILER_LAUNCHER=ccache",
                 )
@@ -73,6 +74,7 @@ androidComponents.onVariants { variant ->
             "armeabi-v7a" -> "arm"
             "x86" -> "x86"
             "x86_64" -> "x64"
+            "riscv64" -> "riscv64"
             else -> error("unsupported abi $it")
         }
     }

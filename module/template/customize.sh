@@ -73,6 +73,10 @@ if [ "$ARCH" = "x86" ] || [ "$ARCH" = "x64" ]; then
   ui_print "- Extracting x64 libraries"
   extract "$ZIPFILE" "lib/x86_64/lib$SONAME.so" "$MODPATH/zygisk" true
   mv "$MODPATH/zygisk/lib$SONAME.so" "$MODPATH/zygisk/x86_64.so"
+elif [ "$ARCH" = "riscv64" ]; then
+  ui_print "- Extracting riscv64 libraries"
+  extract "$ZIPFILE" "lib/riscv64/lib$SONAME.so" "$MODPATH/zygisk" true
+  mv "$MODPATH/zygisk/lib$SONAME.so" "$MODPATH/zygisk/riscv64.so"
 else
   if [ "$HAS32BIT" = true ]; then
     extract "$ZIPFILE" "lib/armeabi-v7a/lib$SONAME.so" "$MODPATH/zygisk" true

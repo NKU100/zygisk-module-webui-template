@@ -10,6 +10,4 @@ add_library(${MODULE_NAME} SHARED
         external/yyjson.c
 )
 target_include_directories(${MODULE_NAME} PRIVATE external)
-target_link_libraries(${MODULE_NAME} cxx log)
-
-add_subdirectory(external)
+target_link_libraries(${MODULE_NAME} log)
