@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -30,6 +31,7 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
@@ -51,21 +53,19 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
-import com.kyant.backdrop.Backdrop
-import com.kyant.backdrop.backdrops.layerBackdrop
-import com.kyant.backdrop.backdrops.rememberCombinedBackdrop
-import com.kyant.backdrop.backdrops.rememberLayerBackdrop
-import com.kyant.backdrop.drawBackdrop
-import com.kyant.backdrop.effects.blur
-import com.kyant.backdrop.effects.lens
-import com.kyant.backdrop.effects.vibrancy
-import com.kyant.backdrop.highlight.Highlight
-import com.kyant.backdrop.shadow.InnerShadow
-import com.kyant.backdrop.shadow.Shadow
-import com.kyant.capsule.ContinuousCapsule
 import io.github.nku100.webui.ui.animation.DampedDragAnimation
 import io.github.nku100.webui.ui.animation.InteractiveHighlight
+import io.github.nku100.webui.ui.component.liquid.lens
+import io.github.nku100.webui.ui.component.liquid.rememberCombinedBackdrop
+import io.github.nku100.webui.ui.component.liquid.vibrancy
 import kotlinx.coroutines.launch
+import top.yukonga.miuix.kmp.blur.Backdrop
+import top.yukonga.miuix.kmp.blur.blur
+import top.yukonga.miuix.kmp.blur.drawBackdrop
+import top.yukonga.miuix.kmp.blur.layerBackdrop
+import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
+import top.yukonga.miuix.kmp.blur.highlight.Highlight
+import androidx.compose.ui.graphics.shadow.Shadow
 import top.yukonga.miuix.kmp.theme.ColorSchemeMode
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import kotlin.math.abs
@@ -270,9 +270,17 @@ fun FloatingBottomBar(
                 }
                 .then(dampedDragAnimation.modifier)
                 .graphicsLayer { translationX = panelOffset }
+                .dropShadow(
+                    shape = CircleShape,
+                    shadow = Shadow(
+                        radius = 10.dp,
+                        color = Color.Black,
+                        alpha = if (isInLightTheme) 0.1f else 0.2f,
+                    ),
+                )
                 .drawBackdrop(
                     backdrop = backdrop,
-                    shape = { ContinuousCapsule },
+                    shape = { CircleShape },
                     effects = {
                         if (isBlurEnabled) {
                             vibrancy()
@@ -282,11 +290,6 @@ fun FloatingBottomBar(
                     },
                     highlight = {
                         Highlight.Default.copy(alpha = if (isBlurEnabled) 1f else 0f)
-                    },
-                    shadow = {
-                        Shadow.Default.copy(
-                            color = Color.Black.copy(if (isInLightTheme) 0.1f else 0.2f),
-                        )
                     },
                     layerBlock = {
                         if (isBlurEnabled) {
@@ -326,7 +329,7 @@ fun FloatingBottomBar(
                     .graphicsLayer { translationX = panelOffset }
                     .drawBackdrop(
                         backdrop = backdrop,
-                        shape = { ContinuousCapsule },
+                        shape = { CircleShape },
                         effects = {
                             if (isBlurEnabled) {
                                 val progress = dampedDragAnimation.pressProgress
@@ -366,7 +369,7 @@ fun FloatingBottomBar(
                     }
                     .drawBackdrop(
                         backdrop = rememberCombinedBackdrop(backdrop, tabsBackdrop),
-                        shape = { ContinuousCapsule },
+                        shape = { CircleShape },
                         effects = {
                             if (isBlurEnabled) {
                                 val progress = dampedDragAnimation.pressProgress
@@ -375,13 +378,6 @@ fun FloatingBottomBar(
                         },
                         highlight = {
                             Highlight.Default.copy(alpha = if (isBlurEnabled) dampedDragAnimation.pressProgress else 0f)
-                        },
-                        shadow = { Shadow(alpha = if (isBlurEnabled) dampedDragAnimation.pressProgress else 0f) },
-                        innerShadow = {
-                            InnerShadow(
-                                radius = 8f.dp * dampedDragAnimation.pressProgress,
-                                alpha = if (isBlurEnabled) dampedDragAnimation.pressProgress else 0f
-                            )
                         },
                         layerBlock = {
                             if (isBlurEnabled) {

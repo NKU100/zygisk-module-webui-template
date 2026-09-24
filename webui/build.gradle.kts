@@ -60,37 +60,27 @@ kotlin {
             implementation(compose.foundation)
             implementation(compose.material3)
             implementation(compose.ui)
+            implementation(compose.materialIconsExtended)
             implementation(compose.components.resources)
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.navigation3.ui)
             implementation(libs.lifecycle.viewmodel)
             implementation(libs.lifecycle.viewmodel.compose)
-            implementation("com.kyant.capsule:capsule")
+            implementation(libs.miuix.core)
+            implementation(libs.miuix.ui)
+            implementation(libs.miuix.preference)
+            implementation(libs.miuix.icons)
+            implementation(libs.miuix.blur)
+            implementation(libs.haze)
+            implementation(libs.navigationevent.compose)
         }
         commonTest.dependencies {
             implementation(kotlin("test"))
         }
         androidMain.dependencies {
             implementation(compose.preview)
-            implementation(compose.materialIconsExtended)
             implementation(libs.activity.compose)
-            implementation(libs.miuix.ui)
-            implementation(libs.miuix.preference)
-            implementation(libs.miuix.icons)
-            implementation("com.kyant.backdrop:backdrop")
-            implementation(libs.haze.android)
-            implementation(libs.material.kolor)
             implementation(libs.appiconloader)
-        }
-        wasmJsMain.dependencies {
-            implementation(compose.materialIconsExtended)
-            // KMP main artifacts — Gradle auto-resolves to wasmJs variant
-            implementation(libs.miuix.ui)
-            implementation(libs.miuix.preference)
-            implementation(libs.miuix.icons)
-            implementation("com.kyant.backdrop:backdrop")
-            implementation(libs.haze)
-            implementation(libs.material.kolor)
         }
     }
 }

@@ -81,9 +81,9 @@ from application failures.
 | `:webui` | Kotlin Multiplatform library — the main codebase. Targets: **wasmJs** and **androidLibrary**. |
 | `:webui-app` | Minimal Android APK hosting `:webui` for Magisk users. |
 
-### Composite Builds
+### External Build Dependencies
 
-`external/Capsule` (G2 smooth corners) and `external/Backdrop` (liquid glass) are git submodules included via `includeBuild` in `settings.gradle.kts`. They are KMP libraries, not regular dependencies.
+The native module keeps `module/src/main/cpp/external/libcxx` as a git submodule. UI dependencies are resolved from Maven; there are no UI composite builds or Capsule/Backdrop submodules.
 
 ### Platform Abstraction (expect/actual)
 
@@ -144,11 +144,11 @@ Module template files (`module/template/`) use `@TOKEN@` placeholders replaced a
 | Library | Purpose |
 |---------|---------|
 | Miuix 0.9.4 | KernelSU-style UI components |
-| Capsule (submodule) | G2 continuous smooth rounded corners (KMP) |
-| Backdrop (submodule) | Liquid glass / blur effects (KMP) |
+| Miuix Blur 0.9.4 | Cross-platform liquid-glass and blur effects |
+| Haze 1.7.2 | Supplementary blur for top bars and navigation surfaces |
 | Haze 1.7.2 | Blur effects (Android + Compose) |
 | MaterialKolor 5.0.1 | Dynamic color theming (Android) |
 
 ## Version Pinning
 
-All dependency versions are in `gradle/libs.versions.toml`. Key versions: AGP 9.2.1, Kotlin 2.4.20, Compose Multiplatform 1.12.0, Gradle 9.7.1 (per wrapper). AGP remains aligned with the Capsule and Backdrop composite builds until those independent repositories move to the newer plugin baseline.
+All dependency versions are in `gradle/libs.versions.toml`. Key versions: AGP 9.2.1, Kotlin 2.4.20, Compose Multiplatform 1.12.0, Gradle 9.7.1 (per wrapper). Miuix Blur declares Android API 33; `webui-app` uses a manifest override while retaining the template's minSdk 26.

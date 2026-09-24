@@ -110,18 +110,11 @@ Ported the KernelSU manager UI to Compose Multiplatform (Android + Wasm), includ
 
 ---
 
-## Backdrop KMP Migration
+## Miuix Blur
 
-Migrated the [Backdrop](https://github.com/KyantStudio/Backdrop) library (originally Android-only) to Kotlin Multiplatform to support wasmJs.
+The shared WebUI uses Miuix Blur 0.9.4 for the liquid-glass surface on Android and Wasm. The small `ui/component/liquid/` helpers provide the lens, vibrancy, combined-backdrop, and inner-shadow effects used by the floating bottom bar.
 
-**Stages:**
-1. Build system: Android Library → KMP (`kotlin.multiplatform` + `com.android.kotlin.multiplatform.library`)
-2. Pure Compose files → `commonMain` (zero or minimal changes)
-3. `expect/actual` for `PlatformRenderEffect`, `RuntimeShaderCache`, `BackdropEffectScope`, `PlatformEffects`
-4. `effects/` directory: `RenderEffect`, `Blur`, `ColorFilter`, `Lens`
-5. `highlight/` and `shadow/`: `HighlightStyle`, `HighlightModifier`, `ShadowModifier`, `InnerShadowModifier`, `PlatformMaskFilter`
-
-The migrated library is included as a git submodule at `external/Backdrop`.
+The standalone Android host keeps `minSdk 26`; its manifest overrides Miuix Blur's API 33 library declaration. Miuix guards unsupported runtime shader and render-effect paths, so older Android versions use the fallback rendering path.
 
 ---
 

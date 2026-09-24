@@ -31,6 +31,3 @@ rootProject.name = "zygisk-module-webui-template"
 include(
     ":module", ":webui", ":webui-app"
 )
-
-includeBuild("external/Capsule")
-includeBuild("external/Backdrop")

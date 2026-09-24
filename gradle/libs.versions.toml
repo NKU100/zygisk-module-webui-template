@@ -7,7 +7,7 @@ kotlinx-serialization = "1.8.1"
 activity-compose = "1.13.0"
 miuix = "0.9.4"
 haze = "1.7.2"
-materialKolor = "5.0.1"
+navigation-event = "1.1.2"
 navigation3 = "1.0.0-alpha05"
 lifecycle = "2.11.0"
 
@@ -17,13 +17,14 @@ activity-compose = { module = "androidx.activity:activity-compose", version.ref 
 # Android-specific artifacts (used in androidMain only) — removed in 0.9.x, use KMP artifacts directly
 # KMP main artifacts (Gradle auto-resolves to correct platform variant)
 miuix-ui = { module = "top.yukonga.miuix.kmp:miuix-ui", version.ref = "miuix" }
+miuix-core = { module = "top.yukonga.miuix.kmp:miuix-core", version.ref = "miuix" }
 miuix-preference = { module = "top.yukonga.miuix.kmp:miuix-preference", version.ref = "miuix" }
 miuix-icons = { module = "top.yukonga.miuix.kmp:miuix-icons", version.ref = "miuix" }
-haze-android = { module = "dev.chrisbanes.haze:haze-android", version.ref = "haze" }
-material-kolor = { group = "com.materialkolor", name = "material-kolor", version.ref = "materialKolor" }
+miuix-blur = { module = "top.yukonga.miuix.kmp:miuix-blur", version.ref = "miuix" }
 appiconloader = { module = "me.zhanghai.android.appiconloader:appiconloader", version.ref = "appiconloader" }
 haze = { module = "dev.chrisbanes.haze:haze", version.ref = "haze" }
 navigation3-ui = { module = "org.jetbrains.androidx.navigation3:navigation3-ui", version.ref = "navigation3" }
+navigationevent-compose = { module = "androidx.navigationevent:navigationevent-compose", version.ref = "navigation-event" }
 lifecycle-viewmodel = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel", version.ref = "lifecycle" }
 lifecycle-viewmodel-compose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycle" }
 

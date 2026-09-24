@@ -9,10 +9,9 @@ A Zygisk module template with **Compose Multiplatform** WebUI, based on [zygisk-
   - **Web (Wasm)**: Renders in KernelSU manager's WebView via `webroot/`
   - **Android APK**: Standalone config app for Magisk users (no WebUI support)
 - **Miuix UI framework** — KernelSU-style UI on both platforms, closely aligned with [KernelSU manager](https://github.com/tiann/KernelSU)
-  - FloatingBottomBar with liquid glass (backdrop), haze blur, AGSL/SkSL shader highlights
+  - FloatingBottomBar with Miuix Blur, lens/vibrancy effects, Haze blur, and AGSL/SkSL shader highlights
   - Shared: DampedDragAnimation (spring physics, velocity deformation), InteractiveHighlight
   - SuperSearchBar, SearchStatus state machine, StatusTag — ported from KernelSU
-- **[Capsule][capsule]** — G2 continuous smooth corners (cross-platform fork, included as git submodule)
 - **KernelSU API abstraction** via `expect/actual` pattern (`PlatformBridge`)
   - Full v3.0.2 API: exec (async callback), toast, listPackages, getPackagesInfo, moduleInfo, fullScreen, enableEdgeToEdge, exit
   - Browser mock data for development preview
@@ -67,8 +66,6 @@ A Zygisk module template with **Compose Multiplatform** WebUI, based on [zygisk-
 │           └── ui/
 │               ├── component/      # AppIconImage.wasmJs (ksu://icon/ + Skia decode)
 │               └── modifier/       # DragGestureInspector (SkSL)
-├── external/
-│   └── Capsule/                     # Cross-platform Capsule library (git submodule)
 ├── module.gradle.kts                # Module metadata (id, name, author)
 └── build.gradle.kts                 # Global build config
 ```
@@ -160,8 +157,8 @@ The module zip will be generated under `module/release/`.
 | Language       | Kotlin 2.4.20                                                          |
 | Web target     | Kotlin/Wasm                                                            |
 | UI library     | Miuix 0.9.4                                                            |
-| Glass effects  | Backdrop 1.0.6 + Haze 1.7.2                                            |
-| Smooth corners | [Capsule][capsule] — G2 continuous rounded rectangles (cross-platform) |
+| Glass effects  | Miuix Blur 0.9.4 + Haze 1.7.2                                       |
+| Shapes         | Compose `CircleShape` and `RoundedCornerShape`                       |
 | Architecture   | ViewModel (lifecycle-viewmodel 2.11.0) + StateFlow + Navigation 3       |
 | Serialization  | kotlinx.serialization (JSON)                                           |
 | Build system   | Gradle 9.7.1, AGP 9.2.1                                                 |
@@ -174,7 +171,5 @@ The module zip will be generated under `module/release/`.
 - [Compose Multiplatform](https://github.com/JetBrains/compose-multiplatform)
 - [Miuix](https://compose-miuix-ui.github.io/miuix/)
 - [KernelSU JS API](https://www.npmjs.com/package/kernelsu)
-- [Capsule (KMP fork)][capsule]
 
 [zygisk-module-template]: https://github.com/5ec1cff/zygisk-module-template
-[capsule]: https://github.com/NKU100/Capsule
