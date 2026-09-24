@@ -13,8 +13,12 @@ fail() {
   exit 1
 }
 
-[[ -z "$(git status --porcelain)" ]] \
-  || fail "working tree is not clean; commit or stash local changes before synchronizing"
+git diff --quiet --ignore-cr-at-eol --ignore-submodules=all -- \
+  || fail "working tree has unstaged changes; commit or stash local changes before synchronizing"
+git diff --cached --quiet --ignore-cr-at-eol --ignore-submodules=all -- \
+  || fail "working tree has staged changes; commit or stash local changes before synchronizing"
+[[ -z "$(git ls-files --others --exclude-standard)" ]] \
+  || fail "working tree has untracked files; remove or move them before synchronizing"
 
 if ! git remote get-url "$template_remote" >/dev/null 2>&1; then
   git remote add "$template_remote" "$template_repository"

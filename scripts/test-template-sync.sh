@@ -79,6 +79,7 @@ printf 'target only\n' > "$TARGET_REPOSITORY/target-only.txt"
 commit_all "$TARGET_REPOSITORY" "module: add target file"
 printf 'target history\n' > "$TARGET_REPOSITORY/target-history.txt"
 commit_all "$TARGET_REPOSITORY" "module: add another target commit"
+printf 'target history\r\n' > "$TARGET_REPOSITORY/target-history.txt"
 
 rm "$TEMPLATE_REPOSITORY/deleted.txt"
 mv "$TEMPLATE_REPOSITORY/rename-old.txt" "$TEMPLATE_REPOSITORY/rename-new.txt"
