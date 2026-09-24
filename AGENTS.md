@@ -105,7 +105,7 @@ When adding new platform-specific code, always create the `expect` declaration i
 
 ### UI Architecture
 
-- **ViewModel**: `MainViewModel` with `StateFlow<MainUiState>`, lifecycle-viewmodel 2.9.0
+- **ViewModel**: `MainViewModel` with `StateFlow<MainUiState>`, lifecycle-viewmodel 2.11.0
 - **Navigation**: JetBrains Navigation 3 with `Route` sealed interface (`Main`, `About`, `AppProfile(packageName)`)
 - **Pager**: Custom `MainPagerState` (ported from KernelSU) with `isNavigating` guard for cross-tab animation
 - **4 tabs**: Home, Apps, Logs, Settings (`BottomTab` enum)
@@ -143,12 +143,12 @@ Module template files (`module/template/`) use `@TOKEN@` placeholders replaced a
 
 | Library | Purpose |
 |---------|---------|
-| Miuix 0.8.8 | KernelSU-style UI components |
+| Miuix 0.9.4 | KernelSU-style UI components |
 | Capsule (submodule) | G2 continuous smooth rounded corners (KMP) |
 | Backdrop (submodule) | Liquid glass / blur effects (KMP) |
 | Haze 1.7.2 | Blur effects (Android + Compose) |
-| MaterialKolor 4.1.1 | Dynamic color theming (Android) |
+| MaterialKolor 5.0.1 | Dynamic color theming (Android) |
 
 ## Version Pinning
 
-All dependency versions are in `gradle/libs.versions.toml`. Key versions: AGP 9.0.0, Kotlin 2.3.20, Compose Multiplatform 1.10.3, Gradle 9.4.0 (per wrapper).
+All dependency versions are in `gradle/libs.versions.toml`. Key versions: AGP 9.2.1, Kotlin 2.4.20, Compose Multiplatform 1.12.0, Gradle 9.7.1 (per wrapper). AGP remains aligned with the Capsule and Backdrop composite builds until those independent repositories move to the newer plugin baseline.

@@ -17,7 +17,7 @@ A Zygisk module template with **Compose Multiplatform** WebUI, based on [zygisk-
   - Full v3.0.2 API: exec (async callback), toast, listPackages, getPackagesInfo, moduleInfo, fullScreen, enableEdgeToEdge, exit
   - Browser mock data for development preview
   - All APIs also available under **[KsuWebUIStandalone](https://github.com/NKU100/KsuWebUIStandalone)** (Magisk users without KernelSU can run the WebUI standalone)
-- **ViewModel architecture** (Compose Multiplatform lifecycle 2.9.0)
+- **ViewModel architecture** (Compose Multiplatform lifecycle 2.11.0)
   - `MainViewModel` with `viewModelScope`, `StateFlow<MainUiState>`, auto-managed search debounce
   - `MainPagerState` — cross-tab navigation with `isNavigating` guard (ported from KernelSU)
   - `LocalMainPagerState` CompositionLocal for child pages to trigger tab navigation
@@ -156,15 +156,15 @@ The module zip will be generated under `module/release/`.
 | Component      | Technology                                                             |
 |----------------|------------------------------------------------------------------------|
 | Native module  | C++20, CMake, Zygisk API v4                                            |
-| UI framework   | Compose Multiplatform 1.10.3                                           |
-| Language       | Kotlin 2.3.20                                                          |
+| UI framework   | Compose Multiplatform 1.12.0                                           |
+| Language       | Kotlin 2.4.20                                                          |
 | Web target     | Kotlin/Wasm                                                            |
-| UI library     | Miuix 0.8.8                                                            |
+| UI library     | Miuix 0.9.4                                                            |
 | Glass effects  | Backdrop 1.0.6 + Haze 1.7.2                                            |
 | Smooth corners | [Capsule][capsule] — G2 continuous rounded rectangles (cross-platform) |
-| Architecture   | ViewModel (lifecycle-viewmodel 2.9.0) + StateFlow + Navigation 3       |
+| Architecture   | ViewModel (lifecycle-viewmodel 2.11.0) + StateFlow + Navigation 3       |
 | Serialization  | kotlinx.serialization (JSON)                                           |
-| Build system   | Gradle 9.3, AGP 9.0                                                    |
+| Build system   | Gradle 9.7.1, AGP 9.2.1                                                 |
 
 ## See also
 
