@@ -34,17 +34,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import dev.chrisbanes.haze.HazeState
-import dev.chrisbanes.haze.HazeStyle
-import dev.chrisbanes.haze.HazeTint
-import dev.chrisbanes.haze.hazeSource
 import androidx.compose.runtime.Immutable
 import io.github.nku100.webui.ModuleInfo
 import io.github.nku100.webui.platform.isAndroidPlatform
 import io.github.nku100.webui.platform.openUrl
 import org.jetbrains.compose.resources.stringResource
-import io.github.nku100.webui.ui.util.defaultHazeEffect
-import io.github.nku100.webui.ui.util.rememberDefaultHazeState
+import io.github.nku100.webui.ui.util.rememberDefaultBlurBackdrop
 import io.github.nku100.webui.ui.util.topBarDefaultWindowInsetsPadding
 import io.github.nku100.webui.ui.util.topBarModifier
 import top.yukonga.miuix.kmp.basic.BasicComponent
@@ -55,6 +50,7 @@ import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TopAppBar
+import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Link
 import top.yukonga.miuix.kmp.theme.ColorSchemeMode
@@ -88,12 +84,12 @@ fun HomePage(
     enableBlur: Boolean = false,
 ) {
     val scrollBehavior = MiuixScrollBehavior()
-    val (hazeState, hazeStyle) = rememberDefaultHazeState(enableBlur)
+    val blurBackdrop = rememberDefaultBlurBackdrop(enableBlur)
 
     Scaffold(
         topBar = {
             TopAppBar(
-                modifier = Modifier.topBarModifier(enableBlur, hazeState, hazeStyle),
+                modifier = Modifier.topBarModifier(blurBackdrop),
                 color = if (enableBlur) Color.Transparent else colorScheme.surface,
                 title = state.moduleName,
                 scrollBehavior = scrollBehavior,
@@ -108,7 +104,7 @@ fun HomePage(
                 .scrollEndHaptic()
                 .overScrollVertical()
                 .nestedScroll(scrollBehavior.nestedScrollConnection)
-                .let { if (enableBlur) it.hazeSource(state = hazeState) else it }
+                .then(blurBackdrop?.let { Modifier.layerBackdrop(it) } ?: Modifier)
                 .padding(horizontal = 12.dp),
             contentPadding = innerPadding,
             overscrollEffect = null,

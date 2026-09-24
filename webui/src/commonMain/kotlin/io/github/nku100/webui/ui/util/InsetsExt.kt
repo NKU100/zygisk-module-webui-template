@@ -5,10 +5,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import dev.chrisbanes.haze.HazeState
-import dev.chrisbanes.haze.HazeStyle
 import io.github.nku100.webui.platform.isAndroidPlatform
 import io.github.nku100.webui.platform.statusBarTopPadding
+import top.yukonga.miuix.kmp.blur.LayerBackdrop
 
 /**
  * Returns the status bar top padding that should be applied manually to the TopAppBar.
@@ -30,11 +29,11 @@ fun wasmStatusBarPadding(): Dp =
 val topBarDefaultWindowInsetsPadding: Boolean get() = isAndroidPlatform
 
 /**
- * Modifier for TopAppBar: applies optional haze blur effect and wasmJs status bar padding.
+ * Modifier for TopAppBar: applies optional Miuix blur and wasmJs status bar padding.
  *
  * Replaces the repeated pattern across pages:
  * ```
- * modifier = (if (enableBlur) Modifier.defaultHazeEffect(hazeState, hazeStyle) else Modifier)
+ * modifier = Modifier.topBarModifier(blurBackdrop)
  *     .padding(top = statusBarPadding),
  * ```
  *
@@ -42,21 +41,19 @@ val topBarDefaultWindowInsetsPadding: Boolean get() = isAndroidPlatform
  */
 @Composable
 fun Modifier.topBarModifier(
-    enableBlur: Boolean,
-    hazeState: HazeState,
-    hazeStyle: HazeStyle,
+    blurBackdrop: LayerBackdrop?,
 ): Modifier {
     val statusBarPadding = wasmStatusBarPadding()
     return this
-        .then(if (enableBlur) Modifier.defaultHazeEffect(hazeState, hazeStyle) else Modifier)
+        .then(blurBackdrop?.let { Modifier.defaultBlurEffect(it) } ?: Modifier)
         .padding(top = statusBarPadding)
 }
 
 /**
- * Modifier that only applies wasmJs status bar top padding (no haze effect).
+ * Modifier that only applies wasmJs status bar top padding (no blur effect).
  *
  * Used by pages where TopAppBar is wrapped in [SearchStatus.TopAppBarAnim] (AppsPage, LogsPage),
- * since haze is handled by TopAppBarAnim itself.
+ * since blur is handled by TopAppBarAnim itself.
  */
 @Composable
 fun Modifier.topBarInsetsPadding(): Modifier {

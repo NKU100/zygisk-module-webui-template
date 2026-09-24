@@ -81,7 +81,7 @@ All APIs were verified on an emulator (Magisk 30700 + root granted via `magisk -
 
 Ported the KernelSU manager UI to Compose Multiplatform (Android + Wasm), including:
 
-- Miuix UI framework + FloatingBottomBar with liquid glass backdrop, haze blur, AGSL/SkSL shader highlights
+- Miuix UI framework + FloatingBottomBar with liquid glass backdrop, AGSL/SkSL shader highlights
 - DampedDragAnimation (spring physics, velocity deformation), InteractiveHighlight
 - SuperSearchBar, SearchStatus state machine, StatusTag
 - ViewModel architecture with `MainPagerState`, `rememberContentReady`, `LocalMainPagerState`

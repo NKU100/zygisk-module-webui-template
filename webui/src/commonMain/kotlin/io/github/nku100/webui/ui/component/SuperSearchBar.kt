@@ -73,9 +73,8 @@ import androidx.compose.ui.zIndex
 import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
-import dev.chrisbanes.haze.HazeState
-import dev.chrisbanes.haze.HazeStyle
-import io.github.nku100.webui.ui.util.defaultHazeEffect
+import io.github.nku100.webui.ui.util.defaultBlurEffect
+import top.yukonga.miuix.kmp.blur.LayerBackdrop
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.InputField
 import top.yukonga.miuix.kmp.basic.Text
@@ -96,8 +95,7 @@ fun SearchStatus.SearchBox(
     },
     searchBarTopPadding: () -> Dp = { 12.dp },
     contentPadding: PaddingValues = PaddingValues(0.dp),
-    hazeState: HazeState? = null,
-    hazeStyle: HazeStyle? = null,
+    blurBackdrop: LayerBackdrop? = null,
     enableBlur: Boolean = false,
     content: @Composable (MutableState<Dp>) -> Unit
 ) {
@@ -130,8 +128,8 @@ fun SearchStatus.SearchBox(
                 detectTapGestures { onSearchStatusChange(searchStatus.copy(current = SearchStatus.Status.EXPANDING)) }
             }
             .then(
-                if (hazeState != null && hazeStyle != null) {
-                    Modifier.defaultHazeEffect(hazeState, hazeStyle)
+                if (blurBackdrop != null) {
+                    Modifier.defaultBlurEffect(blurBackdrop)
                 } else {
                     Modifier.background(colorScheme.surface)
                 }

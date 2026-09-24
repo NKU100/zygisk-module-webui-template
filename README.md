@@ -9,7 +9,7 @@ A Zygisk module template with **Compose Multiplatform** WebUI, based on [zygisk-
   - **Web (Wasm)**: Renders in KernelSU manager's WebView via `webroot/`
   - **Android APK**: Standalone config app for Magisk users (no WebUI support)
 - **Miuix UI framework** — KernelSU-style UI on both platforms, closely aligned with [KernelSU manager](https://github.com/tiann/KernelSU)
-  - FloatingBottomBar with Miuix Blur, lens/vibrancy effects, Haze blur, and AGSL/SkSL shader highlights
+  - FloatingBottomBar with Miuix Blur, lens/vibrancy effects, and AGSL/SkSL shader highlights
   - Shared: DampedDragAnimation (spring physics, velocity deformation), InteractiveHighlight
   - SuperSearchBar, SearchStatus state machine, StatusTag — ported from KernelSU
 - **KernelSU API abstraction** via `expect/actual` pattern (`PlatformBridge`)
@@ -53,7 +53,7 @@ A Zygisk module template with **Compose Multiplatform** WebUI, based on [zygisk-
 │       │       │   ├── logs/       # LogsPage (real-time log viewer with filtering)
 │       │       │   └── settings/   # SettingsPage, AboutPage
 │       │       ├── theme/          # AppTheme, ThemeMode, isSystemDarkTheme
-│       │       └── util/           # DeferredContent, HazeExt (defaultHazeEffect, rememberDefaultHazeState), InsetsExt
+│       │       └── util/           # DeferredContent, BlurExt (defaultBlurEffect, rememberDefaultBlurBackdrop), InsetsExt
 │       ├── androidMain/            # Android target
 │       │   ├── platform/           # PlatformBridge.android, PlatformBackHandler, BrowserHistorySync (no-op)
 │       │   └── ui/
@@ -153,15 +153,15 @@ The module zip will be generated under `module/release/`.
 | Component      | Technology                                                             |
 |----------------|------------------------------------------------------------------------|
 | Native module  | C++20, CMake, Zygisk API v4                                            |
-| UI framework   | Compose Multiplatform 1.12.0                                           |
+| UI framework   | Compose Multiplatform 1.12.1                                           |
 | Language       | Kotlin 2.4.20                                                          |
 | Web target     | Kotlin/Wasm                                                            |
 | UI library     | Miuix 0.9.4                                                            |
-| Glass effects  | Miuix Blur 0.9.4 + Haze 1.7.2                                       |
+| Glass effects  | Miuix Blur 0.9.4                                                        |
 | Shapes         | Compose `CircleShape` and `RoundedCornerShape`                       |
 | Architecture   | ViewModel (lifecycle-viewmodel 2.11.0) + StateFlow + Navigation 3       |
 | Serialization  | kotlinx.serialization (JSON)                                           |
-| Build system   | Gradle 9.7.1, AGP 9.2.1                                                 |
+| Build system   | Gradle 9.7.1, AGP 9.4.1                                                 |
 
 ## See also
 

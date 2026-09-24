@@ -47,10 +47,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import dev.chrisbanes.haze.HazeState
-import dev.chrisbanes.haze.HazeStyle
-import dev.chrisbanes.haze.HazeTint
-import dev.chrisbanes.haze.hazeSource
 import io.github.nku100.webui.platform.PackageInfo
 import io.github.nku100.webui.ui.component.AppIconImage
 import io.github.nku100.webui.ui.component.SearchBox
@@ -58,7 +54,7 @@ import io.github.nku100.webui.platform.isAndroidPlatform
 import io.github.nku100.webui.ui.component.SearchPager
 import io.github.nku100.webui.ui.component.SearchStatus
 import io.github.nku100.webui.ui.component.StatusTag
-import io.github.nku100.webui.ui.util.rememberDefaultHazeState
+import io.github.nku100.webui.ui.util.rememberDefaultBlurBackdrop
 import io.github.nku100.webui.ui.util.RecompositionTracker
 import io.github.nku100.webui.ui.util.topBarDefaultWindowInsetsPadding
 import io.github.nku100.webui.ui.util.topBarInsetsPadding
@@ -76,6 +72,7 @@ import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.basic.rememberPullToRefreshState
+import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.overlay.OverlayListPopup
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.basic.ArrowRight
@@ -117,7 +114,7 @@ fun AppsPage(
         { 12.dp * (1f - scrollBehavior.state.collapsedFraction) }
     }
 
-    val (hazeState, hazeStyle) = rememberDefaultHazeState(enableBlur)
+    val blurBackdrop = rememberDefaultBlurBackdrop(enableBlur)
 
     // Hoist these outside SearchBox lambda so they survive config changes (e.g. toggling target)
     val lazyListState = rememberLazyListState()
@@ -143,8 +140,7 @@ fun AppsPage(
         topBar = {
             searchStatus.TopAppBarAnim(
                 modifier = Modifier.topBarInsetsPadding(),
-                hazeState = if (enableBlur) hazeState else null,
-                hazeStyle = if (enableBlur) hazeStyle else null,
+                blurBackdrop = blurBackdrop,
             ) {
                 TopAppBar(
                     color = if (enableBlur) Color.Transparent else colorScheme.surface,
@@ -242,8 +238,7 @@ fun AppsPage(
                 start = innerPadding.calculateStartPadding(layoutDirection),
                 end = innerPadding.calculateEndPadding(layoutDirection),
             ),
-            hazeState = if (enableBlur) hazeState else null,
-            hazeStyle = if (enableBlur) hazeStyle else null,
+            blurBackdrop = blurBackdrop,
             enableBlur = enableBlur,
         ) { boxHeight ->
             if (displayPackages.isEmpty() && !state.hasLoaded) {
@@ -284,7 +279,7 @@ fun AppsPage(
                             .scrollEndHaptic()
                             .overScrollVertical()
                             .nestedScroll(scrollBehavior.nestedScrollConnection)
-                            .let { if (enableBlur) it.hazeSource(state = hazeState) else it },
+                            .then(blurBackdrop?.let { Modifier.layerBackdrop(it) } ?: Modifier),
                         contentPadding = PaddingValues(
                             top = innerPadding.calculateTopPadding() + boxHeight.value + 6.dp,
                             start = innerPadding.calculateStartPadding(layoutDirection),

@@ -11,9 +11,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import dev.chrisbanes.haze.HazeState
-import dev.chrisbanes.haze.HazeStyle
-import io.github.nku100.webui.ui.util.defaultHazeEffect
+import io.github.nku100.webui.ui.util.defaultBlurEffect
+import top.yukonga.miuix.kmp.blur.LayerBackdrop
 import top.yukonga.miuix.kmp.theme.MiuixTheme.colorScheme
 
 /**
@@ -46,8 +45,7 @@ data class SearchStatus(
     fun TopAppBarAnim(
         modifier: Modifier = Modifier,
         visible: Boolean = shouldCollapsed(),
-        hazeState: HazeState? = null,
-        hazeStyle: HazeStyle? = null,
+        blurBackdrop: LayerBackdrop? = null,
         content: @Composable () -> Unit
     ) {
         val topAppBarAlpha = animateFloatAsState(
@@ -59,8 +57,8 @@ data class SearchStatus(
                 modifier = Modifier
                     .matchParentSize()
                     .then(
-                        if (hazeState != null && hazeStyle != null) {
-                            Modifier.defaultHazeEffect(hazeState, hazeStyle)
+                        if (blurBackdrop != null) {
+                            Modifier.defaultBlurEffect(blurBackdrop)
                         } else {
                             Modifier.background(colorScheme.surface)
                         }

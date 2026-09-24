@@ -27,16 +27,13 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import dev.chrisbanes.haze.HazeState
-import dev.chrisbanes.haze.HazeStyle
-import dev.chrisbanes.haze.HazeTint
-import dev.chrisbanes.haze.hazeSource
-import io.github.nku100.webui.ui.util.defaultHazeEffect
 import io.github.nku100.webui.platform.isAndroidPlatform
 import io.github.nku100.webui.platform.navigationBarBottomPadding
 import io.github.nku100.webui.ui.component.FloatingBottomBar
 import io.github.nku100.webui.ui.component.FloatingBottomBarItem
+import io.github.nku100.webui.ui.util.defaultBlurEffect
 import io.github.nku100.webui.ui.util.rememberContentReady
+import io.github.nku100.webui.ui.util.rememberDefaultBlurBackdrop
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.NavigationBar
 import top.yukonga.miuix.kmp.basic.NavigationBarItem
@@ -61,15 +58,7 @@ fun MainScreen(viewModel: MainViewModel, uiState: MainUiState, onPagerStateReady
     val enableFloatingBottomBarBlur = config.enableFloatingBottomBarBlur && enableFloatingBottomBar
 
     val surfaceColor = MiuixTheme.colorScheme.surface
-    val hazeState = remember { HazeState() }
-    val hazeStyle = if (config.enableBlur) {
-        HazeStyle(
-            backgroundColor = surfaceColor,
-            tint = HazeTint(surfaceColor.copy(0.8f))
-        )
-    } else {
-        HazeStyle.Unspecified
-    }
+    val blurBackdrop = rememberDefaultBlurBackdrop(config.enableBlur)
 
     val backdrop = rememberLayerBackdrop {
         drawRect(surfaceColor)
@@ -141,7 +130,7 @@ fun MainScreen(viewModel: MainViewModel, uiState: MainUiState, onPagerStateReady
             } else {
                 val navBarPadding = if (!isAndroidPlatform) navigationBarBottomPadding() else 0.dp
                 NavigationBar(
-                    modifier = (if (config.enableBlur) Modifier.defaultHazeEffect(hazeState, hazeStyle) else Modifier)
+                    modifier = (blurBackdrop?.let { Modifier.defaultBlurEffect(it) } ?: Modifier)
                         .padding(bottom = navBarPadding),
                     color = if (config.enableBlur) Color.Transparent else MiuixTheme.colorScheme.surface,
                     content = {
@@ -181,7 +170,7 @@ fun MainScreen(viewModel: MainViewModel, uiState: MainUiState, onPagerStateReady
             HorizontalPager(
                 modifier = Modifier
                     .fillMaxSize()
-                    .then(if (config.enableBlur) Modifier.hazeSource(state = hazeState) else Modifier)
+                    .then(blurBackdrop?.let { Modifier.layerBackdrop(it) } ?: Modifier)
                     .then(if (enableFloatingBottomBarBlur) Modifier.layerBackdrop(backdrop) else Modifier),
                 state = pagerState,
                 beyondViewportPageCount = beyondViewportPages,

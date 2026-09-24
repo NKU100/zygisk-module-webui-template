@@ -71,7 +71,6 @@ kotlin {
             implementation(libs.miuix.preference)
             implementation(libs.miuix.icons)
             implementation(libs.miuix.blur)
-            implementation(libs.haze)
             implementation(libs.navigationevent.compose)
         }
         commonTest.dependencies {

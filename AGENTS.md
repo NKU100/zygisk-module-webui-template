@@ -145,10 +145,8 @@ Module template files (`module/template/`) use `@TOKEN@` placeholders replaced a
 |---------|---------|
 | Miuix 0.9.4 | KernelSU-style UI components |
 | Miuix Blur 0.9.4 | Cross-platform liquid-glass and blur effects |
-| Haze 1.7.2 | Supplementary blur for top bars and navigation surfaces |
-| Haze 1.7.2 | Blur effects (Android + Compose) |
 | MaterialKolor 5.0.1 | Dynamic color theming (Android) |
 
 ## Version Pinning
 
-All dependency versions are in `gradle/libs.versions.toml`. Key versions: AGP 9.2.1, Kotlin 2.4.20, Compose Multiplatform 1.12.0, Gradle 9.7.1 (per wrapper). Miuix Blur declares Android API 33; `webui-app` uses a manifest override while retaining the template's minSdk 26.
+All dependency versions are in `gradle/libs.versions.toml`. Key versions: AGP 9.4.1, Kotlin 2.4.20, Compose Multiplatform 1.12.1, Gradle 9.7.1 (per wrapper). Miuix Blur declares Android API 33; `webui-app` uses a manifest override while retaining the template's minSdk 26.

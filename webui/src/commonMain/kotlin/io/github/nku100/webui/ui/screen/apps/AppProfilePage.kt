@@ -30,16 +30,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import dev.chrisbanes.haze.HazeState
-import dev.chrisbanes.haze.HazeStyle
-import dev.chrisbanes.haze.HazeTint
-import dev.chrisbanes.haze.hazeSource
 import io.github.nku100.webui.data.PackageSettings
 import io.github.nku100.webui.platform.PackageInfo
 import io.github.nku100.webui.platform.isAndroidPlatform
 import io.github.nku100.webui.ui.component.AppIconImage
-import io.github.nku100.webui.ui.util.defaultHazeEffect
-import io.github.nku100.webui.ui.util.rememberDefaultHazeState
+import io.github.nku100.webui.ui.util.rememberDefaultBlurBackdrop
 import io.github.nku100.webui.ui.util.topBarDefaultWindowInsetsPadding
 import io.github.nku100.webui.ui.util.topBarModifier
 import top.yukonga.miuix.kmp.basic.Card
@@ -55,6 +50,7 @@ import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextField
 import top.yukonga.miuix.kmp.basic.TopAppBar
+import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.preference.OverlayDropdownPreference
 import top.yukonga.miuix.kmp.overlay.OverlayListPopup
 import top.yukonga.miuix.kmp.preference.SwitchPreference
@@ -88,7 +84,7 @@ fun AppProfilePage(
     enableBlur: Boolean = false,
 ) {
     val scrollBehavior = MiuixScrollBehavior()
-    val (hazeState, hazeStyle) = rememberDefaultHazeState(enableBlur)
+    val blurBackdrop = rememberDefaultBlurBackdrop(enableBlur)
 
     val settings = state.settings
 
@@ -99,7 +95,7 @@ fun AppProfilePage(
     Scaffold(
         topBar = {
             TopAppBar(
-                modifier = Modifier.topBarModifier(enableBlur, hazeState, hazeStyle),
+                modifier = Modifier.topBarModifier(blurBackdrop),
                 color = if (enableBlur) Color.Transparent else colorScheme.surface,
                 title = state.packageInfo.label,
                 navigationIcon = {
@@ -170,7 +166,7 @@ fun AppProfilePage(
                 .scrollEndHaptic()
                 .overScrollVertical()
                 .nestedScroll(scrollBehavior.nestedScrollConnection)
-                .let { if (enableBlur) it.hazeSource(state = hazeState) else it },
+                .then(blurBackdrop?.let { Modifier.layerBackdrop(it) } ?: Modifier),
             contentPadding = innerPadding,
             overscrollEffect = null,
         ) {
