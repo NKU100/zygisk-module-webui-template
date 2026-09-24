@@ -69,6 +69,9 @@ actual fun BrowserHistorySync(navigator: Navigator, mainPagerState: MainPagerSta
         if (needsGuard && !hasGuards) {
             pushHashGuards(GUARD_DEPTH)
             hasGuards = true
+        } else if (!needsGuard && hasGuards) {
+            clearGuards(currentGuardDepth())
+            hasGuards = false
         }
     }
 
