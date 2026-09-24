@@ -54,7 +54,7 @@ data class SearchStatus(
             if (visible) 1f else 0f,
             animationSpec = tween(if (visible) 550 else 0, easing = FastOutSlowInEasing),
         )
-        Box(modifier = modifier) {
+        Box {
             Box(
                 modifier = Modifier
                     .matchParentSize()
@@ -66,10 +66,12 @@ data class SearchStatus(
                         }
                     )
             )
-            Box(
-                modifier = Modifier
-                    .graphicsLayer { alpha = topAppBarAlpha.value }
-            ) { content() }
+            Box(modifier = modifier) {
+                Box(
+                    modifier = Modifier
+                        .graphicsLayer { alpha = topAppBarAlpha.value }
+                ) { content() }
+            }
         }
     }
 
