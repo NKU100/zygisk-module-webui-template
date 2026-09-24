@@ -38,6 +38,9 @@ jobs:
           chmod +x ./scripts/template-sync.sh
           ./scripts/template-sync.sh
 
+      - name: Stash checkout-only changes
+        run: git stash push --include-untracked --message template-sync-worktree-cleanup
+
       - name: Create or update pull request
         uses: peter-evans/create-pull-request@v8
         with:
