@@ -21,3 +21,6 @@ module/build/
 module/release/
 webui/build/
 webui-app/build/
+
+# Temporary agent execution plans
+/docs/superpowers/plans/

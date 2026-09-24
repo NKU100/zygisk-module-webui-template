@@ -8,6 +8,13 @@ Zygisk module template with Compose Multiplatform WebUI. Two deployment targets:
 - **KernelSU**: WebUI renders in the KSU manager's WebView (`webroot/` in module zip)
 - **Magisk**: Standalone Android APK (`webui-app`) since Magisk lacks WebUI support
 
+## Documentation Lifecycle
+
+- Keep durable design decisions in `docs/superpowers/specs/` or the relevant user-facing documentation.
+- Treat files under `docs/superpowers/plans/` as temporary execution plans; do not commit them.
+- If a plan contains a decision that will remain useful after the task, extract that decision into a spec or user-facing documentation before committing.
+- Before committing, inspect the staged file list and remove session notes, temporary plans, and other process artifacts.
+
 ## Build Commands
 
 ```bash

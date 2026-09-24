@@ -1,0 +1,51 @@
+name: Sync Template
+
+on:
+  schedule:
+    - cron: '17 4 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: template-sync
+  cancel-in-progress: true
+
+env:
+  TEMPLATE_REPOSITORY: https://github.com/NKU100/zygisk-module-webui-template.git
+  TEMPLATE_REF: master
+  TEMPLATE_SYNC_BRANCH: chore/template-sync
+
+jobs:
+  sync:
+    name: Sync template
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.TEMPLATE_SYNC_TOKEN || github.token }}
+
+      - name: Merge template updates
+        env:
+          TEMPLATE_REMOTE: template
+        run: |
+          chmod +x ./scripts/template-sync.sh
+          ./scripts/template-sync.sh
+
+      - name: Create or update pull request
+        uses: peter-evans/create-pull-request@v8
+        with:
+          token: ${{ secrets.TEMPLATE_SYNC_TOKEN || github.token }}
+          base: ${{ github.event.repository.default_branch }}
+          branch: ${{ env.TEMPLATE_SYNC_BRANCH }}
+          delete-branch: true
+          title: 'chore: sync template updates'
+          commit-message: 'chore: sync template updates'
+          body: |
+            This pull request contains the latest changes from the template repository.
+
+            Review the Git merge result, resolve any conflicts manually, and merge this pull request when it is ready.
