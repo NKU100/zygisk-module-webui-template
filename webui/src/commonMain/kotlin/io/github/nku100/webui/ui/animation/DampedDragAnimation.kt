@@ -137,7 +137,7 @@ class DampedDragAnimation(
         val span = (valueRange.endInclusive - valueRange.start).coerceAtLeast(1e-6f)
         val targetVelocity = velocityTracker.calculateVelocity().x / span
         animationScope.launch(start = CoroutineStart.UNDISPATCHED) {
-            velocityAnimation.animateTo(targetVelocity, velocityAnimationSpec)
+            velocityAnimation.snapTo(targetVelocity)
         }
     }
 }
