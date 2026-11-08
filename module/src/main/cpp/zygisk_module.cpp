@@ -54,8 +54,10 @@ static ssize_t write_all(int fd, const void *buf, size_t n) {
     return (ssize_t)n;
 }
 
-#define LOG_TAG    "ZygiskWebUI"
-#define MODULE_ID  "zygisk_sample"
+#if !defined(MODULE_ID) || !defined(MODULE_LOG_TAG)
+#error "MODULE_ID and MODULE_LOG_TAG must be defined by the build from module.gradle.kts"
+#endif
+#define LOG_TAG    MODULE_LOG_TAG
 #define DATA_DIR    "/data/adb/" MODULE_ID
 #define CONFIG_PATH DATA_DIR "/config.json"
 #define LOG_PATH    DATA_DIR "/module.log"
@@ -268,13 +270,13 @@ private:
 
         char msgBuf[2048];
         snprintf(msgBuf, sizeof(msgBuf),
-            "[ZygiskWebUI] process=%s logLevel=%s dumpStackTrace=%s",
+            "[" LOG_TAG "] process=%s logLevel=%s dumpStackTrace=%s",
             process, logLevel, dumpStack ? "true" : "false");
         remoteLog(api, prio, logTag, msgBuf);
 
         if (dumpStack) {
             snprintf(msgBuf, sizeof(msgBuf),
-                "[ZygiskWebUI] stack trace requested for %s (implement hook here)", process);
+                "[" LOG_TAG "] stack trace requested for %s (implement hook here)", process);
             remoteLog(api, prio, logTag, msgBuf);
         }
 

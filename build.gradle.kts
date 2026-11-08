@@ -10,6 +10,12 @@ plugins {
 
 apply(from = "module.gradle.kts")
 
+// Native and preview log tag. Falls back to moduleId when moduleName has no ASCII letters or digits.
+val moduleLogTag by extra(
+    (extra["moduleName"] as String).filter { it in 'A'..'Z' || it in 'a'..'z' || it in '0'..'9' }
+        .ifEmpty { extra["moduleId"] as String }
+)
+
 val moduleRepo by extra(
     providers.exec { commandLine("git", "remote", "get-url", "origin") }
         .standardOutput.asText.map { url ->

@@ -201,9 +201,9 @@ private fun charToLevel(c: Char): LogLevel = when (c) {
 }
 
 private val MOCK_LINES = listOf(
-    parseLogLine("04-08 04:49:52.878  3285  3285 I SampleHook: [ZygiskWebUI] process=com.android.chrome logLevel=verbose dumpStackTrace=false"),
-    parseLogLine("04-08 04:50:01.123  4000  4000 D SampleHook: [ZygiskWebUI] preAppSpecialize called for com.google.android.gms"),
-    parseLogLine("04-08 04:50:02.456  4001  4001 W SampleHook: [ZygiskWebUI] config not found for com.example.unknown, skipping"),
-    parseLogLine("04-08 04:50:03.789  4002  4002 E SampleHook: [ZygiskWebUI] Failed to open config.json: No such file or directory"),
-    parseLogLine("04-08 04:50:05.000  4003  4003 V SampleHook: [ZygiskWebUI] onLoad complete"),
+    parseLogLine("04-08 04:49:52.878  3285  3285 I ${ModuleInfo.LOG_TAG}: process=com.android.chrome logLevel=verbose dumpStackTrace=false"),
+    parseLogLine("04-08 04:50:01.123  4000  4000 D ${ModuleInfo.LOG_TAG}: preAppSpecialize called for com.google.android.gms"),
+    parseLogLine("04-08 04:50:02.456  4001  4001 W ${ModuleInfo.LOG_TAG}: config not found for com.example.unknown, skipping"),
+    parseLogLine("04-08 04:50:03.789  4002  4002 E ${ModuleInfo.LOG_TAG}: Failed to open config.json: No such file or directory"),
+    parseLogLine("04-08 04:50:05.000  4003  4003 V ${ModuleInfo.LOG_TAG}: onLoad complete"),
 )

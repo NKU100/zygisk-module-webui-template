@@ -37,6 +37,7 @@ val moduleName = rootProject.extra["moduleName"] as String
 val moduleAuthor = rootProject.extra["moduleAuthor"] as String
 val moduleDesc = rootProject.extra["moduleDesc"] as String
 val moduleLibName = rootProject.extra["moduleLibName"] as String
+val moduleLogTag = rootProject.extra["moduleLogTag"] as String
 @Suppress("UNCHECKED_CAST")
 val abiList = rootProject.extra["abiList"] as List<String>
 
@@ -50,6 +51,7 @@ android {
                 cppFlags("-std=c++20")
                 arguments(
                     "-DANDROID_STL=c++_static", "-DMODULE_NAME=$moduleLibName",
+                    "-DMODULE_ID=$moduleId", "-DMODULE_LOG_TAG=$moduleLogTag",
                     "-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON",
                     "-DCMAKE_C_COMPILER_LAUNCHER=ccache",
                     "-DCMAKE_CXX_COMPILER_LAUNCHER=ccache",

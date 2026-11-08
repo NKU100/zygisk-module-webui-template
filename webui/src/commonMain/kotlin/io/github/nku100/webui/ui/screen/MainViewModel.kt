@@ -156,9 +156,9 @@ class MainViewModel : ViewModel() {
                 packages = sortPackages(rawPackages, targets),
                 isLoading = false,
                 hasLoaded = true,
-                moduleName = "Zygisk Module Sample",
+                moduleName = ModuleInfo.PREVIEW_MODULE_NAME,
                 moduleVersion = "v0.0.0-dev",
-                moduleAuthor = "NKU100",
+                moduleAuthor = ModuleInfo.PREVIEW_MODULE_AUTHOR,
             )
         }
     }

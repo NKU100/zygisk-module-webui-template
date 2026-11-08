@@ -15,6 +15,9 @@ composeCompiler {
 // `by rootProject.extra` delegates capture rootProject, which cannot be
 // serialized/deserialized by the Configuration Cache.
 val moduleId = rootProject.extra["moduleId"] as String
+val moduleName = rootProject.extra["moduleName"] as String
+val moduleAuthor = rootProject.extra["moduleAuthor"] as String
+val moduleLogTag = rootProject.extra["moduleLogTag"] as String
 val moduleRepo = rootProject.extra["moduleRepo"] as String
 val androidCompileSdkVersion = rootProject.extra["androidCompileSdkVersion"] as Int
 val androidMinSdkVersion = rootProject.extra["androidMinSdkVersion"] as Int
@@ -85,16 +88,24 @@ kotlin {
 }
 
 // Generate ModuleInfo.kt — only compile-time constants that cannot be read at runtime.
-// Dynamic metadata (name, version, author) is read from module.prop at runtime.
+// Device builds read name, version, and author from module.prop; PREVIEW_* values are
+// only for the browser preview, where module.prop is unavailable.
 val generateModuleInfo = tasks.register("generateModuleInfo") {
     val outputDir = layout.buildDirectory.dir("generated/moduleInfo/commonMain/kotlin")
     val pkg = "io.github.nku100.webui"
     inputs.property("moduleId", moduleId)
+    inputs.property("moduleName", moduleName)
+    inputs.property("moduleAuthor", moduleAuthor)
+    inputs.property("moduleLogTag", moduleLogTag)
     inputs.property("moduleRepo", moduleRepo)
     outputs.dir(outputDir)
     doLast {
         val props = inputs.properties
+        fun literal(value: String) = value.replace("\\", "\\\\").replace("\"", "\\\"").replace("$", "\\$")
         val id = props["moduleId"] as String
+        val name = literal(props["moduleName"] as String)
+        val author = literal(props["moduleAuthor"] as String)
+        val logTag = literal(props["moduleLogTag"] as String)
         val repo = props["moduleRepo"] as String
 
         val dir = outputDir.get().asFile.resolve(pkg.replace('.', '/'))
@@ -107,6 +118,9 @@ val generateModuleInfo = tasks.register("generateModuleInfo") {
             |object ModuleInfo {
             |    const val MODULE_ID = "$id"
             |    const val MODULE_REPO = "$repo"
+            |    const val LOG_TAG = "$logTag"
+            |    const val PREVIEW_MODULE_NAME = "$name"
+            |    const val PREVIEW_MODULE_AUTHOR = "$author"
             |    const val CONFIG_PATH = "/data/adb/$id/config.json"
             |    const val MODULE_PROP_PATH = "/data/adb/modules/$id/module.prop"
             |}
