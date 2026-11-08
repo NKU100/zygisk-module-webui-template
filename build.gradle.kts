@@ -17,8 +17,11 @@ val moduleLogTag by extra(
 )
 
 val moduleRepo by extra(
-    providers.exec { commandLine("git", "remote", "get-url", "origin") }
-        .standardOutput.asText.map { url ->
+    providers.exec {
+        commandLine("git", "remote", "get-url", "origin")
+        // A checkout without origin is treated as an unknown repository instead of failing the build.
+        isIgnoreExitValue = true
+    }.standardOutput.asText.map { url ->
             val trimmed = url.trim()
             val match = Regex("""(?:https://github\.com/|git@github\.com:)([^/]+)/([^/]+?)(?:\.git)?$""").find(trimmed)
             if (match != null) "https://github.com/${match.groupValues[1]}/${match.groupValues[2]}" else trimmed

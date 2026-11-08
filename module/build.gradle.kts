@@ -26,8 +26,8 @@ val tag = providers.exec {
 val moduleRepoUrl = rootProject.extra["moduleRepo"] as String
 val gitHubPattern = Regex("""https://github\.com/([^/]+)/([^/]+)$""")
 val gitHubMatch = gitHubPattern.find(moduleRepoUrl)
-val gitHubUser = providers.provider { gitHubMatch?.groupValues?.get(1) ?: "NKU100" }
-val gitHubRepo = providers.provider { gitHubMatch?.groupValues?.get(2) ?: "zygisk-module-webui-template" }
+// "owner/repo", or empty when origin is missing or not hosted on GitHub.
+val gitHubRepository = gitHubMatch?.let { "${it.groupValues[1]}/${it.groupValues[2]}" }.orEmpty()
 
 // Resolve extra properties eagerly into plain vals (not delegated properties).
 // `by rootProject.extra` delegates capture rootProject, which cannot be
@@ -119,11 +119,12 @@ androidComponents.onVariants { variant ->
         }
         // Stable (tagged release): point to latest so older versions discover newer releases.
         // Beta (CI build): point to the ci pre-release tag.
-        val updateJson = tag.zip(gitHubUser.zip(gitHubRepo) { u, r -> u to r }) { t, (user, repo) ->
-            if (t.startsWith("v")) {
-                "https://github.com/$user/$repo/releases/latest/download/update.json"
-            } else {
-                "https://github.com/$user/$repo/releases/download/ci/update.json"
+        // Without a GitHub repository the updateJson line is dropped from module.prop.
+        val updateJson = tag.map { t ->
+            when {
+                gitHubRepository.isEmpty() -> ""
+                t.startsWith("v") -> "https://github.com/$gitHubRepository/releases/latest/download/update.json"
+                else -> "https://github.com/$gitHubRepository/releases/download/ci/update.json"
             }
         }
         from(layout.projectDirectory.file("template")) {
@@ -137,6 +138,7 @@ androidComponents.onVariants { variant ->
                 "moduleDesc" to moduleDesc,
                 "updateJson" to updateJson.get(),
             )
+            filter { line -> line.takeUnless { it == "updateJson=" } }
         }
         from(layout.projectDirectory.file("template")) {
             include("customize.sh", "post-fs-data.sh", "service.sh")
@@ -203,8 +205,7 @@ androidComponents.onVariants { variant ->
         inputs.property("zipFileName", zipFileName)
         inputs.property("versionName", versionName)
         inputs.property("versionCode", versionCode)
-        inputs.property("gitHubUser", gitHubUser)
-        inputs.property("gitHubRepo", gitHubRepo)
+        inputs.property("gitHubRepository", gitHubRepository)
         inputs.property("tag", tag)
 
         doLast {
@@ -212,14 +213,18 @@ androidComponents.onVariants { variant ->
             val name = props["zipFileName"] as String
             val version = props["versionName"] as String
             val code = props["versionCode"] as Int
-            val user = props["gitHubUser"] as String
-            val repo = props["gitHubRepo"] as String
+            val repository = props["gitHubRepository"] as String
             val t = props["tag"] as String
+            if (repository.isEmpty()) {
+                releaseDir.delete()
+                logger.lifecycle("Skipping update.json: origin is not a GitHub repository, so update checks are disabled.")
+                return@doLast
+            }
             val jsonContent = mapOf(
                 "version" to version,
                 "versionCode" to code,
-                "zipUrl" to "https://github.com/$user/$repo/releases/download/$t/$name",
-                "changelog" to "https://github.com/$user/$repo/releases/download/$t/changelog.md"
+                "zipUrl" to "https://github.com/$repository/releases/download/$t/$name",
+                "changelog" to "https://github.com/$repository/releases/download/$t/changelog.md"
             )
             releaseDir.writeText(JsonBuilder(jsonContent).toPrettyString())
         }
