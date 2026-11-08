@@ -9,10 +9,10 @@ that remains pending confirmation.
 
 NKU100-authored code in `webui/`, `webui-app/`, `.github/workflows/`, and
 `scripts/`, plus NKU100-authored additions to
-`module/src/main/cpp/example.cpp`, is licensed under GPL-3.0-or-later, except
+`module/src/main/cpp/zygisk_module.cpp`, is licensed under GPL-3.0-or-later, except
 for third-party components identified separately in this file.
 
-The original Zygisk sample content retained in `example.cpp` remains under
+The original Zygisk sample content retained in `zygisk_module.cpp` remains under
 its upstream 0BSD notice; this GPL grant covers only NKU100-authored additions
 in that file.
 
@@ -44,7 +44,7 @@ The full license text is in `LICENSES/GPL-3.0-or-later.txt`.
 
 | Component | Files or use | License and source |
 |---|---|---|
-| Zygisk module sample/API | Upstream portions of `module/src/main/cpp/zygisk.hpp`, `example.cpp`, `Android.mk`, and `Application.mk` | 0BSD; [topjohnwu/zygisk-module-sample](https://github.com/topjohnwu/zygisk-module-sample) states its source code is released under 0BSD. NKU100-authored additions to `example.cpp` are GPL-3.0-or-later. |
+| Zygisk module sample/API | Upstream portions of `module/src/main/cpp/zygisk.hpp`, `zygisk_module.cpp`, `Android.mk`, and `Application.mk` | 0BSD; [topjohnwu/zygisk-module-sample](https://github.com/topjohnwu/zygisk-module-sample) states its source code is released under 0BSD. NKU100-authored additions to `zygisk_module.cpp` are GPL-3.0-or-later. |
 | yyjson | `module/src/main/cpp/external/yyjson.c` and `yyjson.h` | MIT; copyright © 2020 YaoYuan <ibireme@gmail.com>. The copyright and permission notice are included in `LICENSES/MIT.txt`. |
 | AndroidLiquidGlass | Adapted code in `webui/src/commonMain/kotlin/io/github/nku100/webui/ui/component/liquid/` | Apache-2.0; [upstream repository](https://github.com/Kyant0/AndroidLiquidGlass). |
 | Noto Sans SC | `webui/src/commonMain/composeResources/font/noto_sans_sc_regular.woff2` | SIL Open Font License 1.1. Embedded font metadata identifies Noto Sans SC and copyright © 2014–2021 Adobe, with “Source” as a Reserved Font Name. See [Noto CJK](https://github.com/notofonts/noto-cjk). |

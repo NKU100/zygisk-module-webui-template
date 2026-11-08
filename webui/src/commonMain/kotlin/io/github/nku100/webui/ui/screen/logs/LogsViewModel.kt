@@ -103,7 +103,7 @@ class LogsViewModel : ViewModel() {
     }
 
     companion object {
-        /** Must match LOG_PATH in example.cpp */
+        /** Must match LOG_PATH in zygisk_module.cpp */
         val LOG_PATH = ModuleInfo.CONFIG_PATH.replace("config.json", "module.log")
 
     }

@@ -3,7 +3,7 @@ not grant a single license over the repository as a whole.
 
 GPL-3.0-or-later applies only to NKU100-authored code in `webui/`,
 `webui-app/`, `.github/workflows/`, and `scripts/`, the NKU100-authored
-additions to `module/src/main/cpp/example.cpp`, and the explicitly listed
+additions to `module/src/main/cpp/zygisk_module.cpp`, and the explicitly listed
 KernelSU-derived files described in THIRD_PARTY_NOTICES.md. Third-party
 components retain their stated licenses. Files listed as license pending are
 not covered by this license notice, and this repository makes no licensing

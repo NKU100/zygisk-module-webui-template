@@ -94,7 +94,7 @@ val moduleApplicationId by extra("io.github.nku100.zygisk.sample")
 
 ### 3. Write native code
 
-Edit `module/src/main/cpp/example.cpp` with your Zygisk logic.
+Edit `module/src/main/cpp/zygisk_module.cpp` with your Zygisk logic.
 
 ### 4. Customize WebUI
 

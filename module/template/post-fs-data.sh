@@ -1,7 +1,7 @@
 MODDIR=${0%/*}
 
 # Ensure the persistent data directory exists (outside module dir so it survives updates).
-# Matches DATA_DIR in example.cpp and ModuleInfo.DATA_DIR in the WebUI.
+# Matches DATA_DIR in zygisk_module.cpp and ModuleInfo.DATA_DIR in the WebUI.
 DATADIR="/data/adb/@MODULE_ID@"
 mkdir -p "$DATADIR"
 chmod 700 "$DATADIR"

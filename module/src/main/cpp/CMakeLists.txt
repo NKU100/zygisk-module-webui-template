@@ -6,7 +6,7 @@ set(CXX_FLAGS "${CXX_FLAGS} -fno-exceptions -fno-rtti -fvisibility=hidden -fvisi
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CXX_FLAGS}")
 
 add_library(${MODULE_NAME} SHARED
-        example.cpp
+        zygisk_module.cpp
         external/yyjson.c
 )
 target_include_directories(${MODULE_NAME} PRIVATE external)

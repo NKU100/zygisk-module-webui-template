@@ -2,7 +2,7 @@ LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := $(MODULE_NAME)
-LOCAL_SRC_FILES := example.cpp
+LOCAL_SRC_FILES := zygisk_module.cpp
 LOCAL_STATIC_LIBRARIES := libcxx
 LOCAL_LDLIBS := -llog
 include $(BUILD_SHARED_LIBRARY)
@@ -14,6 +14,6 @@ include $(LOCAL_PATH)/external/libcxx/Android.mk
 
 # include $(CLEAR_VARS)
 # LOCAL_MODULE := example
-# LOCAL_SRC_FILES := example.cpp
+# LOCAL_SRC_FILES := zygisk_module.cpp
 # LOCAL_LDLIBS := -llog -lstdc++
 # include $(BUILD_SHARED_LIBRARY)
