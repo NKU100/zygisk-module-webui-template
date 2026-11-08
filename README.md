@@ -92,6 +92,11 @@ val moduleDesc by extra("A sample module for zygisk")
 val moduleApplicationId by extra("io.github.nku100.zygisk.sample")
 ```
 
+Derived values:
+
+- The native and logcat log tag keeps the ASCII letters and digits of `moduleName` (for example `ZygiskModuleSample`), falling back to `moduleId`.
+- `updateJson` in `module.prop` and the `update.json` written by `:module:ciRelease` point to the GitHub repository of `git remote origin`. When origin is missing or not on GitHub, both are omitted and update checks are disabled.
+
 ### 3. Write native code
 
 Edit `module/src/main/cpp/zygisk_module.cpp` with your Zygisk logic.

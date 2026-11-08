@@ -59,12 +59,12 @@ test the packaged assets in the intended Android host when practical.
 # Build and install both targets to device
 ./gradlew :webui-app:installDebug :webui:install
 
-# Launch Android side
-adb shell am start -n io.github.nku100.zygisk.sample/io.github.nku100.webui.MainActivity
+# Launch Android side (<moduleApplicationId> from module.gradle.kts)
+adb shell am start -n <moduleApplicationId>/io.github.nku100.webui.MainActivity
 
-# Launch wasmJs side (requires root + KsuWebUIStandalone)
+# Launch wasmJs side (requires root + KsuWebUIStandalone; <moduleId> and <moduleName> from module.gradle.kts)
 adb shell am start -n io.github.a13e300.ksuwebui/.WebUIActivity \
-  --es id zygisk_sample --es name "Zygisk Module WebUI"
+  --es id <moduleId> --es name "<moduleName>"
 ```
 
 The emulator must be rooted (Magisk) for full wasmJs testing. Root AVD
@@ -84,7 +84,7 @@ from application failures.
 
 | Project | Role |
 |---------|------|
-| `:module` | Zygisk native C++ module + Magisk/KSU packaging. CMake builds `libsample.so`. Shell scripts handle install/verify. |
+| `:module` | Zygisk native C++ module + Magisk/KSU packaging. CMake builds `lib<moduleLibName>.so` from `zygisk_module.cpp`. Shell scripts handle install/verify. |
 | `:webui` | Kotlin Multiplatform library — the main codebase. Targets: **wasmJs** and **androidLibrary**. |
 | `:webui-app` | Minimal Android APK hosting `:webui` for Magisk users. |
 
