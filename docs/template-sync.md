@@ -6,7 +6,9 @@ This repository includes a workflow for receiving updates from the template repo
 
 `.github/workflows/sync-template.yml` runs every day at 04:17 UTC and can also be started from the Actions page with **Run workflow**. It fetches complete histories, merges the configured template ref, and asks `peter-evans/create-pull-request` to create or update the fixed `chore/template-sync` branch and Pull Request.
 
-Review and merge the Pull Request instead of allowing the workflow to update the default branch directly. A merge commit keeps the template parent relationship for later synchronizations. Squash merging is functionally supported, but a later run may need to perform the delayed seed graft again.
+Review and merge the Pull Request instead of allowing the workflow to update the default branch directly. Merge it with a merge commit, manually or through auto-merge, so the template commits become ancestors of the default branch. Do not squash or rebase these Pull Requests: the template commits never become ancestors, so every later run merges the same template commits again.
+
+When the merge would not change any file, for example because earlier squash merges already applied the template changes, the script drops the merge and the workflow does not open a Pull Request.
 
 The defaults are defined in the workflow environment:
 

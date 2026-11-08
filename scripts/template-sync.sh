@@ -39,16 +39,28 @@ template_commit_ref="$template_remote/$remote_ref"
 git rev-parse --verify "$template_commit_ref^{commit}" >/dev/null 2>&1 \
   || fail "template ref '$template_ref' was not found"
 
-target_tree=$(git rev-parse HEAD^{tree})
+target_tree=$(git rev-parse "HEAD^{tree}")
 template_tree=$(git rev-parse "$template_commit_ref^{tree}")
 if [[ "$target_tree" == "$template_tree" ]]; then
   echo "template-sync: no content changes"
   exit 0
 fi
 
-if git merge-base HEAD "$template_commit_ref" >/dev/null 2>&1; then
+start_commit=$(git rev-parse HEAD)
+
+# A merge can succeed without changing files when template commits were already applied by an
+# earlier squash merge. Dropping that merge prevents an empty synchronization Pull Request.
+merge_template() {
   git merge --no-edit "$template_commit_ref"
-  exit $?
+  if [[ "$(git rev-parse "HEAD^{tree}")" == "$target_tree" ]]; then
+    git reset --quiet --hard "$start_commit"
+    echo "template-sync: template changes are already present; no content changes"
+  fi
+}
+
+if git merge-base HEAD "$template_commit_ref" >/dev/null 2>&1; then
+  merge_template
+  exit 0
 fi
 
 target_root=$(git rev-list --max-parents=0 --reverse HEAD | tail -n 1)
@@ -73,4 +85,4 @@ cleanup_replace_ref() {
 }
 trap cleanup_replace_ref EXIT
 
-git merge --no-edit "$template_commit_ref"
+merge_template
