@@ -27,7 +27,8 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "zygisk-module-webui-template"
+apply(from = "module.gradle.kts")
+rootProject.name = extra["moduleId"] as String
 include(
     ":module", ":webui", ":webui-app"
 )

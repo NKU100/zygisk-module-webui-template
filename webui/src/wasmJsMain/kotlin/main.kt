@@ -10,7 +10,7 @@ import androidx.compose.ui.window.ComposeViewport
 import io.github.nku100.webui.ui.App
 import kotlinx.browser.document
 import org.jetbrains.compose.resources.ExperimentalResourceApi
-import zygisk_module_webui_template.webui.generated.resources.Res
+import io.github.nku100.webui.generated.resources.Res
 
 /**
  * CJK font bundled via Compose Resources (composeResources/font/).

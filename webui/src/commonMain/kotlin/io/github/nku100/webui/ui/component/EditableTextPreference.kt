@@ -17,9 +17,9 @@ import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.overlay.OverlayDialog
 import top.yukonga.miuix.kmp.preference.ArrowPreference
-import zygisk_module_webui_template.webui.generated.resources.Res
-import zygisk_module_webui_template.webui.generated.resources.cancel
-import zygisk_module_webui_template.webui.generated.resources.save
+import io.github.nku100.webui.generated.resources.Res
+import io.github.nku100.webui.generated.resources.cancel
+import io.github.nku100.webui.generated.resources.save
 
 @Composable
 fun EditableTextPreference(

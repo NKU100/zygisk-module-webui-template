@@ -11,6 +11,11 @@ composeCompiler {
     reportsDestination = layout.buildDirectory.dir("compose-reports")
 }
 
+// Keep the Res class package independent of the root project name.
+compose.resources {
+    packageOfResClass = "io.github.nku100.webui.generated.resources"
+}
+
 // Resolve extra properties eagerly into plain vals (not delegated properties).
 // `by rootProject.extra` delegates capture rootProject, which cannot be
 // serialized/deserialized by the Configuration Cache.

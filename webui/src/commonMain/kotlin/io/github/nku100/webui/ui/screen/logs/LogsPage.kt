@@ -1,6 +1,6 @@
 package io.github.nku100.webui.ui.screen.logs
 import org.jetbrains.compose.resources.stringResource
-import zygisk_module_webui_template.webui.generated.resources.*
+import io.github.nku100.webui.generated.resources.*
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box

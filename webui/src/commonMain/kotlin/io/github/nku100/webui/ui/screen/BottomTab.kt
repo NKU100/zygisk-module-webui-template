@@ -7,11 +7,11 @@ import androidx.compose.material.icons.rounded.Cottage
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.ui.graphics.vector.ImageVector
 import org.jetbrains.compose.resources.StringResource
-import zygisk_module_webui_template.webui.generated.resources.Res
-import zygisk_module_webui_template.webui.generated.resources.tab_apps
-import zygisk_module_webui_template.webui.generated.resources.tab_home
-import zygisk_module_webui_template.webui.generated.resources.tab_logs
-import zygisk_module_webui_template.webui.generated.resources.tab_settings
+import io.github.nku100.webui.generated.resources.Res
+import io.github.nku100.webui.generated.resources.tab_apps
+import io.github.nku100.webui.generated.resources.tab_home
+import io.github.nku100.webui.generated.resources.tab_logs
+import io.github.nku100.webui.generated.resources.tab_settings
 
 enum class BottomTab(val labelRes: StringResource, val icon: ImageVector) {
     HOME(Res.string.tab_home, Icons.Rounded.Cottage),

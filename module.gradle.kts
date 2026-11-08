@@ -1,3 +1,4 @@
+// Applied to both settings.gradle.kts and the root build script; keep this file to plain extra values.
 val moduleId by extra("zygisk_sample")
 val moduleName by extra("Zygisk Module Sample")
 val moduleAuthor by extra("NKU100")
